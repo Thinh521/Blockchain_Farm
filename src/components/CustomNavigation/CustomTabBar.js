@@ -125,11 +125,12 @@ const CustomTabBar = ({state, descriptors, navigation, config = {}}) => {
           }),
         },
       ],
+      zIndex: 100,
     },
     content: {
+      flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
-      flex: 1,
     },
     tabItem: {
       flex: 1,
