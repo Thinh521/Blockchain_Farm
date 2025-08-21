@@ -4,8 +4,10 @@ import styles from './Home.styles';
 
 const HomeScreen = () => {
   return (
-    <View>
-      <Text>HomeScreen</Text>
+    <View style={styles.contaiber}>
+      <View style={styles.card}>
+        <Text>HomeScreen</Text>
+      </View>
     </View>
   );
 };
