@@ -14,6 +14,12 @@ const HomeScreen = () => {
           navigation.navigate('NoBottomTab', {screen: 'LoginRequired'});
         }}
       />
+      <Button
+        title="Login"
+        onPress={() => {
+          navigation.navigate('NoBottomTab', {screen: 'Login'});
+        }}
+      />
       <View style={styles.card}>
         <Text>HomeScreen</Text>
       </View>
