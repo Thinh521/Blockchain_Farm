@@ -1,6 +1,7 @@
 import LoginScreen from '../screens/Auth/Login/LoginScreen';
 import RegisterScreen from '../screens/Auth/Register/RegisterScreen';
 import OnboardingScreen from '../screens/Onboarding/OnboardingScreen';
+import SplashScreen from '../screens/Splash/SplashScreen';
 
 const routerNoBottomTab = [
   {
@@ -26,6 +27,16 @@ const routerNoBottomTab = [
   {
     name: 'Register',
     component: RegisterScreen,
+    hasLayout: false,
+    options: {
+      title: 'Đăng ký',
+      headerShown: false,
+      animation: 'slide_from_right',
+    },
+  },
+  {
+    name: 'Splash',
+    component: SplashScreen,
     hasLayout: false,
     options: {
       title: 'Đăng ký',

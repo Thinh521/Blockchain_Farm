@@ -1,10 +1,10 @@
 import {scale} from '../utils/scaling';
 
 export const Colors = {
-  primary: '#F55B07',
+  primary: '#007E2F',
   secondary: '#10b981',
   background: '#F5F5F5',
-  gray: '#A8A8A9',
+  gray: '#6B7280',
   white: '#FFFFFF',
   black: '#000000',
   red: '#FF0000',
