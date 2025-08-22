@@ -9,15 +9,9 @@ const HomeScreen = () => {
   return (
     <View style={styles.contaiber}>
       <Button
-        title="onboarding"
+        title="LoginRequired"
         onPress={() => {
-          navigation.navigate('NoBottomTab', {screen: 'Onboarding'});
-        }}
-      />
-      <Button
-        title="splash"
-        onPress={() => {
-          navigation.navigate('NoBottomTab', {screen: 'Splash'});
+          navigation.navigate('NoBottomTab', {screen: 'LoginRequired'});
         }}
       />
       <View style={styles.card}>
