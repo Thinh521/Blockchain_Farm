@@ -4,6 +4,10 @@ const Images = {
   onboarding_1: require('./onboarding_1.png'),
   onboarding_2: require('./onboarding_2.png'),
   onboarding_3: require('./onboarding_3.png'),
+  facbook: require('./facebook.png'),
+  google: require('./google.png'),
+  apple: require('./apple.png'),
+  
 };
 
 export default Images;
