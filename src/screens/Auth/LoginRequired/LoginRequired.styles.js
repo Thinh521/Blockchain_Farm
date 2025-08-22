@@ -37,25 +37,17 @@ export default StyleSheet.create({
   },
   createButton: {
     width: '100%',
-    backgroundColor: '#FF5722',
     borderRadius: 999,
     marginBottom: 10,
-  },
-  createButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
   signInButton: {
     width: '100%',
     backgroundColor: '#fff',
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: '#FF5722',
+    borderRadius: 9999,
+    borderWidth: 2,
+    borderColor: Colors.primary,
   },
   signInButtonText: {
-    color: '#FF5722',
-    fontSize: 16,
-    fontWeight: 'bold',
+    color: Colors.primary,
   },
 });
