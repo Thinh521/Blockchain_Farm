@@ -1,6 +1,7 @@
 import LoginScreen from '../screens/Auth/Login/LoginScreen';
 import LoginRequiredScreen from '../screens/Auth/LoginRequired/LoginRequiredScreen';
 import RegisterScreen from '../screens/Auth/Register/RegisterScreen';
+import ChangePasswordScreen from '../screens/ChangePassword/ChangePasswordScreen';
 import OnboardingScreen from '../screens/Onboarding/OnboardingScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 import SplashScreen from '../screens/Splash/SplashScreen';
@@ -62,6 +63,16 @@ const routerNoBottomTab = [
     hasLayout: false,
     options: {
       title: 'Cập nhật hồ sơ',
+      headerShown: false,
+      animation: 'fade',
+    },
+  },
+  {
+    name: 'ChangePassword',
+    component: ChangePasswordScreen,
+    hasLayout: false,
+    options: {
+      title: 'Đổi mật khẩu',
       headerShown: false,
       animation: 'fade',
     },

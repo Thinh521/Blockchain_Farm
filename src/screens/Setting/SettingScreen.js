@@ -147,7 +147,12 @@ const SettingsScreen = () => {
                 navigation.navigate('NoBottomTab', {screen: 'Profile'});
               }}
             />
-            <SettingItem title="Đổi mật khẩu" onPress={() => {}} />
+            <SettingItem
+              title="Đổi mật khẩu"
+              onPress={() => {
+                navigation.navigate('NoBottomTab', {screen: 'ChangePassword'});
+              }}
+            />
           </View>
 
           {/* Language Selection */}
