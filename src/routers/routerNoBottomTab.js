@@ -2,6 +2,7 @@ import LoginScreen from '../screens/Auth/Login/LoginScreen';
 import LoginRequiredScreen from '../screens/Auth/LoginRequired/LoginRequiredScreen';
 import RegisterScreen from '../screens/Auth/Register/RegisterScreen';
 import OnboardingScreen from '../screens/Onboarding/OnboardingScreen';
+import ProfileScreen from '../screens/Profile/ProfileScreen';
 import SplashScreen from '../screens/Splash/SplashScreen';
 
 const routerNoBottomTab = [
@@ -51,6 +52,16 @@ const routerNoBottomTab = [
     hasLayout: false,
     options: {
       title: 'Kiểm tra đăng nhập',
+      headerShown: false,
+      animation: 'fade',
+    },
+  },
+  {
+    name: 'Profile',
+    component: ProfileScreen,
+    hasLayout: false,
+    options: {
+      title: 'Cập nhật hồ sơ',
       headerShown: false,
       animation: 'fade',
     },
