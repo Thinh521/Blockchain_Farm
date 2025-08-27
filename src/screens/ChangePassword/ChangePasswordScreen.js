@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -15,9 +15,12 @@ import {Arrow_Left_S_Icon, Keyhole_Icon} from '../../assets/icons';
 import {Colors} from '../../theme/theme';
 import {useNavigation} from '@react-navigation/core';
 import {scale} from '../../utils/scaling';
+import {changepasswordApi} from '../../api/userApi';
+import {showMessage} from 'react-native-flash-message';
 
 const ChangePasswordScreen = () => {
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
 
   const {
     control,
@@ -32,6 +35,9 @@ const ChangePasswordScreen = () => {
     },
   });
 
+  const accessToken =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YWQ3Y2MzNjRlZTZhMTA5Mzk0YWI3MSIsImlhdCI6MTc1NjI2NjkzNiwiZXhwIjoxNzU2MjY4NzM2fQ.LSfDVzClnQYSBO9ayLAs8o7DC3EQtkyvpz1AUPjmuJ8';
+
   const newPassword = watch('newPassword');
 
   const passwordRequirements = [
@@ -45,8 +51,30 @@ const ChangePasswordScreen = () => {
     },
   ];
 
-  const onSubmit = data => {
-    console.log('Change Password Data:', data);
+  const onSubmit = async data => {
+    try {
+      setLoading(true);
+      await changepasswordApi({
+        accessToken,
+        oldPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      });
+
+      showMessage({
+        message: 'Đổi mật khẩu thành công!',
+        type: 'success',
+      });
+
+      navigation.goBack();
+    } catch (error) {
+      showMessage({
+        message: 'Đổi mật khẩu thất bại',
+        description: error.message,
+        type: 'danger',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -207,8 +235,11 @@ const ChangePasswordScreen = () => {
             </View>
           </View>
 
-          {/* Submit Button */}
-          <Button.Main title="Đổi mật khẩu" onPress={handleSubmit(onSubmit)} />
+          <Button.Main
+            title={loading ? 'Đang xử lý...' : 'Đổi mật khẩu'}
+            onPress={handleSubmit(onSubmit)}
+            disabled={loading}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>

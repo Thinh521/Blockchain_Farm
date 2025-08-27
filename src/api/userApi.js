@@ -1,14 +1,4 @@
-import axios from 'axios';
-import {API_BASE_URL} from '@env';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  },
-});
+import api from './baseApi';
 
 export const getUserApi = async accessToken => {
   try {
@@ -39,7 +29,37 @@ export const updateUserApi = async (accessToken, formData) => {
     const message =
       error?.response?.data?.message ||
       'Không thể cập nhật thông tin người dùng';
+    const status = error?.response?.data?.code;
     console.log('Không thể cập nhật thông tin người dùng:', message);
+    console.log('Không thể cập nhật thông tin người dùng:', status);
+    throw new Error(message);
+  }
+};
+
+export const changepasswordApi = async ({
+  accessToken,
+  oldPassword,
+  newPassword,
+}) => {
+  try {
+    const res = await api.put(
+      '/api/user/change-password',
+      {
+        oldPassword,
+        newPassword,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+    return res.data;
+  } catch (error) {
+    const message = error?.response?.data?.message || 'Không thể đổi mật khẩu';
+    const status = error?.response?.data?.code || 'Không thể đổi mật khẩu';
+    console.log('Không thể đổi mật khẩu:', message);
+    console.log('Không thể đổi mật khẩu:', status);
     throw new Error(message);
   }
 };
