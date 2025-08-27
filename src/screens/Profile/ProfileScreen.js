@@ -51,7 +51,7 @@ const ProfileScreen = () => {
   });
 
   const accessToken =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YWQ3Y2MzNjRlZTZhMTA5Mzk0YWI3MSIsImlhdCI6MTc1NjI2OTU0MSwiZXhwIjoxNzU2MjcxMzQxfQ.qAByRrnQ7GXAQxyOzzbjBVnOwR7EsPZmH8qicktwlTQ';
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YWQ3Y2MzNjRlZTZhMTA5Mzk0YWI3MSIsImlhdCI6MTc1NjI2NDQyNCwiZXhwIjoxNzU2MjY2MjI0fQ.jOLJFfDXMe9WHiRBd206Mq7dsRYxmmcttqpfhO0hgEY';
 
   const handlePickImage = async () => {
     try {
