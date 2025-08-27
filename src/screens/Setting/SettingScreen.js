@@ -21,8 +21,10 @@ import {
 import {scale} from '../../utils/scaling';
 import {Colors} from '../../theme/theme';
 import Button from '../../components/CustomButton/CustomButton';
+import {useNavigation} from '@react-navigation/core';
 
 const SettingsScreen = () => {
+  const navigation = useNavigation();
   const [language, setLanguage] = useState('en');
   const [darkMode, setDarkMode] = useState(false);
   const [pushNoti, setPushNoti] = useState(true);
@@ -139,8 +141,18 @@ const SettingsScreen = () => {
               <Text style={styles.sectionTitle}>Cài đặt tài khoản</Text>
             </View>
 
-            <SettingItem title="Bảo mật tài khoản" onPress={() => {}} />
-            <SettingItem title="Đổi mật khẩu" onPress={() => {}} />
+            <SettingItem
+              title="Bảo mật tài khoản"
+              onPress={() => {
+                navigation.navigate('NoBottomTab', {screen: 'Profile'});
+              }}
+            />
+            <SettingItem
+              title="Đổi mật khẩu"
+              onPress={() => {
+                navigation.navigate('NoBottomTab', {screen: 'ChangePassword'});
+              }}
+            />
           </View>
 
           {/* Language Selection */}
