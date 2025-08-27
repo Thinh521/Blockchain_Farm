@@ -1,4 +1,5 @@
 import {HomeTabIcon, ProductTabIcon, SettingTabIcon} from '../assets/icons';
+import {Colors, FontSizes, FontWeights} from '../theme/theme';
 import HomeScreen from '../screens/Home/HomeScreen';
 import ProductScreen from '../screens/Product/ProductScreen';
 import SettingScreen from '../screens/Setting/SettingScreen';

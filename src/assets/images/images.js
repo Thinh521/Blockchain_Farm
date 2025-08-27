@@ -8,6 +8,7 @@ const Images = {
   facbook: require('./facebook.png'),
   google: require('./google.png'),
   apple: require('./apple.png'),
+  avatar: require('./avatar.png'),
 };
 
 export default Images;
