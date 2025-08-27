@@ -1,5 +1,6 @@
 import LoginScreen from '../screens/Auth/Login/LoginScreen';
 import LoginRequiredScreen from '../screens/Auth/LoginRequired/LoginRequiredScreen';
+import OTPScreen from '../screens/Auth/OTP/OTPScreen';
 import RegisterScreen from '../screens/Auth/Register/RegisterScreen';
 import OnboardingScreen from '../screens/Onboarding/OnboardingScreen';
 import SplashScreen from '../screens/Splash/SplashScreen';
@@ -48,6 +49,16 @@ const routerNoBottomTab = [
   {
     name: 'LoginRequired',
     component: LoginRequiredScreen,
+    hasLayout: false,
+    options: {
+      title: 'Kiểm tra đăng nhập',
+      headerShown: false,
+      animation: 'fade',
+    },
+  },
+  {
+    name: 'OTP',
+    component: OTPScreen,
     hasLayout: false,
     options: {
       title: 'Kiểm tra đăng nhập',
