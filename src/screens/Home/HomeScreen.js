@@ -20,6 +20,12 @@ const HomeScreen = () => {
           navigation.navigate('NoBottomTab', {screen: 'Login'});
         }}
       />
+      <Button
+        title="OTP"
+        onPress={() => {
+          navigation.navigate('NoBottomTab', {screen: 'OTP'});
+        }}
+      />
       <View style={styles.card}>
         <Text>HomeScreen</Text>
       </View>
