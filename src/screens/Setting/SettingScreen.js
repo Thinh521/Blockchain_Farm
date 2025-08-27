@@ -128,7 +128,6 @@ const SettingsScreen = () => {
             </View>
           </View>
 
-          {/* Account Security */}
           <View style={styles.section}>
             <View style={[styles.sectionHeader, {backgroundColor: '#ECFDF5'}]}>
               <View

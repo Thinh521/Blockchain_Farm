@@ -6,6 +6,7 @@ import {
   View,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import FastImage from 'react-native-fast-image';
@@ -13,13 +14,47 @@ import styles from './Login.styles';
 import Input from '../../../components/CustomInput/CustomInput';
 import Button from '../../../components/CustomButton/CustomButton';
 import Images from '../../../assets/images/images';
+import {
+  validateEmail,
+  validatePhone,
+} from '../../../utils/validation/validation';
+import {loginApi} from '../../../api/auth/auth';
+import {ErrorMap} from '../../../utils/errorMapper/errorMapper';
 
 const LoginScreen = ({navigation}) => {
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [emailPhone, setemailPhone] = useState('');
 
-  const handleLogin = () => {
-    console.log('Đăng nhập', {email, password});
+  const handleLogin = async () => {
+    if (!emailPhone || !password) {
+      Alert.alert('Lỗi', 'Vui lòng nhập Email/SĐT và mật khẩu');
+      return;
+    }
+
+    const isEmail = validateEmail(emailPhone);
+    const isPhone = validatePhone(emailPhone);
+
+    if (!isEmail && !isPhone) {
+      Alert.alert('Lỗi', 'Vui lòng nhập đúng định dạng Email hoặc SĐT');
+      return;
+    }
+
+    try {
+      console.log('📤 Data gửi lên backend:', {emailPhone, password});
+      const data = await loginApi({emailPhone, password});
+
+      console.log('✅ Đăng nhập thành công:', data);
+      Alert.alert('Thành công', 'Đăng nhập thành công');
+      navigation.replace('Home');
+    } catch (err) {
+      console.log('❌ Login error:', err);
+      let message = 'Đăng nhập thất bại';
+      if (err?.code && ErrorMap[err.code]) {
+        message = ErrorMap[err.code];
+      }
+
+      Alert.alert('Lỗi', message);
+    }
   };
 
   return (
@@ -46,10 +81,9 @@ const LoginScreen = ({navigation}) => {
                 label="Email"
                 placeholder="Nhập Email"
                 placeholderTextColor="#ccc"
-                value={email}
-                onChangeText={setEmail}
+                value={emailPhone}
+                onChangeText={setemailPhone}
                 keyboardType="email-address"
-                
               />
             </View>
 
@@ -64,19 +98,16 @@ const LoginScreen = ({navigation}) => {
                 textContentType="password"
               />
             </View>
-
             <Button.Text
               title="Quên mật khẩu?"
               onPress={() => navigation.navigate('ForgotPassword')}
               textStyle={styles.forgotPassword}
             />
-
             <Button.Main
               title="Đăng nhập"
               onPress={handleLogin}
               style={styles.authButton}
             />
-
             <View style={styles.divider}>
               <View style={styles.line} />
               <Text style={styles.orText}>Hoặc đăng nhập bằng</Text>
@@ -130,6 +161,4 @@ const LoginScreen = ({navigation}) => {
     </SafeAreaView>
   );
 };
-
 export default LoginScreen;
-
