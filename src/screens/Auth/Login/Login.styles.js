@@ -10,7 +10,6 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flex: 1,
     justifyContent: 'center',
-    marginTop: scale(20),
   },
   container: {
     flex: 1,

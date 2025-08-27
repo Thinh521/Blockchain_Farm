@@ -1,6 +1,5 @@
-import {MMKV} from 'react-native-mmkv';
+import { storage } from "./storage";
 
-export const storage = new MMKV();
 
 export const setOnboarding = (key, value) => {
   storage.set(key, value);
