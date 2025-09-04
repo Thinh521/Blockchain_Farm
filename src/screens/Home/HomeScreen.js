@@ -26,7 +26,7 @@ const HomeScreen = () => {
           navigation.navigate('NoBottomTab', {screen: 'OTP'});
         }}
       />
-      <View style={styles.card}>
+     <View style={styles.card}>
         <Text>HomeScreen</Text>
       </View>
     </View>

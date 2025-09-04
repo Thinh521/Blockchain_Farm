@@ -1,4 +1,4 @@
-import {API_BASE_URL} from '@env';
+import {API_URL} from '@env';
 import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
@@ -90,7 +90,7 @@ const ProfileScreen = () => {
           setOriginalUser(user);
 
           if (data.user.avatar) {
-            setServerAvatar(`${API_BASE_URL}/api/images/${data.user.avatar}`);
+            setServerAvatar(`${API_URL}/api/images/${data.user.avatar}`);
           }
         }
       } catch (error) {
@@ -146,7 +146,7 @@ const ProfileScreen = () => {
 
       const data = await getUserApi(accessToken);
       if (data?.user?.avatar) {
-        setServerAvatar(`${API_BASE_URL}/api/images/${data.user.avatar}`);
+        setServerAvatar(`${API_URL}/api/images/${data.user.avatar}`);
       }
     } catch (error) {
       console.log('Lỗi update:', error.message);
@@ -176,7 +176,6 @@ const ProfileScreen = () => {
         showsVerticalScrollIndicator={false}>
         <StatusBar barStyle="light-content" backgroundColor="#28a745" />
 
-        {/* Avatar */}
         <View style={{flex: 1, paddingTop: 40}}>
           <TouchableOpacity
             style={styles.avatarContainer}
@@ -213,7 +212,6 @@ const ProfileScreen = () => {
               )}
             />
 
-            {/* User Name */}
             <Controller
               control={control}
               name="userName"
@@ -231,7 +229,6 @@ const ProfileScreen = () => {
               )}
             />
 
-            {/* Email */}
             <Controller
               control={control}
               name="email"
@@ -256,7 +253,6 @@ const ProfileScreen = () => {
               )}
             />
 
-            {/* Phone */}
             <Controller
               control={control}
               name="phone"
@@ -281,7 +277,6 @@ const ProfileScreen = () => {
               )}
             />
 
-            {/* Address */}
             <Controller
               control={control}
               name="address"
@@ -296,7 +291,6 @@ const ProfileScreen = () => {
               )}
             />
 
-            {/* Gender */}
             <View>
               <Text style={styles.label}>Giới tính</Text>
               <View style={styles.genderContainer}>
@@ -320,7 +314,6 @@ const ProfileScreen = () => {
               </View>
             </View>
 
-            {/* Date of Birth */}
             <Controller
               control={control}
               name="dateOfBirth"

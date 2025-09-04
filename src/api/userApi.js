@@ -17,6 +17,7 @@ export const getUserApi = async accessToken => {
 };
 
 export const updateUserApi = async (accessToken, formData) => {
+  console.log('Update User API called with formData:', formData);
   try {
     const res = await api.put('/api/user/update', formData, {
       headers: {
@@ -24,7 +25,9 @@ export const updateUserApi = async (accessToken, formData) => {
         'Content-Type': 'multipart/form-data',
       },
     });
+
     return res.data;
+    
   } catch (error) {
     const message =
       error?.response?.data?.message ||
