@@ -37,6 +37,42 @@ export const ProductTabIcon = ({style = {}}) => {
   );
 };
 
+export const QrTabIcon = ({style = {}}) => {
+  const width = style?.width || 24;
+  const height = style?.height || 24;
+  const color = style?.color || 'black';
+
+  return (
+    <Svg
+      width={width}
+      height={height}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill={color}
+      style={style}>
+      <Path d="M16 17V16H13V13H16V15H18V17H17V19H15V21H13V18H15V17H16ZM21 21H17V19H19V17H21V21ZM3 3H11V11H3V3ZM5 5V9H9V5H5ZM13 3H21V11H13V3ZM15 5V9H19V5H15ZM3 13H11V21H3V13ZM5 15V19H9V15H5ZM18 13H21V15H18V13ZM6 6H8V8H6V6ZM6 16H8V18H6V16ZM16 6H18V8H16V6Z" />
+    </Svg>
+  );
+};
+
+export const NotificationTabIcon = ({style = {}}) => {
+  const width = style?.width || 24;
+  const height = style?.height || 24;
+  const color = style?.color || 'black';
+
+  return (
+    <Svg
+      width={width}
+      height={height}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill={color}
+      style={style}>
+      <Path d="M20 17H22V19H2V17H4V10C4 5.58172 7.58172 2 12 2C16.4183 2 20 5.58172 20 10V17ZM9 21H15V23H9V21Z" />
+    </Svg>
+  );
+};
+
 export const SettingTabIcon = ({style = {}}) => {
   const width = style?.width || 24;
   const height = style?.height || 24;

@@ -1,4 +1,4 @@
-import {API_BASE_URL} from '@env';
+import {API_URL} from '@env';
 import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
@@ -19,6 +19,7 @@ import Input from '../../components/CustomInput/CustomInput';
 import {getUserApi, updateUserApi} from '../../api/userApi';
 import {Colors} from '../../theme/theme';
 import LoadingOverlay from '../../components/CustomLoading/LoadingOverlay';
+import {getUser} from '../../utils/storage/authStorage';
 
 const ProfileScreen = () => {
   const [avatar, setAvatar] = useState(null);
@@ -50,9 +51,6 @@ const ProfileScreen = () => {
     },
   });
 
-  const accessToken =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YWQ3Y2MzNjRlZTZhMTA5Mzk0YWI3MSIsImlhdCI6MTc1NjI2NDQyNCwiZXhwIjoxNzU2MjY2MjI0fQ.jOLJFfDXMe9WHiRBd206Mq7dsRYxmmcttqpfhO0hgEY';
-
   const handlePickImage = async () => {
     try {
       const result = await launchImageLibrary({
@@ -71,9 +69,16 @@ const ProfileScreen = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const data = await getUserApi(accessToken);
-        console.log('user', data);
+        const storedUser = getUser();
 
+        if (!storedUser) {
+          console.log('No user found, redirect to Login if needed');
+          return;
+        }
+
+        const accessToken = storedUser.accessToken;
+
+        const data = await getUserApi(accessToken);
         if (data?.user) {
           const user = {
             fullName: data.user.fullName || '',
@@ -90,7 +95,7 @@ const ProfileScreen = () => {
           setOriginalUser(user);
 
           if (data.user.avatar) {
-            setServerAvatar(`${API_BASE_URL}/api/images/${data.user.avatar}`);
+            setServerAvatar(`${API_URL}/api/images/${data.user.avatar}`);
           }
         }
       } catch (error) {
@@ -146,7 +151,7 @@ const ProfileScreen = () => {
 
       const data = await getUserApi(accessToken);
       if (data?.user?.avatar) {
-        setServerAvatar(`${API_BASE_URL}/api/images/${data.user.avatar}`);
+        setServerAvatar(`${API_URL}/api/images/${data.user.avatar}`);
       }
     } catch (error) {
       console.log('Lỗi update:', error.message);
