@@ -14,8 +14,8 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import Button from '../../../components/CustomButton/CustomButton';
 import styles from './OTPScreen.styles';
 import {ClockIcon} from '../../../assets/icons';
-import { verifyOtpApi } from '../../../api/auth/verifyOtp';
-
+import {verifyOtpApi, resendOtpApi} from '../../../api/auth/verifyOtp';
+import {showMessage} from 'react-native-flash-message';
 
 const OTPScreen = ({navigation, route}) => {
   const {type, email} = route.params || {};
@@ -62,46 +62,68 @@ const OTPScreen = ({navigation, route}) => {
       inputRefs.current[index - 1]?.focus();
     }
   };
-const handleContinue = async () => {
-  const code = otpCode.join('');
-  if (code.length !== 6) {
-    Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ mã OTP');
-    return;
-  }
-
-  try {
-    const payload = { email, type, otp: code };
-    const res = await verifyOtpApi(payload);
-
-    if (res.success) {
-      Alert.alert('Thành công', res.message, [
-        {
-          text: 'OK',
-          onPress: () => navigation.navigate('Login'),
-        },
-      ]);
-    } else {
-      // ❌ Sai OTP hoặc lỗi khác
-      Alert.alert('Lỗi', res.message || 'Xác thực OTP thất bại');
+  const handleContinue = async () => {
+    const code = otpCode.join('');
+    if (code.length !== 6) {
+      Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ mã OTP');
+      return;
     }
-  } catch (err) {
-    console.log('Xác thực OTP thất bại:', err);
-    Alert.alert('Lỗi', err?.message || 'Không thể xác thực OTP');
-  }
-};
 
+    try {
+      const payload = {email, type, otp: code};
+      const res = await verifyOtpApi(payload);
 
-  const handleResend = () => {
+      if (res.success) {
+        if (type === 'resetPassword') {
+          Alert.alert('Thành công', 'Xác thực OTP thành công', [
+            {
+              text: 'OK',
+              onPress: () => navigation.navigate('ResetPassword', {email}),
+            },
+          ]);
+        } else if (type === 'updateEmail') {
+          showMessage({
+            message: 'Xác thực OTP thành công',
+            type: 'success',
+            icon: 'success',
+          });
+          navigation.goBack();
+        } else {
+          Alert.alert('Thành công', res.message, [
+            {text: 'OK', onPress: () => navigation.navigate('Login')},
+          ]);
+        }
+      } else {
+        Alert.alert('Lỗi', res.message || 'Xác thực OTP thất bại');
+      }
+    } catch (err) {
+      console.log(' OTP error:', err);
+      Alert.alert('Lỗi', 'Không thể xác thực OTP');
+    }
+  };
+
+  const handleResend = async () => {
     if (canResend) {
       setTimer(60);
       setCanResend(false);
       setOtpCode(['', '', '', '', '', '']);
       setCurrentIndex(0);
-      // Focus lại vào ô đầu tiên
+
       setTimeout(() => {
         inputRefs.current[0]?.focus();
       }, 100);
-      console.log('Resend OTP');
+
+      try {
+        const res = await resendOtpApi({email, type});
+        if (res.success) {
+          Alert.alert('Thành công', res.message);
+        } else {
+          Alert.alert('Lỗi', res.message);
+        }
+      } catch (err) {
+        console.log('Resend OTP error:', err);
+        Alert.alert('Lỗi', 'Không thể gửi lại OTP');
+      }
     }
   };
 
@@ -148,7 +170,6 @@ const handleContinue = async () => {
       <KeyboardAvoidingView
         style={{flex: 1}}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -170,10 +191,8 @@ const handleContinue = async () => {
               example****@gmail.com
             </Text>
 
-            {/* OTP Input */}
             {renderOTPInput()}
 
-            {/* Timer and Resend */}
             <View style={styles.timerContainer}>
               <View style={styles.resendContainer}>
                 <Text style={styles.resendText}>Didn't receive code? </Text>
@@ -190,7 +209,6 @@ const handleContinue = async () => {
               </View>
             </View>
 
-            {/* Continue Button */}
             <Button.Main
               title="Continue"
               onPress={handleContinue}

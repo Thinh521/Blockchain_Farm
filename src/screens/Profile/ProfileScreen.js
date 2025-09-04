@@ -20,8 +20,11 @@ import {getUserApi, updateUserApi} from '../../api/userApi';
 import {Colors} from '../../theme/theme';
 import LoadingOverlay from '../../components/CustomLoading/LoadingOverlay';
 import {getUser} from '../../utils/storage/authStorage';
+import {useNavigation} from '@react-navigation/core';
 
 const ProfileScreen = () => {
+  const navigation = useNavigation();
+
   const [avatar, setAvatar] = useState(null);
   const [serverAvatar, setServerAvatar] = useState(null);
   const [gender, setGender] = useState('male');
@@ -139,7 +142,19 @@ const ProfileScreen = () => {
     }
 
     try {
-      await updateUserApi(accessToken, formData);
+      const storedUser = getUser();
+      const accessToken = storedUser.accessToken;
+
+      const response = await updateUserApi(accessToken, formData);
+
+      if (response?.requireOtp) {
+        navigation.navigate('OTP', {
+          email: values.email,
+          type: 'updateEmail',
+        });
+        setSaving(false);
+        return;
+      }
 
       showMessage({
         message: 'Cập nhật thành công!',
@@ -181,7 +196,6 @@ const ProfileScreen = () => {
         showsVerticalScrollIndicator={false}>
         <StatusBar barStyle="light-content" backgroundColor="#28a745" />
 
-        {/* Avatar */}
         <View style={{flex: 1, paddingTop: 40}}>
           <TouchableOpacity
             style={styles.avatarContainer}
@@ -218,7 +232,6 @@ const ProfileScreen = () => {
               )}
             />
 
-            {/* User Name */}
             <Controller
               control={control}
               name="userName"
@@ -236,7 +249,6 @@ const ProfileScreen = () => {
               )}
             />
 
-            {/* Email */}
             <Controller
               control={control}
               name="email"
@@ -261,7 +273,6 @@ const ProfileScreen = () => {
               )}
             />
 
-            {/* Phone */}
             <Controller
               control={control}
               name="phone"
@@ -286,7 +297,6 @@ const ProfileScreen = () => {
               )}
             />
 
-            {/* Address */}
             <Controller
               control={control}
               name="address"
@@ -301,7 +311,6 @@ const ProfileScreen = () => {
               )}
             />
 
-            {/* Gender */}
             <View>
               <Text style={styles.label}>Giới tính</Text>
               <View style={styles.genderContainer}>
@@ -325,7 +334,6 @@ const ProfileScreen = () => {
               </View>
             </View>
 
-            {/* Date of Birth */}
             <Controller
               control={control}
               name="dateOfBirth"

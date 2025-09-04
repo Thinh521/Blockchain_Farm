@@ -1,7 +1,9 @@
+import ForgotPasswordScreen from '../screens/ForgotPassword/ForgotPasswordScreen';
 import LoginScreen from '../screens/Auth/Login/LoginScreen';
 import LoginRequiredScreen from '../screens/Auth/LoginRequired/LoginRequiredScreen';
 import OTPScreen from '../screens/Auth/OTP/OTPScreen';
 import RegisterScreen from '../screens/Auth/Register/RegisterScreen';
+import ResetPasswordScreen from '../screens/ResetPassword/ResetPasswordScreen';
 import ChangePasswordScreen from '../screens/ChangePassword/ChangePasswordScreen';
 import OnboardingScreen from '../screens/Onboarding/OnboardingScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
@@ -65,7 +67,7 @@ const routerNoBottomTab = [
     options: {
       title: 'Kiểm tra đăng nhập',
       headerShown: false,
-      animation: 'fade',
+      animation: 'slide_from_left',
     },
   },
   {
@@ -86,6 +88,26 @@ const routerNoBottomTab = [
       title: 'Đổi mật khẩu',
       headerShown: false,
       animation: 'fade',
+    },
+  },
+  {
+    name: 'ForgotPassword',
+    component: ForgotPasswordScreen,
+    hasLayout: false,
+    options: {
+      title: 'Quên mật khẩu',
+      headerShown: false,
+      animation: 'slide_from_left',
+    },
+  },
+  {
+    name: 'ResetPassword',
+    component: ResetPasswordScreen,
+    hasLayout: false,
+    options: {
+      title: 'Thay đổi mật khẩu',
+      headerShown: false,
+      animation: 'slide_from_left',
     },
   },
 ];
