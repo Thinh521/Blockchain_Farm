@@ -14,7 +14,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import Button from '../../../components/CustomButton/CustomButton';
 import styles from './OTPScreen.styles';
 import {ClockIcon} from '../../../assets/icons';
-import { verifyOtpApi } from '../../../api/auth/verifyOtp';
+import { verifyOtpApi,resendOtpApi } from '../../../api/auth/verifyOtp';
 
 
 const OTPScreen = ({navigation, route}) => {
@@ -74,36 +74,54 @@ const handleContinue = async () => {
     const res = await verifyOtpApi(payload);
 
     if (res.success) {
-      Alert.alert('Thành công', res.message, [
-        {
-          text: 'OK',
-          onPress: () => navigation.navigate('Login'),
-        },
-      ]);
+      if (type === 'resetPassword') {
+        Alert.alert('Thành công', 'Xác thực OTP thành công', [
+          {
+            text: 'OK',
+            onPress: () =>
+              navigation.navigate('ResetPassword', { email }),
+          },
+        ]);
+      } else {
+        Alert.alert('Thành công', res.message, [
+          { text: 'OK', onPress: () => navigation.navigate('Login') },
+        ]);
+      }
     } else {
-      // ❌ Sai OTP hoặc lỗi khác
       Alert.alert('Lỗi', res.message || 'Xác thực OTP thất bại');
     }
   } catch (err) {
-    console.log('Xác thực OTP thất bại:', err);
-    Alert.alert('Lỗi', err?.message || 'Không thể xác thực OTP');
+    console.log(' OTP error:', err);
+    Alert.alert('Lỗi', 'Không thể xác thực OTP');
   }
 };
 
 
-  const handleResend = () => {
-    if (canResend) {
-      setTimer(60);
-      setCanResend(false);
-      setOtpCode(['', '', '', '', '', '']);
-      setCurrentIndex(0);
-      // Focus lại vào ô đầu tiên
-      setTimeout(() => {
-        inputRefs.current[0]?.focus();
-      }, 100);
-      console.log('Resend OTP');
+
+const handleResend = async () => {
+  if (canResend) {
+    setTimer(60);
+    setCanResend(false);
+    setOtpCode(['', '', '', '', '', '']);
+    setCurrentIndex(0);
+
+    setTimeout(() => {
+      inputRefs.current[0]?.focus();
+    }, 100);
+
+    try {
+      const res = await resendOtpApi({ email, type });
+      if (res.success) {
+        Alert.alert('Thành công', res.message);
+      } else {
+        Alert.alert('Lỗi', res.message);
+      }
+    } catch (err) {
+      console.log('Resend OTP error:', err);
+      Alert.alert('Lỗi', 'Không thể gửi lại OTP');
     }
-  };
+  }
+};
 
   const formatTime = seconds => {
     const mins = Math.floor(seconds / 60);
@@ -148,7 +166,6 @@ const handleContinue = async () => {
       <KeyboardAvoidingView
         style={{flex: 1}}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -170,10 +187,8 @@ const handleContinue = async () => {
               example****@gmail.com
             </Text>
 
-            {/* OTP Input */}
             {renderOTPInput()}
 
-            {/* Timer and Resend */}
             <View style={styles.timerContainer}>
               <View style={styles.resendContainer}>
                 <Text style={styles.resendText}>Didn't receive code? </Text>
@@ -190,7 +205,6 @@ const handleContinue = async () => {
               </View>
             </View>
 
-            {/* Continue Button */}
             <Button.Main
               title="Continue"
               onPress={handleContinue}
