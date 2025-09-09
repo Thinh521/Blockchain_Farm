@@ -31,10 +31,12 @@ export const loginApi = async ({emailPhone, password}) => {
   try {
     const res = await api.post('/api/auth/login', {emailPhone, password});
 
-    console.log('Login API response:', res.data);
-
     if (res.data?.errorCodes?.code !== '200') {
-      throw {code: res.data.errorCodes?.code || '500-1'};
+      return {
+        success: false,
+        message: ErrorMap[res.data?.errorCodes?.code] || 'Đăng nhập thất bại',
+        code: res.data?.errorCodes?.code,
+      };
     }
 
     if (res.data?.accessToken && res.data?.user?.id) {
@@ -49,11 +51,12 @@ export const loginApi = async ({emailPhone, password}) => {
     const code = err.response?.data?.code;
     return {
       success: false,
-      message: ErrorMap[code] || 'Đăng nhập thất bại',
+      message: ErrorMap[code] || 'Có lỗi từ server',
       code,
     };
   }
 };
+
 
 // Đăng xuất
 export const logoutApi = async () => {

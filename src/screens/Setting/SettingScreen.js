@@ -24,8 +24,9 @@ import {Colors} from '../../theme/theme';
 import Button from '../../components/CustomButton/CustomButton';
 import {useNavigation} from '@react-navigation/core';
 import {logoutApi} from '../../api/auth/auth';
-import {getUserApi} from '../../api/userApi';
+import {deleteUserApi, getUserApi} from '../../api/userApi';
 import {deleteUser, getUser} from '../../utils/storage/authStorage';
+import {showMessage} from 'react-native-flash-message';
 
 const SettingsScreen = () => {
   const navigation = useNavigation();
@@ -75,6 +76,51 @@ const SettingsScreen = () => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    Alert.alert(
+      'Xác nhận',
+      'Bạn có chắc muốn xoá tài khoản? Hành động này không thể hoàn tác.',
+      [
+        {text: 'Huỷ', style: 'cancel'},
+        {
+          text: 'Xoá',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const res = await deleteUserApi(accessToken);
+              if (res.code === 200) {
+                await deleteUser(); // xoá localStorage
+                showMessage({
+                  message: 'Xóa tài khoản thành công',
+                  type: 'success',
+                  icon: 'success',
+                });
+                navigation.reset({
+                  index: 0,
+                  routes: [{name: 'BottomTab', params: {screen: 'Home'}}],
+                });
+              } else {
+                showMessage({
+                  message: 'Xoá tài khoản thất bại',
+                  description: res.message || 'Xoá tài khoản thất bại',
+                  type: 'danger',
+                  icon: 'danger',
+                });
+              }
+            } catch (error) {
+              showMessage({
+                message: 'Lỗi',
+                description: 'Không thể xoá tài khoản. Vui lòng thử lại!',
+                type: 'danger',
+                icon: 'danger',
+              });
+            }
+          },
+        },
+      ],
+    );
+  };
+
   const SwitchComponent = ({value, onValueChange, color = '#10B981'}) => (
     <Switch
       value={value}
@@ -84,6 +130,7 @@ const SettingsScreen = () => {
       ios_backgroundColor="#d1d5db"
     />
   );
+  ``;
 
   const SettingItem = ({
     title,
@@ -207,6 +254,7 @@ const SettingsScreen = () => {
                 navigation.navigate('NoBottomTab', {screen: 'ChangePassword'});
               }}
             />
+            <SettingItem title="Xóa tài khoản " onPress={handleDeleteAccount} />
           </View>
 
           {/* Language Selection */}
