@@ -17,6 +17,7 @@ import Input from '../../../components/CustomInput/CustomInput';
 import Button from '../../../components/CustomButton/CustomButton';
 import Images from '../../../assets/images/images';
 import {registerApi} from '../../../api/auth/auth';
+import LoadingOverlay from '../../../components/CustomLoading/LoadingOverlay';
 import {
   validateEmail,
   validatePassword,
@@ -35,12 +36,13 @@ const RegisterScreen = ({navigation}) => {
       password: '',
     },
     mode: 'onChange',
-    reValidateMode: 'onChange'
+    reValidateMode: 'onChange',
   });
 
   const [agree, setAgree] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const onSubmit = async (data) => {
+  const onSubmit = async data => {
     if (!agree) {
       return showMessage({
         message: 'Bạn phải đồng ý với điều khoản để tiếp tục',
@@ -49,6 +51,7 @@ const RegisterScreen = ({navigation}) => {
     }
 
     try {
+      setLoading(true); // ✅ bật loading
       const payload = {
         userName: data.username,
         email: data.email,
@@ -77,6 +80,8 @@ const RegisterScreen = ({navigation}) => {
         description: err.message,
         type: 'danger',
       });
+    } finally {
+      setLoading(false); // ✅ tắt loading
     }
   };
 
@@ -102,8 +107,7 @@ const RegisterScreen = ({navigation}) => {
               name="email"
               rules={{
                 required: 'Email là bắt buộc',
-                validate: (val) =>
-                  validateEmail(val) || 'Email không hợp lệ',
+                validate: val => validateEmail(val) || 'Email không hợp lệ',
               }}
               render={({field: {onChange, value}}) => (
                 <Input
@@ -166,9 +170,8 @@ const RegisterScreen = ({navigation}) => {
               name="password"
               rules={{
                 required: 'Mật khẩu là bắt buộc',
-                validate: (val) =>
-                  validatePassword(val) ||
-                  'Mật khẩu phải có ít nhất 6 ký tự',
+                validate: val =>
+                  validatePassword(val) || 'Mật khẩu phải có ít nhất 6 ký tự',
               }}
               render={({field: {onChange, value}}) => (
                 <Input
@@ -247,6 +250,7 @@ const RegisterScreen = ({navigation}) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      {loading && <LoadingOverlay />}
     </SafeAreaView>
   );
 };

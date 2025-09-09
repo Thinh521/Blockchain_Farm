@@ -61,12 +61,6 @@ headerTitle: {
   inputContainer: {
     marginBottom: scale(20),
   },
-  helperText: {
-    fontSize: FontSizes.small,
-    color: Colors.gray,
-    marginTop: scale(8),
-    marginLeft: scale(4),
-  },
   verifyButton: {
     marginTop: scale(20),
     borderRadius: scale(40),

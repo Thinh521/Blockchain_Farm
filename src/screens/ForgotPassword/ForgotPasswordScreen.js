@@ -6,57 +6,65 @@ import {
   View,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {useForm, Controller} from 'react-hook-form';
+import {showMessage} from 'react-native-flash-message';
 import styles from './ForgotPassword.styles';
 import Input from '../../components/CustomInput/CustomInput';
 import Button from '../../components/CustomButton/CustomButton';
 import {validateEmail} from '../../utils/validation/validation';
 import {forgotPasswordApi} from '../../api/auth/auth';
-import {ErrorMap} from '../../utils/errorMapper/errorMapper';
 
 const ForgotPasswordScreen = ({navigation}) => {
-  const [email, setEmail] = useState('');
+  const {
+    control,
+    handleSubmit,
+    formState: {errors},
+  } = useForm({
+    defaultValues: {
+      email: '',
+    },
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+  });
+
   const [loading, setLoading] = useState(false);
 
-const handleContinue = async () => {
-  if (!email) {
-    Alert.alert('Lỗi', 'Vui lòng nhập địa chỉ email');
-    return;
-  }
+  const onSubmit = async (data) => {
+    try {
+      setLoading(true);
+      const res = await forgotPasswordApi({email: data.email});
 
-  const isValidEmail = validateEmail(email);
-  if (!isValidEmail) {
-    Alert.alert('Lỗi', 'Vui lòng nhập đúng định dạng email');
-    return;
-  }
+      if (res.success) {
+        showMessage({
+          message: 'Thành công',
+          description: 'Chúng tôi đã gửi mã OTP về email',
+          type: 'success',
+        });
 
-  try {
-    setLoading(true);
-    const res = await forgotPasswordApi({ email });
-
-    if (res.success) {
-      Alert.alert('Thành công', 'Chúng tôi đã gửi mã OTP về email', [
-        {
-          text: 'OK',
-          onPress: () =>
-            navigation.navigate('OTP', {
-              email,
-              type: 'resetPassword',
-            }),
-        },
-      ]);
-    } else {
-      Alert.alert('Lỗi', res.message);
+        navigation.navigate('OTP', {
+          email: data.email,
+          type: 'resetPassword',
+        });
+      } else {
+        showMessage({
+          message: 'Lỗi',
+          description: res.message,
+          type: 'danger',
+        });
+      }
+    } catch (err) {
+      console.log('❌ Forgot password error:', err);
+      showMessage({
+        message: 'Lỗi',
+        description: 'Không thể gửi email',
+        type: 'danger',
+      });
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.log('❌ Forgot password error:', err);
-    Alert.alert('Lỗi', 'Không thể gửi email');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -72,26 +80,38 @@ const handleContinue = async () => {
           <View style={styles.container}>
             <Text style={styles.title}>Forgot password?</Text>
             <Text style={styles.subtitle}>
-              Enter your email address and we'll send you{'\n'}confirmation code to reset your password
+              Enter your email address and we'll send you{'\n'}confirmation code
+              to reset your password
             </Text>
 
-            <View style={styles.inputContainer}>
-              <Input
-                label="Email Address"
-                placeholder="Albertstevano@gmail.com"
-                placeholderTextColor="#ccc"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                textContentType="emailAddress"
-              />
-            </View>
+            <Controller
+              control={control}
+              name="email"
+              rules={{
+                required: 'Email là bắt buộc',
+                validate: (val) => validateEmail(val) || 'Email không hợp lệ',
+              }}
+              render={({field: {onChange, value}}) => (
+                <Input
+                style={styles.inputContainer}
+                  label="Email Address"
+                  placeholder="Albertstevano@gmail.com"
+                  placeholderTextColor="#ccc"
+                  value={value}
+                  onChangeText={onChange}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  textContentType="emailAddress"
+                  error={errors.email?.message}
+                  isError={!!errors.email}
+                />
+              )}
+            />
 
             <Button.Main
               title="Continue"
-              onPress={handleContinue}
+              onPress={handleSubmit(onSubmit)}
               style={styles.continueButton}
               loading={loading}
             />

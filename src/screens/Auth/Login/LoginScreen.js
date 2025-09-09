@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   KeyboardAvoidingView,
   StatusBar,
@@ -14,11 +14,13 @@ import Input from '../../../components/CustomInput/CustomInput';
 import Button from '../../../components/CustomButton/CustomButton';
 import Images from '../../../assets/images/images';
 import {loginApi} from '../../../api/auth/auth';
-import {ErrorMap} from '../../../utils/errorMapper/errorMapper';
-import {useForm} from '../../../components/useForm/useForm'; // ✅ import hook
+import {useForm} from '../../../components/useForm/useForm';
 import {showMessage} from 'react-native-flash-message';
+import LoadingOverlay from '../../../components/CustomLoading/LoadingOverlay';
 
 const LoginScreen = ({navigation}) => {
+  const [loading, setLoading] = useState(false);
+
   const {values, handleChange, validateForm, getFieldError, isError} = useForm(
     {emailPhone: '', password: ''},
     {
@@ -38,30 +40,34 @@ const LoginScreen = ({navigation}) => {
       return;
     }
 
+    setLoading(true);
+
     try {
-      console.log('Data gửi lên backend:', values);
       const data = await loginApi(values);
+      console.log('Kết quả login:', data);
 
-      console.log('Đăng nhập thành công:', data);
-      showMessage({
-        message: 'Đăng nhập thành công',
-        type: 'success',
-        icon: 'success',
-      });
-
-      navigation.replace('BottomTab', {screen: 'Home'});
-    } catch (err) {
-      console.log('Login error:', err);
-      let message = 'Đăng nhập thất bại';
-      if (err?.code && ErrorMap[err.code]) {
-        message = ErrorMap[err.code];
+      if (data.success) {
+        showMessage({
+          message: 'Đăng nhập thành công',
+          type: 'success',
+          icon: 'success',
+        });
+        navigation.replace('BottomTab', {screen: 'Home'});
+      } else {
+        showMessage({
+          message: data.message || 'Đăng nhập thất bại',
+          type: 'danger',
+          icon: 'danger',
+        });
       }
-
+    } catch (err) {
       showMessage({
-        message,
+        message: 'Có lỗi xảy ra',
         type: 'danger',
         icon: 'danger',
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -111,11 +117,13 @@ const LoginScreen = ({navigation}) => {
               />
             </View>
 
-            <Button.Text
-              title="Quên mật khẩu?"
-              onPress={() => navigation.navigate('ForgotPassword')}
-              textStyle={styles.forgotPassword}
-            />
+            <View style={{alignItems: 'flex-end'}}>
+              <Button.Text
+                title="Quên mật khẩu?"
+                onPress={() => navigation.navigate('ForgotPassword')}
+                textStyle={styles.forgotPassword}
+              />
+            </View>
             <Button.Main
               title="Đăng nhập"
               onPress={handleLogin}
@@ -170,6 +178,8 @@ const LoginScreen = ({navigation}) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {loading && <LoadingOverlay />}
     </SafeAreaView>
   );
 };

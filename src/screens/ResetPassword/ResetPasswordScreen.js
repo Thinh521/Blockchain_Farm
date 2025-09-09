@@ -6,10 +6,11 @@ import {
   View,
   Platform,
   ScrollView,
-  Alert,
   TouchableOpacity,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {useForm, Controller} from 'react-hook-form';
+import {showMessage} from 'react-native-flash-message';
 import styles from './ResetPassword.styles';
 import Input from '../../components/CustomInput/CustomInput';
 import Button from '../../components/CustomButton/CustomButton';
@@ -19,55 +20,51 @@ import {Arrow_Left_S_Icon} from '../../assets/icons';
 
 const ResetPasswordScreen = ({navigation, route}) => {
   const {email} = route.params || {};
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const validatePassword = password => {
-    return password.length >= 8;
-  };
+  const {
+    control,
+    handleSubmit,
+    watch,
+    formState: {errors},
+  } = useForm({
+    defaultValues: {
+      newPassword: '',
+      confirmPassword: '',
+    },
+    mode: 'onChange',
+  });
 
-  const handleVerifyAccount = async () => {
-    if (!newPassword || !confirmPassword) {
-      Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
-      return;
-    }
-
-    if (!validatePassword(newPassword)) {
-      Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 8 ký tự');
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
-      return;
-    }
-
+  const onSubmit = async (data) => {
     try {
       setLoading(true);
-      console.log('Data gửi lên backend:', {email, newPassword});
-      const data = await resetPasswordApi({email, newPassword});
+      const res = await resetPasswordApi({email, newPassword: data.newPassword});
 
-      if (data.success) {
-        console.log(' Đặt lại mật khẩu thành công:', data);
-        Alert.alert('Thành công', 'Mật khẩu đã được đặt lại thành công', [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('Login'),
-          },
-        ]);
+      if (res.success) {
+        showMessage({
+          message: 'Thành công',
+          description: 'Mật khẩu đã được đặt lại thành công',
+          type: 'success',
+        });
+        navigation.navigate('Login');
       } else {
-        console.log(' Đặt lại mật khẩu thất bại:', data);
-        Alert.alert('Lỗi', data.message || 'Đặt lại mật khẩu thất bại');
+        showMessage({
+          message: 'Lỗi',
+          description: res.message || 'Đặt lại mật khẩu thất bại',
+          type: 'danger',
+        });
       }
     } catch (err) {
-      console.log(' Reset password error:', err);
+      console.log('❌ Reset password error:', err);
       let message = 'Đặt lại mật khẩu thất bại';
       if (err?.code && ErrorMap[err.code]) {
         message = ErrorMap[err.code];
       }
-
-      Alert.alert('Lỗi', message);
+      showMessage({
+        message: 'Lỗi',
+        description: message,
+        type: 'danger',
+      });
     } finally {
       setLoading(false);
     }
@@ -99,37 +96,59 @@ const ResetPasswordScreen = ({navigation, route}) => {
               password
             </Text>
 
-            <View style={styles.inputContainer}>
-              <Input
-                label="New Password"
-                placeholder="••••••••••"
-                value={newPassword}
-                onChangeText={setNewPassword}
-                isPassword={true}
-                autoComplete="new-password"
-                textContentType="newPassword"
-              />
-              <Text style={styles.helperText}>
-                Must be at least 8 character
-              </Text>
-            </View>
+            <Controller
+              control={control}
+              name="newPassword"
+              rules={{
+                required: 'Mật khẩu là bắt buộc',
+                minLength: {
+                  value: 6,
+                  message: 'Mật khẩu phải có ít nhất 6 ký tự',
+                },
+              }}
+              render={({field: {onChange, value}}) => (
+                <Input
+                  label="New Password"
+                  placeholder="********"
+                  value={value}
+                  onChangeText={onChange}
+                  isPassword
+                  autoComplete="new-password"
+                  textContentType="newPassword"
+                  error={errors.newPassword?.message}
+                  isError={!!errors.newPassword}
+                  style={styles.inputContainer}
+                />
+              )}
+            />
 
-            <View style={styles.inputContainer}>
-              <Input
-                label="Confirm Password"
-                placeholder="••••••••••"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                isPassword={true}
-                autoComplete="new-password"
-                textContentType="newPassword"
-              />
-              <Text style={styles.helperText}>Both password must match</Text>
-            </View>
+            <Controller
+              control={control}
+              name="confirmPassword"
+              rules={{
+                required: 'Xác nhận mật khẩu là bắt buộc',
+                validate: (val) =>
+                  val === watch('newPassword') || 'Mật khẩu xác nhận không khớp',
+              }}
+              render={({field: {onChange, value}}) => (
+                <Input
+                  label="Confirm Password"
+                  placeholder="********"
+                  value={value}
+                  onChangeText={onChange}
+                  isPassword
+                  autoComplete="new-password"
+                  textContentType="newPassword"
+                  error={errors.confirmPassword?.message}
+                  isError={!!errors.confirmPassword}
+                  style={styles.inputContainer}
+                />
+              )}
+            />
 
             <Button.Main
               title="Verify Account"
-              onPress={handleVerifyAccount}
+              onPress={handleSubmit(onSubmit)}
               style={styles.verifyButton}
               loading={loading}
             />
