@@ -45,7 +45,7 @@ const LoginScreen = ({navigation}) => {
 
       console.log('✅ Đăng nhập thành công:', data);
       Alert.alert('Thành công', 'Đăng nhập thành công');
-      navigation.replace('Home');
+      navigation.replace('BottomTab', {screen: 'Home'});
     } catch (err) {
       console.log('❌ Login error:', err);
       let message = 'Đăng nhập thất bại';

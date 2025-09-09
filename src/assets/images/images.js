@@ -9,6 +9,7 @@ const Images = {
   google: require('./google.png'),
   apple: require('./apple.png'),
   avatar: require('./avatar.png'),
+  bg: require('./bg.png'),
 };
 
 export default Images;

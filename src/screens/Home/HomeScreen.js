@@ -26,6 +26,18 @@ const HomeScreen = () => {
           navigation.navigate('NoBottomTab', {screen: 'OTP'});
         }}
       />
+      <Button
+        title="Farm"
+        onPress={() => {
+          navigation.navigate('NoBottomTab', {screen: 'RegisterManage'});
+        }}
+      />
+       <Button
+        title="Admin"
+        onPress={() => {
+          navigation.navigate('NoBottomTab', {screen: 'Admin'});
+        }}
+      />
       <View style={styles.card}>
         <Text>HomeScreen</Text>
       </View>
