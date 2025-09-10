@@ -6,7 +6,6 @@ import {
   View,
   Platform,
   ScrollView,
-  Alert,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import FastImage from 'react-native-fast-image';
@@ -14,35 +13,38 @@ import styles from './Login.styles';
 import Input from '../../../components/CustomInput/CustomInput';
 import Button from '../../../components/CustomButton/CustomButton';
 import Images from '../../../assets/images/images';
-import {
-  validateEmail,
-  validatePhone,
-} from '../../../utils/validation/validation';
 import {loginApi} from '../../../api/auth/auth';
-import {ErrorMap} from '../../../utils/errorMapper/errorMapper';
+import {useForm} from '../../../components/useForm/useForm';
+import {showMessage} from 'react-native-flash-message';
+import LoadingOverlay from '../../../components/CustomLoading/LoadingOverlay';
 
 const LoginScreen = ({navigation}) => {
-  const [password, setPassword] = useState('');
-  const [emailPhone, setemailPhone] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const {values, handleChange, validateForm, getFieldError, isError} = useForm(
+    {emailPhone: '', password: ''},
+    {
+      emailPhone: {required: true, type: 'emailPhone'},
+      password: {required: true, type: 'password'},
+    },
+  );
 
   const handleLogin = async () => {
-    if (!emailPhone || !password) {
-      Alert.alert('Lỗi', 'Vui lòng nhập Email/SĐT và mật khẩu');
+    const isValid = validateForm();
+    if (!isValid) {
+      showMessage({
+        message: 'Vui lòng nhập đúng thông tin',
+        type: 'danger',
+        icon: 'danger',
+      });
       return;
     }
 
-    const isEmail = validateEmail(emailPhone);
-    const isPhone = validatePhone(emailPhone);
-
-    if (!isEmail && !isPhone) {
-      Alert.alert('Lỗi', 'Vui lòng nhập đúng định dạng Email hoặc SĐT');
-      return;
-    }
+    setLoading(true);
 
     try {
-      console.log('📤 Data gửi lên backend:', {emailPhone, password});
-      const data = await loginApi({emailPhone, password});
-
+      const data = await loginApi(values);
+      console.log('Kết quả login:', data);
       console.log('✅ Đăng nhập thành công:', data);
       Alert.alert('Thành công', 'Đăng nhập thành công');
       navigation.replace('BottomTab', {screen: 'Home'});
@@ -52,15 +54,34 @@ const LoginScreen = ({navigation}) => {
       if (err?.code && ErrorMap[err.code]) {
         message = ErrorMap[err.code];
       }
-
-      Alert.alert('Lỗi', message);
+      if (data.success) {
+        showMessage({
+          message: 'Đăng nhập thành công',
+          type: 'success',
+          icon: 'success',
+        });
+        navigation.replace('BottomTab', {screen: 'Home'});
+      } else {
+        showMessage({
+          message: data.message || 'Đăng nhập thất bại',
+          type: 'danger',
+          icon: 'danger',
+        });
+      }
+    } catch (err) {
+      showMessage({
+        message: 'Có lỗi xảy ra',
+        type: 'danger',
+        icon: 'danger',
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-
       <KeyboardAvoidingView
         style={{flex: 1}}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -78,12 +99,14 @@ const LoginScreen = ({navigation}) => {
 
             <View style={styles.inputContainer}>
               <Input
-                label="Email"
-                placeholder="Nhập Email"
+                label="Email hoặc SĐT"
+                placeholder="Nhập Email hoặc SĐT"
                 placeholderTextColor="#ccc"
-                value={emailPhone}
-                onChangeText={setemailPhone}
+                value={values.emailPhone}
+                onChangeText={text => handleChange('emailPhone', text)}
                 keyboardType="email-address"
+                error={getFieldError('emailPhone')}
+                isError={isError('emailPhone')}
               />
             </View>
 
@@ -91,18 +114,24 @@ const LoginScreen = ({navigation}) => {
               <Input
                 label="Mật khẩu"
                 placeholder="Nhập mật khẩu"
-                value={password}
-                onChangeText={setPassword}
+                value={values.password}
+                onChangeText={text => handleChange('password', text)}
                 isPassword={true}
                 autoComplete="password"
                 textContentType="password"
+                error={getFieldError('password')}
+                isError={isError('password')}
+                style={{marginBottom: 20}}
               />
             </View>
-            <Button.Text
-              title="Quên mật khẩu?"
-              onPress={() => navigation.navigate('ForgotPassword')}
-              textStyle={styles.forgotPassword}
-            />
+
+            <View style={{alignItems: 'flex-end'}}>
+              <Button.Text
+                title="Quên mật khẩu?"
+                onPress={() => navigation.navigate('ForgotPassword')}
+                textStyle={styles.forgotPassword}
+              />
+            </View>
             <Button.Main
               title="Đăng nhập"
               onPress={handleLogin}
@@ -113,7 +142,6 @@ const LoginScreen = ({navigation}) => {
               <Text style={styles.orText}>Hoặc đăng nhập bằng</Text>
               <View style={styles.line} />
             </View>
-
             <View style={styles.socialContainer}>
               <Button.Icon
                 icon={
@@ -158,7 +186,10 @@ const LoginScreen = ({navigation}) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {loading && <LoadingOverlay />}
     </SafeAreaView>
   );
 };
+
 export default LoginScreen;

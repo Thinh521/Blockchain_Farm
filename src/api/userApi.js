@@ -1,4 +1,4 @@
-import api from './baseApi';
+import api from './tokenApi';
 
 export const getUserApi = async accessToken => {
   try {
@@ -17,6 +17,7 @@ export const getUserApi = async accessToken => {
 };
 
 export const updateUserApi = async (accessToken, formData) => {
+  console.log('Update User API called with formData:', formData);
   try {
     const res = await api.put('/api/user/update', formData, {
       headers: {
@@ -24,7 +25,9 @@ export const updateUserApi = async (accessToken, formData) => {
         'Content-Type': 'multipart/form-data',
       },
     });
+
     return res.data;
+    
   } catch (error) {
     const message =
       error?.response?.data?.message ||
@@ -63,3 +66,20 @@ export const changepasswordApi = async ({
     throw new Error(message);
   }
 };
+
+export const deleteUserApi = async accessToken => {
+  try {
+    const res = await api.delete('/api/user/delete', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    return res.data;
+  } catch (error) {
+    const message =
+      error?.response?.data?.message || 'Không thể xoá tài khoản';
+    console.log('Không thể xoá tài khoản:', message);
+    throw new Error(message);
+  }
+};
+

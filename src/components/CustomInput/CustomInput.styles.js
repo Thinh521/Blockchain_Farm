@@ -3,6 +3,17 @@ import {Colors, FontSizes} from '../../theme/theme';
 import {scale} from '../../utils/scaling';
 
 export default StyleSheet.create({
+  errorContainer: {
+    borderColor: 'red',
+    borderWidth: 1,
+  },
+
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    marginTop: 4,
+  },
+
   label: {
     fontSize: FontSizes.small,
     marginBottom: scale(8),

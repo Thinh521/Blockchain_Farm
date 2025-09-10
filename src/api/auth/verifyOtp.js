@@ -28,3 +28,29 @@ export const verifyOtpApi = async (data) => {
     };
   }
 };
+export const resendOtpApi = async (data) => {
+  try {
+    const res = await axios.post(`${API_URL}/api/auth/resend-otp`, data);
+
+    if (res.status === 200) {
+      return {
+        success: true,
+        message: 'OTP đã được gửi lại thành công',
+        data: res.data,
+      };
+    }
+
+    return {
+      success: false,
+      message: ErrorMap[res.data?.code] || 'Gửi lại OTP thất bại',
+      code: res.data?.code,
+    };
+  } catch (error) {
+    const errCode = error.response?.data?.code;
+    return {
+      success: false,
+      message: ErrorMap[errCode] || 'Không thể gửi lại OTP',
+      code: errCode,
+    };
+  }
+};

@@ -1,4 +1,4 @@
-import {API_BASE_URL} from '@env';
+import {API_URL} from '@env';
 import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
@@ -19,8 +19,12 @@ import Input from '../../components/CustomInput/CustomInput';
 import {getUserApi, updateUserApi} from '../../api/userApi';
 import {Colors} from '../../theme/theme';
 import LoadingOverlay from '../../components/CustomLoading/LoadingOverlay';
+import {getUser} from '../../utils/storage/authStorage';
+import {useNavigation} from '@react-navigation/core';
 
 const ProfileScreen = () => {
+  const navigation = useNavigation();
+
   const [avatar, setAvatar] = useState(null);
   const [serverAvatar, setServerAvatar] = useState(null);
   const [gender, setGender] = useState('male');
@@ -50,9 +54,6 @@ const ProfileScreen = () => {
     },
   });
 
-  const accessToken =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YWQ3Y2MzNjRlZTZhMTA5Mzk0YWI3MSIsImlhdCI6MTc1NjI2NDQyNCwiZXhwIjoxNzU2MjY2MjI0fQ.jOLJFfDXMe9WHiRBd206Mq7dsRYxmmcttqpfhO0hgEY';
-
   const handlePickImage = async () => {
     try {
       const result = await launchImageLibrary({
@@ -71,9 +72,16 @@ const ProfileScreen = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const data = await getUserApi(accessToken);
-        console.log('user', data);
+        const storedUser = getUser();
 
+        if (!storedUser) {
+          console.log('No user found, redirect to Login if needed');
+          return;
+        }
+
+        const accessToken = storedUser.accessToken;
+
+        const data = await getUserApi(accessToken);
         if (data?.user) {
           const user = {
             fullName: data.user.fullName || '',
@@ -90,7 +98,7 @@ const ProfileScreen = () => {
           setOriginalUser(user);
 
           if (data.user.avatar) {
-            setServerAvatar(`${API_BASE_URL}/api/images/${data.user.avatar}`);
+            setServerAvatar(`${API_URL}/api/images/${data.user.avatar}`);
           }
         }
       } catch (error) {
@@ -134,7 +142,19 @@ const ProfileScreen = () => {
     }
 
     try {
-      await updateUserApi(accessToken, formData);
+      const storedUser = getUser();
+      const accessToken = storedUser.accessToken;
+
+      const response = await updateUserApi(accessToken, formData);
+
+      if (response?.requireOtp) {
+        navigation.navigate('OTP', {
+          email: values.email,
+          type: 'updateEmail',
+        });
+        setSaving(false);
+        return;
+      }
 
       showMessage({
         message: 'Cập nhật thành công!',
@@ -146,7 +166,7 @@ const ProfileScreen = () => {
 
       const data = await getUserApi(accessToken);
       if (data?.user?.avatar) {
-        setServerAvatar(`${API_BASE_URL}/api/images/${data.user.avatar}`);
+        setServerAvatar(`${API_URL}/api/images/${data.user.avatar}`);
       }
     } catch (error) {
       console.log('Lỗi update:', error.message);
@@ -176,7 +196,6 @@ const ProfileScreen = () => {
         showsVerticalScrollIndicator={false}>
         <StatusBar barStyle="light-content" backgroundColor="#28a745" />
 
-        {/* Avatar */}
         <View style={{flex: 1, paddingTop: 40}}>
           <TouchableOpacity
             style={styles.avatarContainer}
@@ -213,7 +232,6 @@ const ProfileScreen = () => {
               )}
             />
 
-            {/* User Name */}
             <Controller
               control={control}
               name="userName"
@@ -231,7 +249,6 @@ const ProfileScreen = () => {
               )}
             />
 
-            {/* Email */}
             <Controller
               control={control}
               name="email"
@@ -256,7 +273,6 @@ const ProfileScreen = () => {
               )}
             />
 
-            {/* Phone */}
             <Controller
               control={control}
               name="phone"
@@ -281,7 +297,6 @@ const ProfileScreen = () => {
               )}
             />
 
-            {/* Address */}
             <Controller
               control={control}
               name="address"
@@ -296,7 +311,6 @@ const ProfileScreen = () => {
               )}
             />
 
-            {/* Gender */}
             <View>
               <Text style={styles.label}>Giới tính</Text>
               <View style={styles.genderContainer}>
@@ -320,7 +334,6 @@ const ProfileScreen = () => {
               </View>
             </View>
 
-            {/* Date of Birth */}
             <Controller
               control={control}
               name="dateOfBirth"

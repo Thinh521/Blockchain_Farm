@@ -20,11 +20,11 @@ const CustomTabBar = ({state, descriptors, navigation, config = {}}) => {
   ).current;
 
   const {
-    activeColor = '#347AE2',
-    inactiveColor = '#7C8DB5',
+    activeColor = '#10b981',
+    inactiveColor = '#10b981',
     backgroundColor = '#fff',
-    centerActiveColor = '#347AE2',
-    centerInactiveColor = '#f5f5f5',
+    centerActiveColor = '#10b981',
+    centerInactiveColor = '#fff',
     tabHeight = 76,
     centerButtonSize = 60,
     iconSize = 24,
@@ -202,11 +202,39 @@ const CustomTabBar = ({state, descriptors, navigation, config = {}}) => {
           const label = options.tabBarLabel ?? options.title ?? route.name;
           const Icon = options.tabBarCustomIcon ?? (() => null);
 
+          const isCenter = route.name === 'QrScan';
+
           const handlePress = () => handleTabPress(index, route);
+
           const handleLongPress = () => {
             navigation.emit({type: 'tabLongPress', target: route.key});
             onLongPress(index, route);
           };
+
+          if (isCenter) {
+            return (
+              <TouchableOpacity
+                key={route.key}
+                style={{
+                  position: 'relative',
+                  top: -20,
+                  width: 70,
+                  height: 70,
+                  borderRadius: 35,
+                  backgroundColor: focused
+                    ? centerActiveColor
+                    : centerInactiveColor,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+                onPress={handlePress}>
+                <Icon
+                  size={32}
+                  style={{color: focused ? Colors.white : activeColor}}
+                />
+              </TouchableOpacity>
+            );
+          }
 
           const buttonProps = {
             accessibilityRole: 'button',
@@ -233,8 +261,16 @@ const CustomTabBar = ({state, descriptors, navigation, config = {}}) => {
             <TouchableOpacity
               key={route.key}
               style={styles.tabItem}
-              {...buttonProps}>
-              <View style={styles.iconContainer}>{icon}</View>
+              onPress={handlePress}>
+              <View style={styles.iconContainer}>
+                <Animated.View
+                  style={{transform: [{scale: iconScales[index]}]}}>
+                  <Icon
+                    size={24}
+                    style={{color: focused ? activeColor : inactiveColor}}
+                  />
+                </Animated.View>
+              </View>
             </TouchableOpacity>
           );
         })}

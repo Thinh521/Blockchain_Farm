@@ -8,105 +8,82 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  Alert,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
+import {useForm, Controller} from 'react-hook-form';
+import {showMessage} from 'react-native-flash-message';
 import styles from './Register.styles';
 import Input from '../../../components/CustomInput/CustomInput';
 import Button from '../../../components/CustomButton/CustomButton';
 import Images from '../../../assets/images/images';
 import {registerApi} from '../../../api/auth/auth';
+import LoadingOverlay from '../../../components/CustomLoading/LoadingOverlay';
 import {
   validateEmail,
   validatePassword,
-  validatePhone,
 } from '../../../utils/validation/validation';
 
 const RegisterScreen = ({navigation}) => {
-  const [form, setForm] = useState({email: '', username: '', password: ''});
+  const {
+    control,
+    handleSubmit,
+    formState: {errors},
+  } = useForm({
+    defaultValues: {
+      email: '',
+      phone: '',
+      username: '',
+      password: '',
+    },
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+  });
+
   const [agree, setAgree] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleChange = (key, value) => {
-    setForm(prev => ({...prev, [key]: value}));
-  };
-
-  const handleRegister = async () => {
+  const onSubmit = async data => {
     if (!agree) {
-      return Alert.alert(
-        'Thông báo',
-        'Bạn phải đồng ý với điều khoản để tiếp tục',
-      );
+      return showMessage({
+        message: 'Bạn phải đồng ý với điều khoản để tiếp tục',
+        type: 'warning',
+      });
     }
 
-    if (
-      !form.email.trim() ||
-      !form.phone?.trim() ||
-      !form.username.trim() ||
-      !form.password.trim()
-    ) {
-      return Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
-    }
-    if (!validateEmail(form.email)) {
-      return Alert.alert('Lỗi', 'Email không hợp lệ');
-    }
-    if (!/^[0-9]{10}$/.test(form.phone)) {
-      return Alert.alert('Lỗi', 'Số điện thoại phải gồm đúng 10 chữ số');
-    }
-    if (!validatePassword(form.password)) {
-      return Alert.alert('Lỗi', 'Mật khẩu phải có ít nhất 6 ký tự');
-    }
+    try {
+      setLoading(true); // ✅ bật loading
+      const payload = {
+        userName: data.username,
+        email: data.email,
+        password: data.password,
+        phone: data.phone,
+      };
 
-    const payload = {
-      userName: form.username,
-      email: form.email,
-      password: form.password,
-      phone: form.phone,
-    };
+      const res = await registerApi(payload);
 
-    const res = await registerApi(payload);
-
-    if (res.success) {
-      console.log('✅ Đăng ký thành công:', res);
-      navigation.navigate('OTP', {type: 'register', email: form.email});
-    } else {
-      Alert.alert('Đăng ký thất bại', res.message);
+      if (res.success) {
+        showMessage({
+          message: 'Đăng ký thành công',
+          type: 'success',
+        });
+        navigation.navigate('OTP', {type: 'register', email: data.email});
+      } else {
+        showMessage({
+          message: 'Đăng ký thất bại',
+          description: res.message,
+          type: 'danger',
+        });
+      }
+    } catch (err) {
+      showMessage({
+        message: 'Có lỗi xảy ra',
+        description: err.message,
+        type: 'danger',
+      });
+    } finally {
+      setLoading(false); // ✅ tắt loading
     }
   };
-  const inputs = [
-    {
-      label: 'Email',
-      placeholder: 'Nhập Email',
-      key: 'email',
-      keyboardType: 'email-address',
-    },
-    {
-      label: 'Số điện thoại',
-      placeholder: 'Nhập số điện thoại',
-      key: 'phone',
-      keyboardType: 'numeric',
-      maxLength: 10,
-    },
-    {
-      label: 'Tên người dùng',
-      placeholder: 'Nhập tên người dùng',
-      key: 'username',
-    },
-    {
-      label: 'Mật khẩu',
-      placeholder: 'Nhập mật khẩu',
-      key: 'password',
-      isPassword: true,
-    },
-  ];
-
-  const socialButtons = [
-    {source: Images.google, action: () => console.log('Register with Google')},
-    {
-      source: Images.facbook,
-      action: () => console.log('Register with Facebook'),
-    },
-    {source: Images.apple, action: () => console.log('Register with Apple')},
-  ];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -125,19 +102,91 @@ const RegisterScreen = ({navigation}) => {
               Vui lòng điền thông tin để đăng ký
             </Text>
 
-            {inputs.map(({label, placeholder, key, ...rest}) => (
-              <View style={styles.inputContainer} key={key}>
+            <Controller
+              control={control}
+              name="email"
+              rules={{
+                required: 'Email là bắt buộc',
+                validate: val => validateEmail(val) || 'Email không hợp lệ',
+              }}
+              render={({field: {onChange, value}}) => (
                 <Input
-                  label={label}
-                  placeholder={placeholder}
-                  value={form[key]}
-                  onChangeText={val => handleChange(key, val)}
-                  {...rest}
+                  label="Email"
+                  placeholder="Nhập Email"
+                  keyboardType="email-address"
+                  value={value}
+                  style={styles.inputContainer}
+                  onChangeText={onChange}
+                  error={errors.email?.message}
+                  isError={!!errors.email}
                 />
-              </View>
-            ))}
+              )}
+            />
 
-            {/* Checkbox */}
+            <Controller
+              control={control}
+              name="phone"
+              rules={{
+                required: 'Số điện thoại là bắt buộc',
+                pattern: {
+                  value: /^[0-9]{10}$/,
+                  message: 'Số điện thoại phải gồm đúng 10 chữ số',
+                },
+              }}
+              render={({field: {onChange, value}}) => (
+                <Input
+                  label="Số điện thoại"
+                  placeholder="Nhập số điện thoại"
+                  keyboardType="numeric"
+                  style={styles.inputContainer}
+                  maxLength={10}
+                  value={value}
+                  onChangeText={onChange}
+                  error={errors.phone?.message}
+                  isError={!!errors.phone}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="username"
+              rules={{required: 'Tên người dùng là bắt buộc'}}
+              render={({field: {onChange, value}}) => (
+                <Input
+                  label="Tên người dùng"
+                  style={styles.inputContainer}
+                  placeholder="Nhập tên người dùng"
+                  value={value}
+                  onChangeText={onChange}
+                  error={errors.username?.message}
+                  isError={!!errors.username}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="password"
+              rules={{
+                required: 'Mật khẩu là bắt buộc',
+                validate: val =>
+                  validatePassword(val) || 'Mật khẩu phải có ít nhất 6 ký tự',
+              }}
+              render={({field: {onChange, value}}) => (
+                <Input
+                  label="Mật khẩu"
+                  style={styles.inputContainer}
+                  placeholder="Nhập mật khẩu"
+                  isPassword
+                  value={value}
+                  onChangeText={onChange}
+                  error={errors.password?.message}
+                  isError={!!errors.password}
+                />
+              )}
+            />
+
             <View style={styles.checkboxContainer}>
               <TouchableOpacity
                 style={[styles.checkbox, agree && styles.checkboxChecked]}
@@ -153,7 +202,7 @@ const RegisterScreen = ({navigation}) => {
 
             <Button.Main
               title="Đăng ký"
-              onPress={handleRegister}
+              onPress={handleSubmit(onSubmit)}
               style={styles.authButton}
             />
 
@@ -164,16 +213,30 @@ const RegisterScreen = ({navigation}) => {
             </View>
 
             <View style={styles.socialContainer}>
-              {socialButtons.map((btn, index) => (
-                <Button.Icon
-                  key={index}
-                  icon={
-                    <FastImage source={btn.source} style={styles.socialIcon} />
-                  }
-                  onPress={btn.action}
-                  style={styles.socialButton}
-                />
-              ))}
+              <Button.Icon
+                icon={
+                  <FastImage source={Images.google} style={styles.socialIcon} />
+                }
+                onPress={() => console.log('Register with Google')}
+                style={styles.socialButton}
+              />
+              <Button.Icon
+                icon={
+                  <FastImage
+                    source={Images.facbook}
+                    style={styles.socialIcon}
+                  />
+                }
+                onPress={() => console.log('Register with Facebook')}
+                style={styles.socialButton}
+              />
+              <Button.Icon
+                icon={
+                  <FastImage source={Images.apple} style={styles.socialIcon} />
+                }
+                onPress={() => console.log('Register with Apple')}
+                style={styles.socialButton}
+              />
             </View>
 
             <View style={styles.switchContainer}>
@@ -187,6 +250,7 @@ const RegisterScreen = ({navigation}) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      {loading && <LoadingOverlay />}
     </SafeAreaView>
   );
 };

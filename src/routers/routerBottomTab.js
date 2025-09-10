@@ -1,7 +1,14 @@
-import {HomeTabIcon, ProductTabIcon, SettingTabIcon} from '../assets/icons';
-import {Colors, FontSizes, FontWeights} from '../theme/theme';
+import {
+  HomeTabIcon,
+  NotificationTabIcon,
+  ProductTabIcon,
+  QrTabIcon,
+  SettingTabIcon,
+} from '../assets/icons';
 import HomeScreen from '../screens/Home/HomeScreen';
+import NotificationScreen from '../screens/Notification/NotificationScreen';
 import ProductScreen from '../screens/Product/ProductScreen';
+import QrScanScreen from '../screens/QrScan/QrScanScreen';
 import SettingScreen from '../screens/Setting/SettingScreen';
 
 export const getRouterBottomTab = t => [
@@ -22,6 +29,20 @@ export const getRouterBottomTab = t => [
     options: {
       headerShown: false,
     },
+  },
+  {
+    name: 'QrScan',
+    component: QrScanScreen,
+    label: 'Quét QR',
+    Icon: QrTabIcon,
+    options: {headerShown: false},
+  },
+  {
+    name: 'Notification',
+    component: NotificationScreen,
+    label: 'Thông báo',
+    Icon: NotificationTabIcon,
+    options: {headerShown: false},
   },
   {
     name: 'Setting',

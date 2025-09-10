@@ -1,4 +1,5 @@
-import React, {useState} from 'react';
+import {API_URL} from '@env';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -6,10 +7,10 @@ import {
   TouchableOpacity,
   Switch,
   StatusBar,
+  Alert,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import LinearGradient from 'react-native-linear-gradient';
-import Images from '../../assets/images/images';
 import {
   Arrow_Right_S_Icon,
   ContrastIcon,
@@ -22,14 +23,103 @@ import {scale} from '../../utils/scaling';
 import {Colors} from '../../theme/theme';
 import Button from '../../components/CustomButton/CustomButton';
 import {useNavigation} from '@react-navigation/core';
+import {logoutApi} from '../../api/auth/auth';
+import {deleteUserApi, getUserApi} from '../../api/userApi';
+import {deleteUser, getUser} from '../../utils/storage/authStorage';
+import {showMessage} from 'react-native-flash-message';
 
 const SettingsScreen = () => {
   const navigation = useNavigation();
+  const [user, setUser] = useState(null);
   const [language, setLanguage] = useState('en');
   const [darkMode, setDarkMode] = useState(false);
   const [pushNoti, setPushNoti] = useState(true);
   const [emailNoti, setEmailNoti] = useState(true);
   const [orderUpdates, setOrderUpdates] = useState(false);
+
+  const storedUser = getUser();
+
+  const accessToken = storedUser.accessToken;
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await getUserApi(accessToken);
+        if (res.user) {
+          setUser(res.user);
+        } else {
+          console.log('Lỗi load user', res.message);
+        }
+      } catch (error) {
+        console.log('Lỗi load user:', error.message);
+      }
+    };
+
+    fetchUser();
+  }, [setUser, accessToken]);
+
+  const handleLogout = async () => {
+    try {
+      const res = await logoutApi();
+      if (res.success) {
+        await deleteUser();
+
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'BottomTab', params: {screen: 'Home'}}],
+        });
+      } else {
+        Alert.alert('Thông báo', res.message || 'Đăng xuất thất bại');
+      }
+    } catch (error) {
+      Alert.alert('Lỗi', 'Không thể đăng xuất. Vui lòng thử lại!');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    Alert.alert(
+      'Xác nhận',
+      'Bạn có chắc muốn xoá tài khoản? Hành động này không thể hoàn tác.',
+      [
+        {text: 'Huỷ', style: 'cancel'},
+        {
+          text: 'Xoá',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const res = await deleteUserApi(accessToken);
+              if (res.code === 200) {
+                await deleteUser(); // xoá localStorage
+                showMessage({
+                  message: 'Xóa tài khoản thành công',
+                  type: 'success',
+                  icon: 'success',
+                });
+                navigation.reset({
+                  index: 0,
+                  routes: [{name: 'BottomTab', params: {screen: 'Home'}}],
+                });
+              } else {
+                showMessage({
+                  message: 'Xoá tài khoản thất bại',
+                  description: res.message || 'Xoá tài khoản thất bại',
+                  type: 'danger',
+                  icon: 'danger',
+                });
+              }
+            } catch (error) {
+              showMessage({
+                message: 'Lỗi',
+                description: 'Không thể xoá tài khoản. Vui lòng thử lại!',
+                type: 'danger',
+                icon: 'danger',
+              });
+            }
+          },
+        },
+      ],
+    );
+  };
 
   const SwitchComponent = ({value, onValueChange, color = '#10B981'}) => (
     <Switch
@@ -40,6 +130,7 @@ const SettingsScreen = () => {
       ios_backgroundColor="#d1d5db"
     />
   );
+  ``;
 
   const SettingItem = ({
     title,
@@ -110,17 +201,28 @@ const SettingsScreen = () => {
             <View style={styles.profileInfo}>
               <View style={styles.avatarContainer}>
                 <FastImage
-                  source={Images.avatar}
+                  source={
+                    user?.avatar
+                      ? {
+                          uri: `${API_URL}/api/images/${user?.avatar}`,
+                        }
+                      : require('../../assets/images/avatar.png')
+                  }
                   style={styles.avatar}
                   resizeMode={FastImage.resizeMode.contain}
                 />
-                <TouchableOpacity style={styles.editButton} activeOpacity={0.7}>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  activeOpacity={0.8}
+                  onPress={() => {
+                    navigation.navigate('NoBottomTab', {screen: 'Profile'});
+                  }}>
                   <EditIcon style={{width: scale(18), height: scale(18)}} />
                 </TouchableOpacity>
               </View>
               <View style={styles.userInfo}>
-                <Text style={styles.userName}>Nguyễn Văn An</Text>
-                <Text style={styles.userEmail}>nguyenvanan@gmail.com</Text>
+                <Text style={styles.userName}>{user?.fullName}</Text>
+                <Text style={styles.userEmail}>{user?.email}</Text>
                 <View style={styles.premiumBadge}>
                   <Text style={styles.premiumText}>Tài khoản Premium</Text>
                 </View>
@@ -152,6 +254,7 @@ const SettingsScreen = () => {
                 navigation.navigate('NoBottomTab', {screen: 'ChangePassword'});
               }}
             />
+            <SettingItem title="Xóa tài khoản " onPress={handleDeleteAccount} />
           </View>
 
           {/* Language Selection */}
@@ -292,7 +395,11 @@ const SettingsScreen = () => {
         </View>
 
         <View style={styles.footer}>
-          <Button.Main title="Đăng xuất" style={{flex: 1}} />
+          <Button.Main
+            title="Đăng xuất"
+            style={{flex: 1}}
+            onPress={handleLogout}
+          />
           <Button.Main title="Đổi tài khoản" style={{flex: 1}} />
         </View>
       </ScrollView>
@@ -321,7 +428,7 @@ const styles = {
     color: 'rgba(255, 255, 255, 0.8)',
   },
   content: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     marginTop: -16,
     paddingBottom: 20,
   },

@@ -11,18 +11,19 @@ import {
   Alert,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {showMessage} from 'react-native-flash-message';
 import Button from '../../../components/CustomButton/CustomButton';
 import styles from './OTPScreen.styles';
 import {ClockIcon} from '../../../assets/icons';
-import { verifyOtpApi } from '../../../api/auth/verifyOtp';
-
-
+import {verifyOtpApi, resendOtpApi} from '../../../api/auth/verifyOtp';
+import LoadingOverlay from '../../../components/CustomLoading/LoadingOverlay';
 const OTPScreen = ({navigation, route}) => {
   const {type, email} = route.params || {};
   const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
-  const [timer, setTimer] = useState(60);
+  const [timer, setTimer] = useState(10);
   const [canResend, setCanResend] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(false); // ✅ state loading
   const inputRefs = useRef([]);
 
   useEffect(() => {
@@ -37,7 +38,7 @@ const OTPScreen = ({navigation, route}) => {
     let interval = null;
     if (timer > 0 && !canResend) {
       interval = setInterval(() => {
-        setTimer(timer => timer - 1);
+        setTimer(t => t - 1);
       }, 1000);
     } else {
       setCanResend(true);
@@ -62,46 +63,90 @@ const OTPScreen = ({navigation, route}) => {
       inputRefs.current[index - 1]?.focus();
     }
   };
-const handleContinue = async () => {
-  const code = otpCode.join('');
-  if (code.length !== 6) {
-    Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ mã OTP');
-    return;
-  }
 
-  try {
-    const payload = { email, type, otp: code };
-    const res = await verifyOtpApi(payload);
-
-    if (res.success) {
-      Alert.alert('Thành công', res.message, [
-        {
-          text: 'OK',
-          onPress: () => navigation.navigate('Login'),
-        },
-      ]);
-    } else {
-      // ❌ Sai OTP hoặc lỗi khác
-      Alert.alert('Lỗi', res.message || 'Xác thực OTP thất bại');
+  const handleContinue = async () => {
+    const code = otpCode.join('');
+    if (code.length !== 6) {
+      return showMessage({
+        message: 'Lỗi',
+        description: 'Vui lòng nhập đầy đủ mã OTP',
+        type: 'danger',
+      });
     }
-  } catch (err) {
-    console.log('Xác thực OTP thất bại:', err);
-    Alert.alert('Lỗi', err?.message || 'Không thể xác thực OTP');
-  }
-};
 
+    try {
+      setLoading(true); // ✅ bật loading
+      const payload = {email, type, otp: code};
+      const res = await verifyOtpApi(payload);
 
-  const handleResend = () => {
+      if (res.success) {
+        if (type === 'resetPassword') {
+          Alert.alert('Thành công', 'Xác thực OTP thành công', [
+            {
+              text: 'OK',
+              onPress: () => navigation.navigate('ResetPassword', {email}),
+            },
+          ]);
+        } else if (type === 'updateEmail') {
+          showMessage({
+            message: 'Xác thực OTP thành công',
+            type: 'success',
+            icon: 'success',
+          });
+          navigation.goBack();
+        } else {
+          Alert.alert('Thành công', res.message, [
+            {text: 'OK', onPress: () => navigation.navigate('Login')},
+          ]);
+        }
+      } else {
+        Alert.alert('Lỗi', res.message || 'Xác thực OTP thất bại');
+      }
+    } catch (err) {
+      console.log('❌ OTP error:', err);
+      Alert.alert('Lỗi', 'Không thể xác thực OTP');
+    } finally {
+      setLoading(false); // ✅ tắt loading
+    }
+  };
+
+  const handleResend = async () => {
     if (canResend) {
       setTimer(60);
       setCanResend(false);
       setOtpCode(['', '', '', '', '', '']);
       setCurrentIndex(0);
-      // Focus lại vào ô đầu tiên
+
       setTimeout(() => {
         inputRefs.current[0]?.focus();
       }, 100);
-      console.log('Resend OTP');
+
+      try {
+        setLoading(true); // ✅ bật loading
+        const res = await resendOtpApi({email, type});
+        if (res.success) {
+          showMessage({
+            message: 'Thành công',
+            description: res.message || 'Đã gửi lại OTP',
+            type: 'success',
+          });
+        } else {
+          showMessage({
+            message: 'Lỗi',
+            description: res.message || 'Không thể gửi lại OTP',
+            type: 'danger',
+          });
+        }
+      } catch (err) {
+        console.log('❌ Resend OTP error:', err);
+        showMessage({
+          message: 'Lỗi',
+          description: 'Không thể gửi lại OTP',
+          type: 'danger',
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -113,33 +158,31 @@ const handleContinue = async () => {
       .padStart(2, '0')}`;
   };
 
-  const renderOTPInput = () => {
-    return (
-      <View style={styles.otpContainer}>
-        {otpCode.map((digit, index) => (
-          <View
-            key={index}
-            style={[
-              styles.otpBox,
-              currentIndex === index && styles.otpBoxFocused,
-            ]}>
-            <TextInput
-              ref={ref => (inputRefs.current[index] = ref)}
-              style={styles.otpInput}
-              value={digit}
-              onChangeText={value => handleOTPChange(value, index)}
-              onKeyPress={e => handleOTPKeyPress(e, index)}
-              onFocus={() => setCurrentIndex(index)}
-              keyboardType="numeric"
-              maxLength={1}
-              selectTextOnFocus
-              textAlign="center"
-            />
-          </View>
-        ))}
-      </View>
-    );
-  };
+  const renderOTPInput = () => (
+    <View style={styles.otpContainer}>
+      {otpCode.map((digit, index) => (
+        <View
+          key={index}
+          style={[
+            styles.otpBox,
+            currentIndex === index && styles.otpBoxFocused,
+          ]}>
+          <TextInput
+            ref={ref => (inputRefs.current[index] = ref)}
+            style={styles.otpInput}
+            value={digit}
+            onChangeText={value => handleOTPChange(value, index)}
+            onKeyPress={e => handleOTPKeyPress(e, index)}
+            onFocus={() => setCurrentIndex(index)}
+            keyboardType="numeric"
+            maxLength={1}
+            selectTextOnFocus
+            textAlign="center"
+          />
+        </View>
+      ))}
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -148,7 +191,6 @@ const handleContinue = async () => {
       <KeyboardAvoidingView
         style={{flex: 1}}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
@@ -166,14 +208,12 @@ const handleContinue = async () => {
           <View style={styles.container}>
             <Text style={styles.title}>Email verification</Text>
             <Text style={styles.subtitle}>
-              Enter the verification code we send you on:{'\n'}
-              example****@gmail.com
+              Enter the verification code we sent to:{'\n'}
+              {email}
             </Text>
 
-            {/* OTP Input */}
             {renderOTPInput()}
 
-            {/* Timer and Resend */}
             <View style={styles.timerContainer}>
               <View style={styles.resendContainer}>
                 <Text style={styles.resendText}>Didn't receive code? </Text>
@@ -190,7 +230,6 @@ const handleContinue = async () => {
               </View>
             </View>
 
-            {/* Continue Button */}
             <Button.Main
               title="Continue"
               onPress={handleContinue}
@@ -202,6 +241,7 @@ const handleContinue = async () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      {loading && <LoadingOverlay />}
     </SafeAreaView>
   );
 };

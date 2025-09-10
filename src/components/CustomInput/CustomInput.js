@@ -34,6 +34,8 @@ const Input = forwardRef(
       clearButtonMode = 'never',
       onClear,
       showClearButton = false,
+      error,
+      isError = false,
       ...rest
     },
     ref,
@@ -78,6 +80,7 @@ const Input = forwardRef(
       ];
       if (isFocused) base.push(styles.focusedContainer);
       if (disabled || readonly) base.push(styles.disabledContainer);
+      if (isError) base.push(styles.errorContainer); // ✅ thêm viền đỏ khi lỗi
       return base;
     };
 
@@ -109,7 +112,8 @@ const Input = forwardRef(
                     isFocused && styles.focusedIcon,
                   ]}
                 />
-              ) : (React.cloneElement(LeftIcon, {
+              ) : (
+                React.cloneElement(LeftIcon, {
                   style: [
                     styles.leftIcon,
                     isFocused && styles.focusedIcon,
@@ -184,6 +188,11 @@ const Input = forwardRef(
             </View>
           )}
         </View>
+
+        {/* ✅ hiện error dưới input */}
+        {error ? (
+          <Text style={styles.errorText}>{error}</Text>
+        ) : null}
       </View>
     );
   },
