@@ -45,21 +45,17 @@ const LoginScreen = ({navigation}) => {
     try {
       const data = await loginApi(values);
       console.log('Kết quả login:', data);
-      console.log('✅ Đăng nhập thành công:', data);
-      Alert.alert('Thành công', 'Đăng nhập thành công');
-      navigation.replace('BottomTab', {screen: 'Home'});
-    } catch (err) {
-      console.log('❌ Login error:', err);
-      let message = 'Đăng nhập thất bại';
-      if (err?.code && ErrorMap[err.code]) {
-        message = ErrorMap[err.code];
-      }
+
       if (data.success) {
+        console.log('✅ Đăng nhập thành công:', data);
+        Alert.alert('Thành công', 'Đăng nhập thành công');
+
         showMessage({
           message: 'Đăng nhập thành công',
           type: 'success',
           icon: 'success',
         });
+
         navigation.replace('BottomTab', {screen: 'Home'});
       } else {
         showMessage({
@@ -69,8 +65,15 @@ const LoginScreen = ({navigation}) => {
         });
       }
     } catch (err) {
+      console.log('❌ Login error:', err);
+
+      let message = 'Đăng nhập thất bại';
+      if (err?.code && ErrorMap[err.code]) {
+        message = ErrorMap[err.code];
+      }
+
       showMessage({
-        message: 'Có lỗi xảy ra',
+        message,
         type: 'danger',
         icon: 'danger',
       });
