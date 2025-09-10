@@ -7,6 +7,7 @@ import ResetPasswordScreen from '../screens/ResetPassword/ResetPasswordScreen';
 import ChangePasswordScreen from '../screens/ChangePassword/ChangePasswordScreen';
 import OnboardingScreen from '../screens/Onboarding/OnboardingScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
+import RegisterManage from '../screens/RegisterManage/RegisterManage';
 import SplashScreen from '../screens/Splash/SplashScreen';
 
 const routerNoBottomTab = [
@@ -86,6 +87,16 @@ const routerNoBottomTab = [
     hasLayout: false,
     options: {
       title: 'Đổi mật khẩu',
+      headerShown: false,
+      animation: 'fade',
+    },
+  },
+  {
+    name: 'RegisterManage',
+    component: RegisterManage,
+    hasLayout: false,
+    options: {
+      title: 'Đăng ký farm',
       headerShown: false,
       animation: 'fade',
     },

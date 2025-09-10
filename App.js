@@ -1,3 +1,4 @@
+import "@walletconnect/react-native-compat";
 import React from 'react';
 import AppNavigator from './src/navigation/AppNavigator';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
@@ -6,6 +7,9 @@ import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {NavigationContainer} from '@react-navigation/native';
 import FlashMessage from 'react-native-flash-message';
+import { AppKit } from '@reown/appkit-ethers-react-native';
+import './src/Metamask/appkit';
+
 
 const queryClient = new QueryClient();
 
@@ -16,6 +20,7 @@ export default function App() {
         <QueryClientProvider client={queryClient}>
           <SafeAreaProvider>
             <NavigationContainer>
+              <AppKit />
               <FlashMessage position="top" />
               <AppNavigator />
             </NavigationContainer>
