@@ -1,4 +1,3 @@
-import AdminAuthorizeUser from '../screens/Admin/AdminAuthorizeUser';
 import LoginScreen from '../screens/Auth/Login/LoginScreen';
 import LoginRequiredScreen from '../screens/Auth/LoginRequired/LoginRequiredScreen';
 import OTPScreen from '../screens/Auth/OTP/OTPScreen';
@@ -96,16 +95,6 @@ const routerNoBottomTab = [
     hasLayout: false,
     options: {
       title: 'Đăng ký farm',
-      headerShown: false,
-      animation: 'fade',
-    },
-  },
-    {
-    name: 'Admin',
-    component: AdminAuthorizeUser,
-    hasLayout: false,
-    options: {
-      title: 'Quản lý người dùng',
       headerShown: false,
       animation: 'fade',
     },
