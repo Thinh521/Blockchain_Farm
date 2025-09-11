@@ -10,6 +10,8 @@ const Images = {
   apple: require('./apple.png'),
   avatar: require('./avatar.png'),
   bg: require('./bg.png'),
+  slider_1: require('./slider_1.png'),
+  slider_2: require('./slider_2.png'),
 };
 
 export default Images;

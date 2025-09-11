@@ -11,6 +11,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {CommonActions} from '@react-navigation/native';
 import {FontSizes, FontWeights, Shadows, Colors} from '../../theme/theme';
 import {scale} from '../../utils/scaling';
+import {getUser} from '../../utils/storage/authStorage';
 
 const CustomTabBar = ({state, descriptors, navigation, config = {}}) => {
   const insets = useSafeAreaInsets();
@@ -172,6 +173,16 @@ const CustomTabBar = ({state, descriptors, navigation, config = {}}) => {
   });
 
   const handleTabPress = (index, route) => {
+    const user = getUser();
+    const isHome = route.name === 'Home';
+
+    if (!user && !isHome) {
+      navigation.navigate('NoBottomTab', {
+        screen: 'LoginRequired',
+      });
+      return;
+    }
+
     const {options} = descriptors[route.key];
 
     const event = navigation.emit({

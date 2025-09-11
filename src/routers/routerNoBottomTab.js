@@ -9,6 +9,9 @@ import OnboardingScreen from '../screens/Onboarding/OnboardingScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
 import RegisterManage from '../screens/RegisterManage/RegisterManage';
 import SplashScreen from '../screens/Splash/SplashScreen';
+import FarmDetailScreen from '../screens/FarmDetail/FarmDetailScreen';
+import AllFarmsScreen from '../screens/Home/components/AllFarmsScreen';
+import {Colors} from '../theme/theme';
 
 const routerNoBottomTab = [
   {
@@ -119,6 +122,33 @@ const routerNoBottomTab = [
       title: 'Thay đổi mật khẩu',
       headerShown: false,
       animation: 'slide_from_left',
+    },
+  },
+  {
+    name: 'FarmDetail',
+    component: FarmDetailScreen,
+    hasLayout: false,
+    options: {
+      title: 'Chi tiết nông trại',
+      headerShown: false,
+      animation: 'slide_from_bottom',
+    },
+  },
+  {
+    name: 'AllFarms',
+    component: AllFarmsScreen,
+    hasLayout: false,
+    options: {
+      title: 'Tất cả nông trại',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
     },
   },
 ];

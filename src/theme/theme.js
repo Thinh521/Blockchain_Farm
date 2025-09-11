@@ -9,7 +9,10 @@ export const Colors = {
   black: '#000000',
   red: '#FF0000',
   border: '#D6D6D6',
+  border_2: '#E5E7EB',
   title: '#212121',
+  green: '#059669',
+  
 };
 
 export const FontSizes = {

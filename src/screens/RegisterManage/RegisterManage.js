@@ -23,7 +23,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Images from '../../assets/images/images';
 import {CONTRACT_ADDRESS} from '@env';
 import styles from './Style';
-import contractArtifact from '../Smart Conctract/contractABI.json';
+import contractArtifact from '../SmartConctract/contractABI.json';
 import {storage} from '../../utils/storage/storage';
 import api from '../../api/baseApi';
 import {getUserApi} from '../../api/userApi';
@@ -130,149 +130,151 @@ const RegisterManage = ({navigation}) => {
   };
 
   const handleSubmit = async () => {
-  console.log('🔽 Bắt đầu submit form');
-  console.log('👉 Dữ liệu form:', formData);
+    console.log('🔽 Bắt đầu submit form');
+    console.log('👉 Dữ liệu form:', formData);
 
-  if (
-    !formData.fullname ||
-    !formData.nameFarm ||
-    !formData.phone ||
-    !formData.email ||
-    !formData.farmCode
-  ) {
-    showMessage({
-      message: 'Lỗi',
-      description: 'Vui lòng điền đầy đủ các trường bắt buộc trong form',
-      type: 'danger',
-    });
-    return;
-  }
-
-  if (!isConnected || !walletProvider) {
-    showMessage({
-      message: 'Lỗi',
-      description: 'Vui lòng kết nối ví trước!',
-      type: 'danger',
-    });
-    setShowWalletModal(true);
-    return;
-  }
-
-  try {
-    const accessToken = await storage.getString('accessToken');
-    if (!accessToken) {
-      throw new Error('Không tìm thấy accessToken');
-    }
-
-    let uploadedImages = [];
-
-    const hasKycImage = formData.kycImage && formData.kycImage.uri;
-    const hasFarmImages = formData.farmImages && formData.farmImages.length > 0;
-
-    if (hasKycImage || hasFarmImages) {
-      const formDataToSend = new FormData();
-      formDataToSend.append('farmCode', formData.farmCode);
-      formDataToSend.append('accessToken', accessToken);
-
-      if (hasKycImage) {
-        formDataToSend.append('images', {
-          uri: formData.kycImage.uri,
-          type: formData.kycImage.type || 'image/jpeg',
-          name: formData.kycImage.name || 'kyc_image.jpg',
-        });
-      }
-
-      if (hasFarmImages) {
-        formData.farmImages.forEach((img, index) => {
-          formDataToSend.append('images', {
-            uri: img.uri,
-            type: img.type || 'image/jpeg',
-            name: img.name || `farm_image_${index}.jpg`,
-          });
-        });
-      }
-
-      const response = await api.post(`/api/farms`, formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${accessToken}`,
-        },
-        timeout: 60000,
+    if (
+      !formData.fullname ||
+      !formData.nameFarm ||
+      !formData.phone ||
+      !formData.email ||
+      !formData.farmCode
+    ) {
+      showMessage({
+        message: 'Lỗi',
+        description: 'Vui lòng điền đầy đủ các trường bắt buộc trong form',
+        type: 'danger',
       });
-      console.log('response', response.data);
-
-      if (response.data?.images && Array.isArray(response.data.images)) {
-        uploadedImages = response.data.images.filter(Boolean); 
-      } else {
-        throw new Error('API không trả về URL ảnh hợp lệ');
-      }
+      return;
     }
 
-    const provider = new ethers.BrowserProvider(walletProvider);
-    const signer = await provider.getSigner();
+    if (!isConnected || !walletProvider) {
+      showMessage({
+        message: 'Lỗi',
+        description: 'Vui lòng kết nối ví trước!',
+        type: 'danger',
+      });
+      setShowWalletModal(true);
+      return;
+    }
 
-    const contract = new ethers.Contract(
-      CONTRACT_ADDRESS,
-      contractArtifact.abi,
-      signer,
-    );
+    try {
+      const accessToken = await storage.getString('accessToken');
+      if (!accessToken) {
+        throw new Error('Không tìm thấy accessToken');
+      }
 
-    // gọi smart contract với mảng string
-    const tx = await contract.registerFarm(
-      formData.farmCode,
-      formData.nameFarm,
-      (await storage.getString('id')) || 'USER123',
-      formData.fullname,
-      formData.email,
-      formData.phone,
-      formData.description,
-      formData.location || 'Unknown',
-      Number(formData.area) || 1000,
-      uploadedImages, // 👈 truyền thẳng mảng
-    );
+      let uploadedImages = [];
 
-    await tx.wait();
+      const hasKycImage = formData.kycImage && formData.kycImage.uri;
+      const hasFarmImages =
+        formData.farmImages && formData.farmImages.length > 0;
 
-    // cập nhật txHash về backend
-    await api.put(
-      `/api/farms/farmCode/txHash`,
-      {
-        farmCode: formData.farmCode,
-        txHash: tx.hash,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
+      if (hasKycImage || hasFarmImages) {
+        const formDataToSend = new FormData();
+        formDataToSend.append('farmCode', formData.farmCode);
+        formDataToSend.append('accessToken', accessToken);
+
+        if (hasKycImage) {
+          formDataToSend.append('images', {
+            uri: formData.kycImage.uri,
+            type: formData.kycImage.type || 'image/jpeg',
+            name: formData.kycImage.name || 'kyc_image.jpg',
+          });
+        }
+
+        if (hasFarmImages) {
+          formData.farmImages.forEach((img, index) => {
+            formDataToSend.append('images', {
+              uri: img.uri,
+              type: img.type || 'image/jpeg',
+              name: img.name || `farm_image_${index}.jpg`,
+            });
+          });
+        }
+
+        const response = await api.post(`/api/farms`, formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${accessToken}`,
+          },
+          timeout: 60000,
+        });
+        console.log('response', response.data);
+
+        if (response.data?.images && Array.isArray(response.data.images)) {
+          uploadedImages = response.data.images.filter(Boolean);
+        } else {
+          throw new Error('API không trả về URL ảnh hợp lệ');
+        }
+      }
+
+      const provider = new ethers.BrowserProvider(walletProvider);
+      const signer = await provider.getSigner();
+
+      const contract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        contractArtifact.abi,
+        signer,
+      );
+
+      // gọi smart contract với mảng string
+      const tx = await contract.registerFarm(
+        formData.farmCode,
+        formData.nameFarm,
+        (await storage.getString('id')) || 'USER123',
+        formData.fullname,
+        formData.email,
+        formData.phone,
+        formData.description,
+        formData.location || 'Unknown',
+        Number(formData.area) || 1000,
+        uploadedImages, // 👈 truyền thẳng mảng
+      );
+
+      await tx.wait();
+
+      console.log('✅ Giao dịch thành công:', tx.hash);
+
+      // cập nhật txHash về backend
+      await api.put(
+        `/api/farms/farmCode/txHash`,
+        {
+          farmCode: formData.farmCode,
+          txHash: tx.hash,
         },
-      },
-    );
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
 
-    showMessage({
-      message: 'Thành công',
-      description: `Đăng ký farm thành công`,
-      type: 'success',
-      duration: 2000,
-      onHide: () => {
-        navigation.navigate('Auth', {screen: 'MyFarm'});
-      },
-    });
-  } catch (error) {
-    console.error('❌ Lỗi tổng thể khi xử lý:', {
-      message: error.message,
-      reason: error.reason,
-      code: error.code,
-    });
-    showMessage({
-      message: 'Lỗi',
-      description:
-        error.reason || error.message || 'Đã xảy ra lỗi khi đăng ký farm.',
-      type: 'danger',
-    });
-  }
-};
+      showMessage({
+        message: 'Thành công',
+        description: `Đăng ký farm thành công`,
+        type: 'success',
+        duration: 2000,
+        onHide: () => {
+          navigation.navigate('Auth', {screen: 'MyFarm'});
+        },
+      });
+    } catch (error) {
+      console.error('❌ Lỗi tổng thể khi xử lý:', {
+        message: error.message,
+        reason: error.reason,
+        code: error.code,
+      });
+      showMessage({
+        message: 'Lỗi',
+        description:
+          error.reason || error.message || 'Đã xảy ra lỗi khi đăng ký farm.',
+        type: 'danger',
+      });
+    }
+  };
 
-
-  const isCompleted = sectionIndex => {
+  const isCompleted = sectionIndex => { CONTRACT_ADDRESS
     switch (sectionIndex) {
       case 0:
         return (
