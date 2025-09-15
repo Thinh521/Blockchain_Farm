@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   StatusBar,
-  ImageBackground,
   SafeAreaView,
   Modal,
   ScrollView,
@@ -20,7 +19,6 @@ import {
 } from '@reown/appkit-ethers-react-native';
 import {launchImageLibrary} from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import Images from '../../assets/images/images';
 import {CONTRACT_ADDRESS} from '@env';
 import styles from './Style';
 import contractArtifact from '../SmartConctract/contractABI.json';
@@ -28,14 +26,16 @@ import {storage} from '../../utils/storage/storage';
 import api from '../../api/baseApi';
 import {getUserApi} from '../../api/userApi';
 
-const RegisterManage = ({navigation}) => {
+const RegisterManage = ({navigation, route}) => {
   const {address, isConnected} = useAppKitAccount();
   const {walletProvider} = useAppKitProvider();
 
   // State cho modal ví
   const [showWalletModal, setShowWalletModal] = useState(false);
-  // State cho trạng thái mở/rút gọn của các section
-  const [activeSections, setActiveSections] = useState([]);
+  // State cho active section
+  const [activeSection, setActiveSection] = useState(null);
+  // State cho loading user data
+  const [loadingUserData, setLoadingUserData] = useState(true);
 
   const generateFarmCode = () => {
     const randomDigits = Math.floor(100000 + Math.random() * 900000);
@@ -43,20 +43,20 @@ const RegisterManage = ({navigation}) => {
   };
 
   const [formData, setFormData] = useState({
-    fullname: '',
+    fullName: '',
     nameFarm: '',
     email: '',
     phone: '',
     description: '',
-    country: '',
-    addressInfo: '',
+    location: '',
     area: '',
     kycImage: null,
     farmImages: [],
     farmCode: generateFarmCode(),
   });
 
-  useEffect(() => {
+  // Fetch user data using getUserApi
+   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const accessToken = await storage.getString('accessToken');
@@ -70,9 +70,11 @@ const RegisterManage = ({navigation}) => {
         if (response?.user) {
           const userData = response.user;
 
+          console.log('Fetched user data:', userData);  
+
           setFormData(prev => ({
             ...prev,
-            fullname: userData.fullName || prev.fullName,
+            fullName: userData.fullName || prev.fullName,
             phone: userData.phone || prev.phone,
             email: userData.email || prev.email,
           }));
@@ -90,43 +92,86 @@ const RegisterManage = ({navigation}) => {
     };
 
     fetchUserData();
-  }, []); // Chạy một lần khi component mount
+  }, []); 
 
   useEffect(() => {
+    if (route.params?.updatedFormData) {
+      setFormData(prev => ({
+        ...prev,
+        ...route.params.updatedFormData,
+        farmCode:
+          route.params.updatedFormData.farmCode ||
+          prev.farmCode ||
+          generateFarmCode(),
+      }));
+    }
+
+    // Hiện modal wallet khi chưa kết nối
     if (!isConnected) {
       setShowWalletModal(true);
     } else {
       setShowWalletModal(false);
     }
-  }, [isConnected]);
 
-  const toggleSection = index => {
-    setActiveSections(prev =>
-      prev.includes(index) ? prev.filter(i => i !== index) : [...prev, index],
-    );
+    if (walletProvider) {
+      const handleSessionRequest = sessionId => {
+        console.log('Xử lý session request:', sessionId);
+      };
+      return () => {
+        // walletProvider.off('session_request', handleSessionRequest);
+      };
+    }
+  }, [route.params?.updatedFormData, walletProvider, isConnected]);
+
+  const handleMenuItemPress = sectionIndex => {
+    setActiveSection(activeSection === sectionIndex ? null : sectionIndex);
   };
 
-  const handleImagePick = (type, index = null) => {
-    launchImageLibrary({mediaType: 'photo', quality: 1}, response => {
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.errorCode) {
-        console.log('ImagePicker Error: ', response.errorMessage);
-      } else if (response.assets && response.assets.length > 0) {
-        const image = response.assets[0];
+  const handleBellPress = () => {
+    setShowWalletModal(true);
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const selectImage = (type) => {
+    const options = {
+      mediaType: 'photo',
+      includeBase64: false,
+      maxHeight: 2000,
+      maxWidth: 2000,
+    };
+
+    launchImageLibrary(options, (response) => {
+      if (response.didCancel || response.error) return;
+      
+      if (response.assets && response.assets[0]) {
+        const imageData = response.assets[0];
+        
         if (type === 'kyc') {
-          setFormData(prev => ({...prev, kycImage: image}));
+          setFormData(prev => ({
+            ...prev,
+            kycImage: imageData,
+          }));
         } else if (type === 'farm') {
           setFormData(prev => ({
             ...prev,
-            farmImages:
-              index !== null
-                ? prev.farmImages.map((img, i) => (i === index ? image : img))
-                : [...prev.farmImages, image],
+            farmImages: [...prev.farmImages, imageData],
           }));
         }
       }
     });
+  };
+
+  const removeFarmImage = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      farmImages: prev.farmImages.filter((_, i) => i !== index),
+    }));
   };
 
   const handleSubmit = async () => {
@@ -134,7 +179,7 @@ const RegisterManage = ({navigation}) => {
     console.log('👉 Dữ liệu form:', formData);
 
     if (
-      !formData.fullname ||
+      !formData.fullName ||
       !formData.nameFarm ||
       !formData.phone ||
       !formData.email ||
@@ -167,8 +212,7 @@ const RegisterManage = ({navigation}) => {
       let uploadedImages = [];
 
       const hasKycImage = formData.kycImage && formData.kycImage.uri;
-      const hasFarmImages =
-        formData.farmImages && formData.farmImages.length > 0;
+      const hasFarmImages = formData.farmImages && formData.farmImages.length > 0;
 
       if (hasKycImage || hasFarmImages) {
         const formDataToSend = new FormData();
@@ -200,43 +244,49 @@ const RegisterManage = ({navigation}) => {
           },
           timeout: 60000,
         });
-        console.log('response', response.data);
+        console.log('Response from API:', response.data);
 
         if (response.data?.images && Array.isArray(response.data.images)) {
-          uploadedImages = response.data.images.filter(Boolean);
+          uploadedImages = response.data.images.filter(Boolean); 
         } else {
           throw new Error('API không trả về URL ảnh hợp lệ');
         }
       }
 
+      // Kiểm tra walletProvider trước khi tạo provider
+      if (!walletProvider) {
+        throw new Error('Wallet provider is not available');
+      }
       const provider = new ethers.BrowserProvider(walletProvider);
       const signer = await provider.getSigner();
+      console.log('Signer retrieved:', signer);
 
+      // Kiểm tra ABI
+      if (!contractArtifact.abi) {
+        throw new Error('Contract ABI is undefined');
+      }
       const contract = new ethers.Contract(
         CONTRACT_ADDRESS,
         contractArtifact.abi,
         signer,
       );
 
-      // gọi smart contract với mảng string
       const tx = await contract.registerFarm(
         formData.farmCode,
         formData.nameFarm,
         (await storage.getString('id')) || 'USER123',
-        formData.fullname,
+        formData.fullName,
         formData.email,
         formData.phone,
         formData.description,
         formData.location || 'Unknown',
         Number(formData.area) || 1000,
-        uploadedImages, // 👈 truyền thẳng mảng
+        uploadedImages,
       );
 
       await tx.wait();
+      console.log('Transaction hash:', tx.hash);
 
-      console.log('✅ Giao dịch thành công:', tx.hash);
-
-      // cập nhật txHash về backend
       await api.put(
         `/api/farms/farmCode/txHash`,
         {
@@ -264,6 +314,7 @@ const RegisterManage = ({navigation}) => {
         message: error.message,
         reason: error.reason,
         code: error.code,
+        stack: error.stack,
       });
       showMessage({
         message: 'Lỗi',
@@ -274,15 +325,14 @@ const RegisterManage = ({navigation}) => {
     }
   };
 
-  const isCompleted = sectionIndex => { CONTRACT_ADDRESS
+  const isCompleted = sectionIndex => {
     switch (sectionIndex) {
       case 0:
         return (
-          formData.fullname &&
+          formData.fullName &&
           formData.nameFarm &&
           formData.phone &&
-          formData.email &&
-          formData.farmCode
+          formData.email
         );
       case 1:
         return formData.description.length > 0;
@@ -306,127 +356,184 @@ const RegisterManage = ({navigation}) => {
 
   const menuItems = [
     {
-      title: 'General information',
-      description: 'fullname, farm name, phone, email',
-      content: (
-        <View style={styles.formContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Full Name"
-            value={formData.fullname}
-            onChangeText={text => setFormData({...formData, fullname: text})}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Farm Name"
-            value={formData.nameFarm}
-            onChangeText={text => setFormData({...formData, nameFarm: text})}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Phone"
-            value={formData.phone}
-            onChangeText={text => setFormData({...formData, phone: text})}
-            keyboardType="phone-pad"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={formData.email}
-            onChangeText={text => setFormData({...formData, email: text})}
-            keyboardType="email-address"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Farm Code"
-            value={formData.farmCode}
-            editable={false}
-          />
-        </View>
-      ),
+      title: 'Thông tin chung',
+      description: 'Họ và tên, tên trang trại, điện thoại, email',
     },
     {
-      title: 'Description',
-      description: 'Farm description and cultivation methods',
-      content: (
-        <View style={styles.formContainer}>
-          <TextInput
-            style={[styles.input, {height: 100}]}
-            placeholder="Farm Description"
-            value={formData.description}
-            onChangeText={text => setFormData({...formData, description: text})}
-            multiline
-          />
-        </View>
-      ),
+      title: 'Mô tả',
+      description: 'Mô tả trang trại và phương pháp canh tác',
     },
     {
-      title: 'Location and area',
-      description: 'Location, area',
-      content: (
-        <View style={styles.formContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Location"
-            value={formData.location}
-            onChangeText={text => setFormData({...formData, location: text})}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Area (m²)"
-            value={formData.area}
-            onChangeText={text => setFormData({...formData, area: text})}
-            keyboardType="numeric"
-          />
-        </View>
-      ),
+      title: 'Vị trí và diện tích',
+      description: 'Vị trí, diện tích trang trại',
     },
     {
-      title: 'Image KYC owner farm',
-      description: 'Upload owner identification image',
-      content: (
-        <View style={styles.formContainer}>
-          <TouchableOpacity
-            style={styles.imageButton}
-            onPress={() => handleImagePick('kyc')}>
-            <Text style={styles.imageButtonText}>
-              {formData.kycImage ? 'Replace KYC Image' : 'Upload KYC Image'}
-            </Text>
-          </TouchableOpacity>
-          {formData.kycImage && (
-            <Image
-              source={{uri: formData.kycImage.uri}}
-              style={styles.previewImage}
-            />
-          )}
-        </View>
-      ),
+      title: 'Hình ảnh xác thực chủ trang trại',
+      description: 'Tải lên hình ảnh định danh chủ sở hữu',
     },
     {
-      title: 'Detail image farm',
-      description: 'Upload farm detail images',
-      content: (
-        <View style={styles.formContainer}>
-          {formData.farmImages.map((img, index) => (
-            <View key={index} style={styles.imagePreviewContainer}>
-              <Image source={{uri: img.uri}} style={styles.previewImage} />
-              <TouchableOpacity
-                style={styles.replaceImageButton}
-                onPress={() => handleImagePick('farm', index)}>
-                <Text style={styles.imageButtonText}>Replace</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-          <TouchableOpacity
-            style={styles.imageButton}
-            onPress={() => handleImagePick('farm')}>
-            <Text style={styles.imageButtonText}>Add Farm Image</Text>
-          </TouchableOpacity>
-        </View>
-      ),
+      title: 'Chi tiết hình ảnh trang trại',
+      description: 'Tải lên hình ảnh chi tiết trang trại',
     },
   ];
 
+  // Render form sections
+  const renderFormSection = (sectionIndex) => {
+    if (activeSection !== sectionIndex) return null;
+
+    switch (sectionIndex) {
+      case 0:
+        return (
+          <View style={styles.formSection}>            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Họ và tên</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Nhập họ và tên"
+                value={formData.fullName}
+                onChangeText={(text) => handleInputChange('fullName', text)}
+                editable={!loadingUserData}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Tên trang trại</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Nhập tên trang trại"
+                value={formData.nameFarm}
+                onChangeText={(text) => handleInputChange('nameFarm', text)}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Điện thoại</Text>
+              <View style={styles.phoneInputContainer}>
+                <Text style={styles.countryCode}>+1</Text>
+                <TextInput
+                  style={[styles.textInput, styles.phoneInput]}
+                  placeholder="Điện thoại"
+                  value={formData.phone}
+                  onChangeText={(text) => handleInputChange('phone', text)}
+                  keyboardType="phone-pad"
+                  editable={!loadingUserData}
+                />
+              </View>
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Email</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Nhập email của bạn"
+                value={formData.email}
+                onChangeText={(text) => handleInputChange('email', text)}
+                keyboardType="email-address"
+                editable={!loadingUserData}
+              />
+            </View>
+          </View>
+        );
+
+      case 1:
+        return (
+          <View style={styles.formSection}>
+            <TextInput
+              style={[styles.textInput, styles.textArea]}
+              placeholder="Mô tả chi tiết về trang trại và phương pháp canh tác"
+              value={formData.description}
+              onChangeText={(text) => handleInputChange('description', text)}
+              multiline={true}
+              numberOfLines={4}
+            />
+          </View>
+        );
+
+      case 2:
+        return (
+          <View style={styles.formSection}>            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Vị trí</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Nhập vị trí trang trại"
+                value={formData.location}
+                onChangeText={(text) => handleInputChange('location', text)}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Diện tích (m²)</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Nhập diện tích"
+                value={formData.area}
+                onChangeText={(text) => handleInputChange('area', text)}
+                keyboardType="numeric"
+              />
+            </View>
+          </View>
+        );
+
+      case 3:
+        return (
+          <View style={styles.formSection}>            
+            {formData.kycImage ? (
+              <View style={styles.imagePreviewContainer}>
+                <Image source={{uri: formData.kycImage.uri}} style={styles.imagePreview} />
+                <TouchableOpacity 
+                  style={styles.removeImageButton}
+                  onPress={() => handleInputChange('kycImage', null)}
+                >
+                  <Icon name="close" size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity 
+                style={styles.uploadButton}
+                onPress={() => selectImage('kyc')}
+              >
+                <Icon name="photo-camera" size={40} color="#999" />
+                <Text style={styles.uploadText}>Nhập để chọn ảnh để tải lên</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        );
+
+      case 4:
+        return (
+          <View style={styles.formSection}>            
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <View style={styles.farmImagesContainer}>
+                {formData.farmImages.map((image, index) => (
+                  <View key={index} style={styles.farmImageContainer}>
+                    <Image source={{uri: image.uri}} style={styles.farmImagePreview} />
+                    <TouchableOpacity 
+                      style={styles.removeFarmImageButton}
+                      onPress={() => removeFarmImage(index)}
+                    >
+                      <Icon name="close" size={16} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                
+                <TouchableOpacity 
+                  style={styles.addFarmImageButton}
+                  onPress={() => selectImage('farm')}
+                >
+                  <Icon name="add" size={30} color="#999" />
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  // Modal component cho wallet
   const WalletModal = () => (
     <Modal
       visible={showWalletModal && !isConnected}
@@ -450,69 +557,53 @@ const RegisterManage = ({navigation}) => {
     </Modal>
   );
 
+  // Nếu chưa kết nối ví, chỉ hiện modal
   if (!isConnected) {
     return (
-      <ImageBackground source={Images.bg} style={{flex: 1}} resizeMode="cover">
+      <View style={styles.whiteBackground}>
         <SafeAreaView style={styles.container}>
           <StatusBar backgroundColor="#4CAF50" barStyle="light-content" />
           <View style={styles.header}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Icon name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Register for farm management</Text>
-            <TouchableOpacity onPress={() => setShowWalletModal(true)}>
+            <Text style={styles.headerTitle}>Đăng ký quản lý trang trại</Text>
+            <TouchableOpacity onPress={handleBellPress}>
               <Icon name="notifications" size={24} color="#fff" />
             </TouchableOpacity>
           </View>
           <WalletModal />
         </SafeAreaView>
-      </ImageBackground>
+      </View>
     );
   }
 
+  // Khi đã kết nối ví, hiện nội dung đầy đủ
   return (
-    <ImageBackground source={Images.bg} style={{flex: 1}} resizeMode="cover">
+    <View style={styles.whiteBackground}>
       <SafeAreaView style={styles.container}>
         <StatusBar backgroundColor="#4CAF50" barStyle="light-content" />
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Icon name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Register for farm management</Text>
-          <TouchableOpacity onPress={() => setShowWalletModal(true)}>
+          <Text style={styles.headerTitle}>Đăng ký quản lý trang trại</Text>
+          <TouchableOpacity onPress={handleBellPress}>
             <Icon name="notifications" size={24} color="#fff" />
           </TouchableOpacity>
-        </View>
-
-        <View style={styles.progressContainer}>
-          <Text style={styles.progressText}>{getCompletionStatus()}</Text>
-          <View style={styles.progressBar}>
-            <View
-              style={[
-                styles.progressFill,
-                {
-                  width: `${
-                    ([0, 1, 2, 3, 4].filter(index => isCompleted(index))
-                      .length /
-                      5) *
-                    100
-                  }%`,
-                },
-              ]}
-            />
-          </View>
         </View>
 
         <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
           <View style={styles.content}>
             {menuItems.map((item, index) => (
-              <View key={index}>
+              <View key={index} style={styles.menuItemContainer}>
                 <TouchableOpacity
                   style={[
                     styles.menuItem,
                     isCompleted(index) && styles.menuItemCompleted,
+                    activeSection === index && styles.menuItemActive,
                   ]}
-                  onPress={() => toggleSection(index)}
+                  onPress={() => handleMenuItemPress(index)}
                   activeOpacity={0.7}>
                   <View style={styles.menuItemLeft}>
                     <Text style={styles.menuItemText}>{item.title}</Text>
@@ -522,27 +613,17 @@ const RegisterManage = ({navigation}) => {
                   </View>
                   <View style={styles.menuItemRight}>
                     {isCompleted(index) && (
-                      <Icon
-                        name="check-circle"
-                        size={20}
-                        color="#4CAF50"
-                        style={{marginRight: 8}}
-                      />
+                      <Icon name="check-circle" size={20} color="#4CAF50" style={{marginRight: 8}} />
                     )}
-                    <Icon
-                      name={
-                        activeSections.includes(index)
-                          ? 'expand-less'
-                          : 'expand-more'
-                      }
-                      size={24}
-                      color="#FF6B35"
+                    <Icon name={item.icon} size={24} color="#FF6B35" />
+                    <Icon 
+                      name={activeSection === index ? "keyboard-arrow-up" : "keyboard-arrow-down"} 
+                      size={20} 
+                      color="#666" 
                     />
                   </View>
                 </TouchableOpacity>
-                {activeSections.includes(index) && (
-                  <View style={styles.collapsibleContent}>{item.content}</View>
-                )}
+                {renderFormSection(index)}
               </View>
             ))}
           </View>
@@ -552,21 +633,19 @@ const RegisterManage = ({navigation}) => {
           <TouchableOpacity
             style={[
               styles.submitButton,
-              [0, 1, 2, 3, 4].filter(index => isCompleted(index)).length < 5
-                ? {backgroundColor: '#ccc'}
-                : {},
+              ([0, 1, 2, 3, 4].filter(index => isCompleted(index)).length < 5 || !isConnected) && styles.submitButtonDisabled
             ]}
             onPress={handleSubmit}
             disabled={
-              [0, 1, 2, 3, 4].filter(index => isCompleted(index)).length < 5
-            }>
-            <Text style={styles.submitButtonText}>Create Farm</Text>
+              [0, 1, 2, 3, 4].filter(index => isCompleted(index)).length < 5 ||
+              !isConnected
+            }
+          >
+            <Text style={styles.submitButtonText}>OK</Text>
           </TouchableOpacity>
-          <Text style={styles.submitNote}>
-            Complete all sections and connect wallet to create your farm
-          </Text>
         </View>
 
+        {/* Modal cho wallet khi ấn vào BellIconTab */}
         <Modal
           visible={showWalletModal && isConnected}
           transparent={true}
@@ -585,7 +664,7 @@ const RegisterManage = ({navigation}) => {
           </View>
         </Modal>
       </SafeAreaView>
-    </ImageBackground>
+    </View>
   );
 };
 

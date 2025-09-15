@@ -17,6 +17,7 @@ import {loginApi} from '../../../api/auth/auth';
 import {useForm} from '../../../components/useForm/useForm';
 import {showMessage} from 'react-native-flash-message';
 import LoadingOverlay from '../../../components/CustomLoading/LoadingOverlay';
+import { ErrorMap } from '../../../utils/errorMapper/errorMapper';
 
 const LoginScreen = ({navigation}) => {
   const [loading, setLoading] = useState(false);
@@ -48,7 +49,6 @@ const LoginScreen = ({navigation}) => {
 
       if (data.success) {
         console.log('✅ Đăng nhập thành công:', data);
-        Alert.alert('Thành công', 'Đăng nhập thành công');
 
         showMessage({
           message: 'Đăng nhập thành công',
@@ -98,7 +98,7 @@ const LoginScreen = ({navigation}) => {
             </Text>
             <Text style={styles.subtitle}>
               Vui lòng đăng nhập vào tài khoản của bạn
-            </Text>
+</Text>
 
             <View style={styles.inputContainer}>
               <Input
@@ -181,7 +181,7 @@ const LoginScreen = ({navigation}) => {
             <View style={styles.switchContainer}>
               <Text style={styles.switchText}>Chưa có tài khoản? </Text>
               <Button.Text
-                title="Đăng ký"
+title="Đăng ký"
                 onPress={() => navigation.navigate('Register')}
                 textStyle={styles.switchLink}
               />
