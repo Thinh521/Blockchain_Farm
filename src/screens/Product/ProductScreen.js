@@ -32,6 +32,18 @@ const ProductScreen = () => {
           navigation.navigate('NoBottomTab', {screen: 'RegisterManage'});
         }}
       />
+      <Button
+        title="NewList"
+        onPress={() => {
+          navigation.navigate('NoBottomTab', {screen: 'NewList'});
+        }}
+      />
+      <Button
+        title="AllWishlistFarms"
+        onPress={() => {
+          navigation.navigate('NoBottomTab', {screen: 'AllWishlistFarms'});
+        }}
+      />
       <View style={styles.card}>
         <Text>ProductScreen</Text>
       </View>

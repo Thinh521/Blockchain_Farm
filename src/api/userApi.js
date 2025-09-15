@@ -27,7 +27,6 @@ export const updateUserApi = async (accessToken, formData) => {
     });
 
     return res.data;
-    
   } catch (error) {
     const message =
       error?.response?.data?.message ||

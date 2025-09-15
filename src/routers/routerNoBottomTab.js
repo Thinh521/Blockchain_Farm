@@ -12,6 +12,10 @@ import SplashScreen from '../screens/Splash/SplashScreen';
 import FarmDetailScreen from '../screens/FarmDetail/FarmDetailScreen';
 import AllFarmsScreen from '../screens/Home/components/AllFarmsScreen';
 import {Colors} from '../theme/theme';
+import NewsListScreen from '../screens/News/NewsListScreen';
+import NewsScreen from '../screens/News/NewsScreen';
+import EditNewsScreen from '../screens/News/EditNewsScreen';
+import AllWishlistFarmsScreen from '../screens/AllWishlistFarms/AllWishlistFarmsScreen';
 
 const routerNoBottomTab = [
   {
@@ -140,6 +144,74 @@ const routerNoBottomTab = [
     hasLayout: false,
     options: {
       title: 'Tất cả nông trại',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'AllWishlistFarms',
+    component: AllWishlistFarmsScreen,
+    hasLayout: false,
+    options: {
+      title: 'Tất cả nông trại',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'NewList',
+    component: NewsListScreen,
+    hasLayout: false,
+    options: {
+      title: 'Tin tức',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'News',
+    component: NewsScreen,
+    hasLayout: false,
+    options: {
+      title: 'Tạo tin tức',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'EditNews',
+    component: EditNewsScreen,
+    hasLayout: false,
+    options: {
+      title: 'Chỉnh sửa tin tức',
       headerShown: true,
       headerStyle: {
         backgroundColor: Colors.green,

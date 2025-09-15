@@ -33,7 +33,12 @@ const FarmCard = ({farm, favorites, toggleFavorite}) => {
       }}>
       <View style={styles.imageContainer}>
         <FastImage
-          source={{uri: farm.image[0] || 'https://via.placeholder.com/400'}}
+          source={{
+            uri:
+              (farm.image && farm.image.length > 0 && farm.image[0]) ||
+              (farm.images && farm.images.length > 0 && farm.images[0]) ||
+              'https://via.placeholder.com/150', // fallback nếu không có ảnh
+          }}
           style={styles.farmImage}
           resizeMode="cover"
         />
