@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   StatusBar,
   SafeAreaView,
-  Modal,
   ScrollView,
   TextInput,
   Image,
@@ -13,7 +12,6 @@ import {
 import {showMessage} from 'react-native-flash-message';
 import {ethers} from 'ethers';
 import {
-  AppKitButton,
   useAppKitAccount,
   useAppKitProvider,
 } from '@reown/appkit-ethers-react-native';
@@ -25,17 +23,17 @@ import contractArtifact from '../SmartConctract/contractABI.json';
 import {storage} from '../../utils/storage/storage';
 import api from '../../api/baseApi';
 import {getUserApi} from '../../api/userApi';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+import Button from '../../components/CustomButton/CustomButton';
+import Input from '../../components/CustomInput/CustomInput';
 
 const RegisterManage = ({navigation, route}) => {
   const {address, isConnected} = useAppKitAccount();
   const {walletProvider} = useAppKitProvider();
 
-  // State cho modal ví
-  const [showWalletModal, setShowWalletModal] = useState(false);
-  // State cho active section
   const [activeSection, setActiveSection] = useState(null);
-  // State cho loading user data
   const [loadingUserData, setLoadingUserData] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const generateFarmCode = () => {
     const randomDigits = Math.floor(100000 + Math.random() * 900000);
@@ -56,7 +54,7 @@ const RegisterManage = ({navigation, route}) => {
   });
 
   // Fetch user data using getUserApi
-   useEffect(() => {
+  useEffect(() => {
     const fetchUserData = async () => {
       try {
         const accessToken = await storage.getString('accessToken');
@@ -64,13 +62,11 @@ const RegisterManage = ({navigation, route}) => {
           throw new Error('Không tìm thấy accessToken');
         }
 
-        // Sử dụng getUserApi từ userApi
         const response = await getUserApi(accessToken);
-        console.log('response', response);
         if (response?.user) {
           const userData = response.user;
 
-          console.log('Fetched user data:', userData);  
+          console.log('Fetched user data:', userData);
 
           setFormData(prev => ({
             ...prev,
@@ -88,11 +84,13 @@ const RegisterManage = ({navigation, route}) => {
           description: 'Không thể lấy thông tin người dùng. Vui lòng thử lại.',
           type: 'danger',
         });
+      } finally {
+        setLoadingUserData(false);
       }
     };
 
     fetchUserData();
-  }, []); 
+  }, []);
 
   useEffect(() => {
     if (route.params?.updatedFormData) {
@@ -106,13 +104,6 @@ const RegisterManage = ({navigation, route}) => {
       }));
     }
 
-    // Hiện modal wallet khi chưa kết nối
-    if (!isConnected) {
-      setShowWalletModal(true);
-    } else {
-      setShowWalletModal(false);
-    }
-
     if (walletProvider) {
       const handleSessionRequest = sessionId => {
         console.log('Xử lý session request:', sessionId);
@@ -121,14 +112,10 @@ const RegisterManage = ({navigation, route}) => {
         // walletProvider.off('session_request', handleSessionRequest);
       };
     }
-  }, [route.params?.updatedFormData, walletProvider, isConnected]);
+  }, [route.params?.updatedFormData, walletProvider]);
 
   const handleMenuItemPress = sectionIndex => {
     setActiveSection(activeSection === sectionIndex ? null : sectionIndex);
-  };
-
-  const handleBellPress = () => {
-    setShowWalletModal(true);
   };
 
   const handleInputChange = (field, value) => {
@@ -138,7 +125,7 @@ const RegisterManage = ({navigation, route}) => {
     }));
   };
 
-  const selectImage = (type) => {
+  const selectImage = type => {
     const options = {
       mediaType: 'photo',
       includeBase64: false,
@@ -146,12 +133,12 @@ const RegisterManage = ({navigation, route}) => {
       maxWidth: 2000,
     };
 
-    launchImageLibrary(options, (response) => {
+    launchImageLibrary(options, response => {
       if (response.didCancel || response.error) return;
-      
+
       if (response.assets && response.assets[0]) {
         const imageData = response.assets[0];
-        
+
         if (type === 'kyc') {
           setFormData(prev => ({
             ...prev,
@@ -167,7 +154,7 @@ const RegisterManage = ({navigation, route}) => {
     });
   };
 
-  const removeFarmImage = (index) => {
+  const removeFarmImage = index => {
     setFormData(prev => ({
       ...prev,
       farmImages: prev.farmImages.filter((_, i) => i !== index),
@@ -199,9 +186,10 @@ const RegisterManage = ({navigation, route}) => {
         description: 'Vui lòng kết nối ví trước!',
         type: 'danger',
       });
-      setShowWalletModal(true);
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       const accessToken = await storage.getString('accessToken');
@@ -212,7 +200,8 @@ const RegisterManage = ({navigation, route}) => {
       let uploadedImages = [];
 
       const hasKycImage = formData.kycImage && formData.kycImage.uri;
-      const hasFarmImages = formData.farmImages && formData.farmImages.length > 0;
+      const hasFarmImages =
+        formData.farmImages && formData.farmImages.length > 0;
 
       if (hasKycImage || hasFarmImages) {
         const formDataToSend = new FormData();
@@ -247,7 +236,7 @@ const RegisterManage = ({navigation, route}) => {
         console.log('Response from API:', response.data);
 
         if (response.data?.images && Array.isArray(response.data.images)) {
-          uploadedImages = response.data.images.filter(Boolean); 
+          uploadedImages = response.data.images.filter(Boolean);
         } else {
           throw new Error('API không trả về URL ảnh hợp lệ');
         }
@@ -273,8 +262,8 @@ const RegisterManage = ({navigation, route}) => {
 
       const tx = await contract.registerFarm(
         formData.farmCode,
+        (await storage.getString('userId')) || 'USER123',
         formData.nameFarm,
-        (await storage.getString('id')) || 'USER123',
         formData.fullName,
         formData.email,
         formData.phone,
@@ -322,6 +311,8 @@ const RegisterManage = ({navigation, route}) => {
           error.reason || error.message || 'Đã xảy ra lỗi khi đăng ký farm.',
         type: 'danger',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -345,13 +336,6 @@ const RegisterManage = ({navigation, route}) => {
       default:
         return false;
     }
-  };
-
-  const getCompletionStatus = () => {
-    const completedSections = [0, 1, 2, 3, 4].filter(index =>
-      isCompleted(index),
-    );
-    return `${completedSections.length}/5 sections completed`;
   };
 
   const menuItems = [
@@ -378,43 +362,40 @@ const RegisterManage = ({navigation, route}) => {
   ];
 
   // Render form sections
-  const renderFormSection = (sectionIndex) => {
+  const renderFormSection = sectionIndex => {
     if (activeSection !== sectionIndex) return null;
 
     switch (sectionIndex) {
       case 0:
         return (
-          <View style={styles.formSection}>            
+          <View style={styles.formSection}>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Họ và tên</Text>
-              <TextInput
-                style={styles.textInput}
+             <Input
                 placeholder="Nhập họ và tên"
                 value={formData.fullName}
-                onChangeText={(text) => handleInputChange('fullName', text)}
+                onChangeText={text => handleInputChange('fullName', text)}
                 editable={!loadingUserData}
               />
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Tên trang trại</Text>
-              <TextInput
-                style={styles.textInput}
+           <Input 
                 placeholder="Nhập tên trang trại"
                 value={formData.nameFarm}
-                onChangeText={(text) => handleInputChange('nameFarm', text)}
+                onChangeText={text => handleInputChange('nameFarm', text)}
               />
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Điện thoại</Text>
               <View style={styles.phoneInputContainer}>
-                <Text style={styles.countryCode}>+1</Text>
-                <TextInput
-                  style={[styles.textInput, styles.phoneInput]}
-                  placeholder="Điện thoại"
+                <Input
+                  style={styles.phoneInput}
+                  placeholder="Nhập số điện thoại"
                   value={formData.phone}
-                  onChangeText={(text) => handleInputChange('phone', text)}
+                  onChangeText={text => handleInputChange('phone', text)}
                   keyboardType="phone-pad"
                   editable={!loadingUserData}
                 />
@@ -423,11 +404,10 @@ const RegisterManage = ({navigation, route}) => {
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Email</Text>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Nhập email của bạn"
+             <Input
+                placeholder="Nhập email"
                 value={formData.email}
-                onChangeText={(text) => handleInputChange('email', text)}
+                onChangeText={text => handleInputChange('email', text)}
                 keyboardType="email-address"
                 editable={!loadingUserData}
               />
@@ -438,11 +418,10 @@ const RegisterManage = ({navigation, route}) => {
       case 1:
         return (
           <View style={styles.formSection}>
-            <TextInput
-              style={[styles.textInput, styles.textArea]}
-              placeholder="Mô tả chi tiết về trang trại và phương pháp canh tác"
+            <Input
+              placeholder="Mô tả trang trại và phương pháp canh tác"
               value={formData.description}
-              onChangeText={(text) => handleInputChange('description', text)}
+              onChangeText={text => handleInputChange('description', text)}
               multiline={true}
               numberOfLines={4}
             />
@@ -451,24 +430,22 @@ const RegisterManage = ({navigation, route}) => {
 
       case 2:
         return (
-          <View style={styles.formSection}>            
+          <View style={styles.formSection}>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Vị trí</Text>
-              <TextInput
-                style={styles.textInput}
+              <Input
                 placeholder="Nhập vị trí trang trại"
                 value={formData.location}
-                onChangeText={(text) => handleInputChange('location', text)}
+                onChangeText={text => handleInputChange('location', text)}
               />
             </View>
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Diện tích (m²)</Text>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Nhập diện tích"
+              <Input
+                placeholder="Nhập diện tích trang trại"
                 value={formData.area}
-                onChangeText={(text) => handleInputChange('area', text)}
+                onChangeText={text => handleInputChange('area', text)}
                 keyboardType="numeric"
               />
             </View>
@@ -477,24 +454,27 @@ const RegisterManage = ({navigation, route}) => {
 
       case 3:
         return (
-          <View style={styles.formSection}>            
+          <View style={styles.formSection}>
             {formData.kycImage ? (
               <View style={styles.imagePreviewContainer}>
-                <Image source={{uri: formData.kycImage.uri}} style={styles.imagePreview} />
-                <TouchableOpacity 
+                <Image
+                  source={{uri: formData.kycImage.uri}}
+                  style={styles.imagePreview}
+                />
+                <TouchableOpacity
                   style={styles.removeImageButton}
-                  onPress={() => handleInputChange('kycImage', null)}
-                >
+                  onPress={() => handleInputChange('kycImage', null)}>
                   <Icon name="close" size={20} color="#fff" />
                 </TouchableOpacity>
               </View>
             ) : (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.uploadButton}
-                onPress={() => selectImage('kyc')}
-              >
+                onPress={() => selectImage('kyc')}>
                 <Icon name="photo-camera" size={40} color="#999" />
-                <Text style={styles.uploadText}>Nhập để chọn ảnh để tải lên</Text>
+                <Text style={styles.uploadText}>
+                  Nhập để chọn ảnh để tải lên
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -502,25 +482,26 @@ const RegisterManage = ({navigation, route}) => {
 
       case 4:
         return (
-          <View style={styles.formSection}>            
+          <View style={styles.formSection}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.farmImagesContainer}>
                 {formData.farmImages.map((image, index) => (
                   <View key={index} style={styles.farmImageContainer}>
-                    <Image source={{uri: image.uri}} style={styles.farmImagePreview} />
-                    <TouchableOpacity 
+                    <Image
+                      source={{uri: image.uri}}
+                      style={styles.farmImagePreview}
+                    />
+                    <TouchableOpacity
                       style={styles.removeFarmImageButton}
-                      onPress={() => removeFarmImage(index)}
-                    >
+                      onPress={() => removeFarmImage(index)}>
                       <Icon name="close" size={16} color="#fff" />
                     </TouchableOpacity>
                   </View>
                 ))}
-                
-                <TouchableOpacity 
+
+                <TouchableOpacity
                   style={styles.addFarmImageButton}
-                  onPress={() => selectImage('farm')}
-                >
+                  onPress={() => selectImage('farm')}>
                   <Icon name="add" size={30} color="#999" />
                 </TouchableOpacity>
               </View>
@@ -533,65 +514,23 @@ const RegisterManage = ({navigation, route}) => {
     }
   };
 
-  // Modal component cho wallet
-  const WalletModal = () => (
-    <Modal
-      visible={showWalletModal && !isConnected}
-      transparent={true}
-      animationType="slide"
-      onRequestClose={() => setShowWalletModal(false)}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Connect Your Wallet</Text>
-          <Text style={styles.modalDescription}>
-            Please connect your wallet to continue with farm registration
-          </Text>
-          <AppKitButton balance="show" />
-          <TouchableOpacity
-            style={styles.modalCloseButton}
-            onPress={() => setShowWalletModal(false)}>
-            <Text style={styles.modalCloseText}>Close</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-
-  // Nếu chưa kết nối ví, chỉ hiện modal
-  if (!isConnected) {
+  // Check if form is valid and wallet is connected
+  const isFormValid = () => {
     return (
-      <View style={styles.whiteBackground}>
-        <SafeAreaView style={styles.container}>
-          <StatusBar backgroundColor="#4CAF50" barStyle="light-content" />
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Icon name="arrow-back" size={24} color="#fff" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Đăng ký quản lý trang trại</Text>
-            <TouchableOpacity onPress={handleBellPress}>
-              <Icon name="notifications" size={24} color="#fff" />
-            </TouchableOpacity>
-          </View>
-          <WalletModal />
-        </SafeAreaView>
-      </View>
+      formData.fullName &&
+      formData.nameFarm &&
+      formData.phone &&
+      formData.email &&
+      formData.farmCode &&
+      isConnected &&
+      walletProvider
     );
-  }
+  };
 
-  // Khi đã kết nối ví, hiện nội dung đầy đủ
   return (
     <View style={styles.whiteBackground}>
       <SafeAreaView style={styles.container}>
-        <StatusBar backgroundColor="#4CAF50" barStyle="light-content" />
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Icon name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Đăng ký quản lý trang trại</Text>
-          <TouchableOpacity onPress={handleBellPress}>
-            <Icon name="notifications" size={24} color="#fff" />
-          </TouchableOpacity>
-        </View>
+        <StatusBar backgroundColor={Colors.green} barStyle="light-content" />
 
         <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
           <View style={styles.content}>
@@ -613,13 +552,22 @@ const RegisterManage = ({navigation, route}) => {
                   </View>
                   <View style={styles.menuItemRight}>
                     {isCompleted(index) && (
-                      <Icon name="check-circle" size={20} color="#4CAF50" style={{marginRight: 8}} />
+                      <Icon
+                        name="check-circle"
+                        size={20}
+                        color="#4CAF50"
+                        style={{marginRight: 8}}
+                      />
                     )}
                     <Icon name={item.icon} size={24} color="#FF6B35" />
-                    <Icon 
-                      name={activeSection === index ? "keyboard-arrow-up" : "keyboard-arrow-down"} 
-                      size={20} 
-                      color="#666" 
+                    <Icon
+                      name={
+                        activeSection === index
+                          ? 'keyboard-arrow-up'
+                          : 'keyboard-arrow-down'
+                      }
+                      size={20}
+                      color="#666"
                     />
                   </View>
                 </TouchableOpacity>
@@ -630,39 +578,12 @@ const RegisterManage = ({navigation, route}) => {
         </ScrollView>
 
         <View style={styles.submitContainer}>
-          <TouchableOpacity
-            style={[
-              styles.submitButton,
-              ([0, 1, 2, 3, 4].filter(index => isCompleted(index)).length < 5 || !isConnected) && styles.submitButtonDisabled
-            ]}
+          <Button.Main 
+            title={isSubmitting ? "Đang xử lý..." : "Xác nhận"}
             onPress={handleSubmit}
-            disabled={
-              [0, 1, 2, 3, 4].filter(index => isCompleted(index)).length < 5 ||
-              !isConnected
-            }
-          >
-            <Text style={styles.submitButtonText}>OK</Text>
-          </TouchableOpacity>
+            disabled={!isFormValid() || isSubmitting}
+          />
         </View>
-
-        {/* Modal cho wallet khi ấn vào BellIconTab */}
-        <Modal
-          visible={showWalletModal && isConnected}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setShowWalletModal(false)}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Wallet Information</Text>
-              <AppKitButton balance="show" />
-              <TouchableOpacity
-                style={styles.modalCloseButton}
-                onPress={() => setShowWalletModal(false)}>
-                <Text style={styles.modalCloseText}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
       </SafeAreaView>
     </View>
   );

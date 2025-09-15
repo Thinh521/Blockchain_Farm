@@ -98,10 +98,17 @@ const routerNoBottomTab = [
     name: 'RegisterManage',
     component: RegisterManage,
     hasLayout: false,
-    options: {
-      title: 'Đăng ký farm',
-      headerShown: false,
-      animation: 'fade',
+     options: {
+      title: 'Đăng ký quản lý trang trại',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
     },
   },
   {
