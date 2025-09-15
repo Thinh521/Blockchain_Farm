@@ -12,6 +12,9 @@ import SplashScreen from '../screens/Splash/SplashScreen';
 import FarmDetailScreen from '../screens/FarmDetail/FarmDetailScreen';
 import AllFarmsScreen from '../screens/Home/components/AllFarmsScreen';
 import {Colors} from '../theme/theme';
+import ManageScreen from '../screens/Manage/ManageScreen';
+import MyFarmScreen from '../screens/MyFarm/MyFarmScreen';
+import WishListScreen from '../screens/WishList/WishListScreen';
 
 const routerNoBottomTab = [
   {
@@ -140,6 +143,57 @@ const routerNoBottomTab = [
     hasLayout: false,
     options: {
       title: 'Tất cả nông trại',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'Manage',
+    component: ManageScreen,
+    hasLayout: false,
+    options: {
+      title: 'Quản lí nông trại',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'MyFarm',
+    component: MyFarmScreen,
+    hasLayout: false,
+    options: {
+      title: 'Nông trại của tôi',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'WishList',
+    component: WishListScreen,
+    hasLayout: false,
+    options: {
+      title: 'Nông trại yêu thích',
       headerShown: true,
       headerStyle: {
         backgroundColor: Colors.green,
