@@ -34,21 +34,23 @@ const FarmCard = ({farm, favorites, toggleFavorite, isUserFarm}) => {
       }}>
       <View style={styles.imageContainer}>
         <FastImage
-          source={{uri: farm.image[0] || 'https://via.placeholder.com/400'}}
+          source={{
+            uri:
+              (farm.image && farm.image.length > 0 && farm.image[0]) ||
+              (farm.images && farm.images.length > 0 && farm.images[0]) ||
+              'https://via.placeholder.com/150', // fallback nếu không có ảnh
+          }}
           style={styles.farmImage}
           resizeMode="cover"
         />
 
-        <TouchableOpacity
-          style={styles.favoriteButton}
-          onPress={() => toggleFavorite(farm.farmCode)}>
+        <View style={styles.favoriteButton}>
           {favorites.has(farm.farmCode) ? (
             <Heart_Fill_Icon style={{color: '#EF4444', width: 20}} />
           ) : (
             <Heart_Line_Icon style={{color: '#9CA3AF', width: 20}} />
           )}
-        </TouchableOpacity>
-
+        </View>
         <View style={styles.areaBadge}>
           <Text style={styles.areaBadgeText}>{farm.area} ha</Text>
         </View>

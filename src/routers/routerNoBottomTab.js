@@ -12,6 +12,9 @@ import SplashScreen from '../screens/Splash/SplashScreen';
 import FarmDetailScreen from '../screens/FarmDetail/FarmDetailScreen';
 import AllFarmsScreen from '../screens/Home/components/AllFarmsScreen';
 import {Colors} from '../theme/theme';
+import NewsListScreen from '../screens/News/NewsListScreen';
+import NewsScreen from '../screens/News/NewsScreen';
+import EditNewsScreen from '../screens/News/EditNewsScreen';
 import ManageScreen from '../screens/Manage/ManageScreen';
 import MyFarmScreen from '../screens/MyFarm/MyFarmScreen';
 import WishListScreen from '../screens/WishList/WishListScreen';
@@ -162,6 +165,7 @@ const routerNoBottomTab = [
     },
   },
   {
+
     name: 'Manage',
     component: ManageScreen,
     hasLayout: false,
@@ -179,6 +183,7 @@ const routerNoBottomTab = [
     },
   },
   {
+
     name: 'MyFarm',
     component: MyFarmScreen,
     hasLayout: false,
@@ -196,6 +201,7 @@ const routerNoBottomTab = [
     },
   },
   {
+
     name: 'WishList',
     component: WishListScreen,
     hasLayout: false,

@@ -29,6 +29,7 @@ import Categories from './components/Categories';
 import FarmList from '../../components/Farms/FarmList';
 import {useNavigation} from '@react-navigation/core';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
+import {useWishlist} from '../../context/WishlistContext';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -37,7 +38,9 @@ const HomeScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [favorites, setFavorites] = useState(new Set());
+
+  // lấy từ context
+  const {favorites, toggleFavorite, loading} = useWishlist();
 
   const categories = [
     {id: 'all', name: 'Tất cả', icon: Leaf_Line_Icon},
@@ -47,16 +50,11 @@ const HomeScreen = () => {
   ];
 
   const getAllFarms = useCallback(async () => {
-    if (!isConnected) {
-      return;
-    }
+    if (!isConnected) return;
+
     setIsLoading(true);
-
     try {
-      const rpcProvider = new ethers.JsonRpcProvider(
-        'https://rpc.zeroscan.org',
-      );
-
+      const rpcProvider = new ethers.JsonRpcProvider('https://rpc.zeroscan.org');
       const contractRead = new ethers.Contract(
         CONTRACT_ADDRESS,
         contractArtifact.abi,
@@ -65,22 +63,18 @@ const HomeScreen = () => {
 
       const farmsData = await contractRead.getAllFarms();
 
-      const formattedFarms = farmsData.map((farm, idx) => {
-        return {
-          farmCode: farm.farmCode || farm[0],
-          fullname: farm.fullname || farm[1],
-          nameFarm: farm.nameFarm || farm[2],
-          userId: farm.userId || farm[3],
-          email: farm.email || farm[4],
-          phone: farm.phone || farm[5],
-          description: farm.description || farm[6],
-          location: farm.location || farm[7],
-          area: farm.area?.toString?.() || farm[8]?.toString?.() || '',
-          image: Array.isArray(farm.images || farm[9])
-            ? farm.images || farm[9]
-            : [],
-        };
-      });
+      const formattedFarms = farmsData.map((farm) => ({
+        farmCode: farm.farmCode || farm[0],
+        fullname: farm.fullname || farm[1],
+        nameFarm: farm.nameFarm || farm[2],
+        userId: farm.userId || farm[3],
+        email: farm.email || farm[4],
+        phone: farm.phone || farm[5],
+        description: farm.description || farm[6],
+        location: farm.location || farm[7],
+        area: farm.area?.toString?.() || farm[8]?.toString?.() || '',
+        image: Array.isArray(farm.images || farm[9]) ? farm.images || farm[9] : [],
+      }));
 
       setFarms(formattedFarms);
     } catch (error) {
@@ -98,25 +92,16 @@ const HomeScreen = () => {
   }, [isConnected, getAllFarms]);
 
   const filteredFarms = farms.filter(
-    farm =>
+    (farm) =>
       farm.nameFarm.toLowerCase().includes(searchQuery.toLowerCase()) ||
       farm.location.toLowerCase().includes(searchQuery.toLowerCase()),
   );
-
-  const toggleFavorite = farmCode => {
-    const newFavorites = new Set(favorites);
-    if (newFavorites.has(farmCode)) {
-      newFavorites.delete(farmCode);
-    } else {
-      newFavorites.add(farmCode);
-    }
-    setFavorites(newFavorites);
-  };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#059669" />
 
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.welcomeSection}>
@@ -172,14 +157,14 @@ const HomeScreen = () => {
               </View>
             </View>
 
-            {/* Enhanced Categories */}
+            {/* Categories */}
             <Categories
               categories={categories}
               selectedCategory={selectedCategory}
               onSelectCategory={setSelectedCategory}
             />
 
-            {/* Main Content */}
+            {/* Farms */}
             <View style={styles.mainContent}>
               <View style={styles.resultsHeader}>
                 <View>
@@ -196,9 +181,7 @@ const HomeScreen = () => {
                       screen: 'AllFarms',
                       params: {
                         farms: filteredFarms,
-                        favorites,
-                        toggleFavorite,
-                        isLoading: isLoading
+                        isLoading: isLoading,
                       },
                     })
                   }>
@@ -219,21 +202,17 @@ const HomeScreen = () => {
                   </Text>
                 </View>
               ) : (
-                <>
-                  <FarmList
-                    farms={filteredFarms.slice(0, 6)}
-                    favorites={favorites}
-                    isLoading={isLoading}
-                    toggleFavorite={toggleFavorite}
-                  />
-                </>
+                <FarmList
+                  farms={filteredFarms.slice(0, 6)}
+                  favorites={favorites}
+                  isLoading={isLoading}
+                  toggleFavorite={toggleFavorite}
+                />
               )}
             </View>
 
-            {/* Features Section */}
+            {/* Features + Footer */}
             <Features />
-
-            {/* Footer Section */}
             <Footer />
           </>
         )}
