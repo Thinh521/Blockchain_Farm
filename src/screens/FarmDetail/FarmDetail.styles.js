@@ -123,7 +123,7 @@ export default StyleSheet.create({
     fontWeight: FontWeights.semiBold,
   },
   description: {
-    color: '#4B5563',
+    color: Colors.gray,
     lineHeight: scale(18),
     fontSize: FontSizes.small,
   },
@@ -178,8 +178,10 @@ export default StyleSheet.create({
     marginLeft: 8,
   },
   infoGrid: {
-    flexDirection: 'row',
+    gap: scale(10),
     flexWrap: 'wrap',
+    flexDirection: 'row',
+    padding: scale(16),
     justifyContent: 'space-between',
   },
   infoItem: {
@@ -188,7 +190,6 @@ export default StyleSheet.create({
     padding: 16,
     backgroundColor: '#F9FAFB',
     borderRadius: 12,
-    marginBottom: 12,
   },
   infoLabel: {
     fontSize: 12,
@@ -198,7 +199,7 @@ export default StyleSheet.create({
   },
   infoValue: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: FontWeights.semiBold,
     color: Colors.title,
     textAlign: 'center',
   },
@@ -244,7 +245,7 @@ export default StyleSheet.create({
   },
   facilityName: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: FontWeights.semiBold,
     color: Colors.title,
     marginBottom: 2,
   },
@@ -261,9 +262,8 @@ export default StyleSheet.create({
   productCard: {
     width: '48%',
     backgroundColor: '#F9FAFB',
-    borderRadius: 12,
-    marginBottom: 12,
-    position: 'relative',
+    borderRadius: scale(12),
+    marginBottom: scale(10),
     borderBottomWidth: 1,
     borderBottomColor: Colors.border_2,
   },
@@ -274,29 +274,19 @@ export default StyleSheet.create({
   },
   productInfo: {
     flex: 1,
-    padding: scale(10),
+    paddingVertical: scale(8),
+    paddingHorizontal: scale(12),
   },
   productName: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: FontSizes.medium,
+    fontWeight: FontWeights.semiBold,
     color: Colors.title,
-    marginBottom: 4,
+    marginBottom: scale(2),
   },
   productPrice: {
-    fontSize: 12,
+    fontSize: FontSizes.small,
     color: Colors.green,
-    fontWeight: '600',
-  },
-  addToCartButton: {
-    position: 'absolute',
-    bottom: 8,
-    right: 8,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: Colors.green,
-    alignItems: 'center',
-    justifyContent: 'center',
+    fontWeight: FontWeights.semiBold,
   },
   contactInfo: {
     padding: scale(16),
@@ -309,7 +299,6 @@ export default StyleSheet.create({
   },
   contactDetails: {
     flex: 1,
-    marginLeft: 12,
   },
   contactLabel: {
     fontSize: 12,
@@ -335,7 +324,7 @@ export default StyleSheet.create({
   },
   mapText: {
     fontSize: FontSizes.medium,
-    fontWeight: '600',
+    fontWeight: FontWeights.semiBold,
     color: Colors.title,
     marginTop: scale(8),
     marginBottom: scale(12),
@@ -365,7 +354,7 @@ export default StyleSheet.create({
   },
   callButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: FontWeights.semiBold,
     color: Colors.white,
     marginLeft: 8,
   },
@@ -380,7 +369,7 @@ export default StyleSheet.create({
   },
   visitButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: FontWeights.semiBold,
     color: Colors.white,
     marginLeft: 8,
   },
@@ -448,7 +437,7 @@ export default StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: FontWeights.semiBold,
     color: '#374151',
     marginBottom: 8,
     textAlign: 'center',

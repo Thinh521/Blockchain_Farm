@@ -1,6 +1,6 @@
 import {StyleSheet} from 'react-native';
 import {Colors} from '../../theme/theme';
-import { scale } from '../../utils/scaling';
+import {scale} from '../../utils/scaling';
 
 export default StyleSheet.create({
   container: {
@@ -10,14 +10,14 @@ export default StyleSheet.create({
   header: {
     paddingHorizontal: 24,
     paddingTop: 20,
-    paddingBottom: 30,
+    paddingBottom: scale(20),
     backgroundColor: Colors.green,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: scale(4),
+    marginBottom: scale(2),
   },
   headerSubtitle: {
     fontSize: 14,
@@ -25,7 +25,7 @@ export default StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
-    marginTop: -16,
+    marginTop: -10,
     paddingBottom: 20,
   },
   profileCard: {

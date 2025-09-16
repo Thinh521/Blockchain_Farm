@@ -185,6 +185,39 @@ const FarmDetailScreen = ({navigation}) => {
     Linking.openURL(`mailto:${farmData.email}`);
   };
 
+  const contactItems = [
+    {
+      id: 1,
+      icon: 'person-circle',
+      label: 'Chủ trang trại',
+      value: farm.fullname || 'Nguyễn Văn A',
+      onPress: null,
+    },
+    {
+      id: 2,
+      icon: 'call',
+      label: 'Số điện thoại',
+      value: farm.phone || '0123456789',
+      onPress: handleCall,
+      showChevron: true,
+    },
+    {
+      id: 3,
+      icon: 'mail',
+      label: 'Email',
+      value: farm.email,
+      onPress: handleEmail,
+      showChevron: true,
+    },
+    {
+      id: 4,
+      icon: 'location',
+      label: 'Địa chỉ',
+      value: farmData.location,
+      onPress: null,
+    },
+  ];
+
   const headerOpacity = scrollY.interpolate({
     inputRange: [0, 200],
     outputRange: [0, 1],
@@ -229,7 +262,6 @@ const FarmDetailScreen = ({navigation}) => {
         </View>
       </View>
 
-      {/* Certifications */}
       <View style={styles.infoCard}>
         <View style={styles.cardHeader}>
           <Ionicons name="shield-checkmark" size={24} color="#059669" />
@@ -246,7 +278,6 @@ const FarmDetailScreen = ({navigation}) => {
         </View>
       </View>
 
-      {/* Facilities */}
       <View style={styles.infoCard}>
         <View style={styles.cardHeader}>
           <Ionicons name="construct" size={24} color="#059669" />
@@ -286,13 +317,12 @@ const FarmDetailScreen = ({navigation}) => {
                 style={styles.productImage}
               />
               <View style={styles.productInfo}>
-                <Text style={styles.productName}>{product.name}</Text>
+                <Text style={styles.productName} numberOfLines={1}>
+                  {product.name}
+                </Text>
                 <Text style={styles.productPrice}>
                   {product.price} VNĐ/{product.unit}
                 </Text>
-                <TouchableOpacity style={styles.addToCartButton}>
-                  <Ionicons name="add" size={16} color="#FFFFFF" />
-                </TouchableOpacity>
               </View>
             </TouchableOpacity>
           ))}
@@ -310,43 +340,24 @@ const FarmDetailScreen = ({navigation}) => {
         </View>
 
         <View style={styles.contactInfo}>
-          <View style={styles.contactItem}>
-            <Ionicons name="person-circle" size={20} color="#059669" />
-            <View style={styles.contactDetails}>
-              <Text style={styles.contactLabel}>Chủ trang trại</Text>
-              <Text style={styles.contactValue}>
-                {farm.fullname || 'Nguyễn Văn A'}
-              </Text>
-            </View>
-          </View>
-
-          <TouchableOpacity style={styles.contactItem} onPress={handleCall}>
-            <Ionicons name="call" size={20} color="#059669" />
-            <View style={styles.contactDetails}>
-              <Text style={styles.contactLabel}>Số điện thoại</Text>
-              <Text style={styles.contactValue}>
-                {farm.phone || '0123456789'}
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#6B7280" />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.contactItem} onPress={handleEmail}>
-            <Ionicons name="mail" size={20} color="#059669" />
-            <View style={styles.contactDetails}>
-              <Text style={styles.contactLabel}>Email</Text>
-              <Text style={styles.contactValue}>{farm.email}</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color="#6B7280" />
-          </TouchableOpacity>
-
-          <View style={styles.contactItem}>
-            <Ionicons name="location" size={20} color="#059669" />
-            <View style={styles.contactDetails}>
-              <Text style={styles.contactLabel}>Địa chỉ</Text>
-              <Text style={styles.contactValue}>{farmData.location}</Text>
-            </View>
-          </View>
+          {contactItems.map(item => (
+            <TouchableOpacity
+              key={item.id}
+              style={styles.contactItem}
+              onPress={item.onPress}
+              activeOpacity={item.onPress ? 0.7 : 1}>
+              <View style={styles.facilityIcon}>
+                <Ionicons name={item.icon} size={20} color="#059669" />
+              </View>
+              <View style={styles.contactDetails}>
+                <Text style={styles.contactLabel}>{item.label}</Text>
+                <Text style={styles.contactValue}>{item.value}</Text>
+              </View>
+              {item.showChevron && (
+                <Ionicons name="chevron-forward" size={18} color="#6B7280" />
+              )}
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
 
@@ -364,7 +375,6 @@ const FarmDetailScreen = ({navigation}) => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#059669" />
 
-      {/* Animated Header */}
       <Animated.View style={[styles.header, {opacity: headerOpacity}]}>
         <TouchableOpacity
           style={styles.backButton}
@@ -402,7 +412,6 @@ const FarmDetailScreen = ({navigation}) => {
           {useNativeDriver: false},
         )}
         scrollEventThrottle={16}>
-        {/* Image Carousel */}
         <ImageCarousel
           farm={farm}
           imageScale={imageScale}
@@ -411,7 +420,6 @@ const FarmDetailScreen = ({navigation}) => {
           currentImageIndex={currentImageIndex}
         />
 
-        {/* Main Content */}
         <View style={styles.content}>
           <View style={styles.titleSection}>
             <Text style={styles.farmName}>{farm.nameFarm}</Text>
@@ -422,10 +430,8 @@ const FarmDetailScreen = ({navigation}) => {
             <Text style={styles.description}>{farm.description}</Text>
           </View>
 
-          {/* Tabs */}
           <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-          {/* Tab Content */}
           {activeTab === 'overview' && renderOverviewTab()}
           {activeTab === 'products' && renderProductsTab()}
           {activeTab === 'contact' && renderContactTab()}
@@ -480,10 +486,8 @@ const FarmDetailScreen = ({navigation}) => {
         </View>
       </Animated.ScrollView>
 
-      {/* Bottom Action Bar */}
       <BottomActionBar handleCall={handleCall} />
 
-      {/* Image Modal */}
       <Modal
         visible={showImageModal}
         transparent={true}

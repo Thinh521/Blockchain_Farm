@@ -1,8 +1,8 @@
 import {Dimensions, StyleSheet} from 'react-native';
 import {scale} from '../../utils/scaling';
-import {Colors, FontSizes} from '../../theme/theme';
+import {Colors} from '../../theme/theme';
 
-const {width, height} = Dimensions.get('window');
+const {height} = Dimensions.get('window');
 
 export default StyleSheet.create({
   container: {
@@ -32,14 +32,14 @@ export default StyleSheet.create({
   header: {
     paddingHorizontal: 24,
     paddingTop: 20,
-    paddingBottom: 30,
+    paddingBottom: scale(20),
     backgroundColor: Colors.green,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: scale(4),
+    marginBottom: scale(2),
   },
   headerSubtitle: {
     fontSize: 14,
@@ -103,25 +103,15 @@ export default StyleSheet.create({
     fontSize: 14,
     color: '#6b7280',
   },
-  bottomDisconnect: {
-    alignItems: 'center',
-    paddingVertical: 30,
-    paddingHorizontal: 20,
-  },
   bottomDisconnectButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fef2f2',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 25,
+    marginTop: scale(40),
+    width: '60%',
+    marginInline: 'auto',
     borderWidth: 1,
     borderColor: '#fecaca',
+    backgroundColor: '#fef2f2',
   },
   bottomDisconnectText: {
-    marginLeft: 8,
-    fontSize: 16,
     color: '#dc2626',
-    fontWeight: '600',
   },
 });
