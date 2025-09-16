@@ -262,9 +262,9 @@ const RegisterManage = ({navigation, route}) => {
 
       const tx = await contract.registerFarm(
         formData.farmCode,
-        (await storage.getString('userId')) || 'USER123',
-        formData.nameFarm,
         formData.fullName,
+        formData.nameFarm,
+        (await storage.getString('userId')) || 'USER123',
         formData.email,
         formData.phone,
         formData.description,
@@ -295,7 +295,7 @@ const RegisterManage = ({navigation, route}) => {
         type: 'success',
         duration: 2000,
         onHide: () => {
-          navigation.navigate('Auth', {screen: 'MyFarm'});
+          navigation.navigate('NoBottomTab', {screen: 'MyFarm'});
         },
       });
     } catch (error) {

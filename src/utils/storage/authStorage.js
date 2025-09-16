@@ -25,6 +25,7 @@ export const deleteUser = () => {
   try {
     storage.delete('userId');
     storage.delete('accessToken');
+    storage.delete('refreshToken');
   } catch (error) {
     console.log('Delete user error:', error);
   }
