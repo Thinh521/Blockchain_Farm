@@ -15,7 +15,9 @@ import {Colors} from '../theme/theme';
 import NewsListScreen from '../screens/News/NewsListScreen';
 import NewsScreen from '../screens/News/NewsScreen';
 import EditNewsScreen from '../screens/News/EditNewsScreen';
-import AllWishlistFarmsScreen from '../screens/AllWishlistFarms/AllWishlistFarmsScreen';
+import ManageScreen from '../screens/Manage/ManageScreen';
+import MyFarmScreen from '../screens/MyFarm/MyFarmScreen';
+import WishListScreen from '../screens/WishList/WishListScreen';
 
 const routerNoBottomTab = [
   {
@@ -102,10 +104,17 @@ const routerNoBottomTab = [
     name: 'RegisterManage',
     component: RegisterManage,
     hasLayout: false,
-    options: {
-      title: 'Đăng ký farm',
-      headerShown: false,
-      animation: 'fade',
+     options: {
+      title: 'Đăng ký quản lý trang trại',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
     },
   },
   {
@@ -156,11 +165,12 @@ const routerNoBottomTab = [
     },
   },
   {
-    name: 'AllWishlistFarms',
-    component: AllWishlistFarmsScreen,
+
+    name: 'Manage',
+    component: ManageScreen,
     hasLayout: false,
     options: {
-      title: 'Tất cả nông trại',
+      title: 'Quản lí nông trại',
       headerShown: true,
       headerStyle: {
         backgroundColor: Colors.green,
@@ -173,11 +183,12 @@ const routerNoBottomTab = [
     },
   },
   {
-    name: 'NewList',
-    component: NewsListScreen,
+
+    name: 'MyFarm',
+    component: MyFarmScreen,
     hasLayout: false,
     options: {
-      title: 'Tin tức',
+      title: 'Nông trại của tôi',
       headerShown: true,
       headerStyle: {
         backgroundColor: Colors.green,
@@ -190,28 +201,12 @@ const routerNoBottomTab = [
     },
   },
   {
-    name: 'News',
-    component: NewsScreen,
+
+    name: 'WishList',
+    component: WishListScreen,
     hasLayout: false,
     options: {
-      title: 'Tạo tin tức',
-      headerShown: true,
-      headerStyle: {
-        backgroundColor: Colors.green,
-      },
-      headerTintColor: Colors.white,
-      headerTitleStyle: {
-        fontWeight: 'bold',
-        fontSize: 18,
-      },
-    },
-  },
-  {
-    name: 'EditNews',
-    component: EditNewsScreen,
-    hasLayout: false,
-    options: {
-      title: 'Chỉnh sửa tin tức',
+      title: 'Nông trại yêu thích',
       headerShown: true,
       headerStyle: {
         backgroundColor: Colors.green,

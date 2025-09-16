@@ -3,9 +3,11 @@ import {StyleSheet, View} from 'react-native';
 import FarmList from '../../../components/Farms/FarmList';
 import FarmCardSkeleton from '../../../components/CustomSkeleton/FarmCardSkeleton';
 import {scale} from '../../../utils/scaling';
+import {useWishlist} from '../../../context/WishlistContext';
 
 const AllFarmsScreen = ({route}) => {
-  const {farms, favorites, toggleFavorite, isLoading} = route.params;
+  const {farms, isLoading} = route.params; 
+  const {favorites, toggleFavorite} = useWishlist(); // lấy từ context
 
   return (
     <View style={styles.container}>

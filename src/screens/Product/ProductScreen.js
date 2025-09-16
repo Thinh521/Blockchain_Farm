@@ -1,7 +1,7 @@
 import React from 'react';
 import {Button, Text, View} from 'react-native';
-import {useNavigation} from '@react-navigation/core';
 import styles from './Product.styles';
+import {useNavigation} from '@react-navigation/core';
 
 const ProductScreen = () => {
   const navigation = useNavigation();

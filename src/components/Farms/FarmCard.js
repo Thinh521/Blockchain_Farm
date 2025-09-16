@@ -15,10 +15,11 @@ import {
 } from '../../assets/icons/index';
 import FastImage from 'react-native-fast-image';
 import {useNavigation} from '@react-navigation/core';
+import {scale} from '../../utils/scaling';
 
 const {width} = Dimensions.get('window');
 
-const FarmCard = ({farm, favorites, toggleFavorite}) => {
+const FarmCard = ({farm, favorites, toggleFavorite, isUserFarm}) => {
   const navigation = useNavigation();
 
   return (
@@ -43,16 +44,13 @@ const FarmCard = ({farm, favorites, toggleFavorite}) => {
           resizeMode="cover"
         />
 
-        <TouchableOpacity
-          style={styles.favoriteButton}
-          onPress={() => toggleFavorite(farm.farmCode)}>
+        <View style={styles.favoriteButton}>
           {favorites.has(farm.farmCode) ? (
             <Heart_Fill_Icon style={{color: '#EF4444', width: 20}} />
           ) : (
             <Heart_Line_Icon style={{color: '#9CA3AF', width: 20}} />
           )}
-        </TouchableOpacity>
-
+        </View>
         <View style={styles.areaBadge}>
           <Text style={styles.areaBadgeText}>{farm.area} ha</Text>
         </View>
@@ -74,16 +72,29 @@ const FarmCard = ({farm, favorites, toggleFavorite}) => {
           </Text>
         </View>
 
-        <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
-            <Pulse_Line_Icon style={{color: '#10B981', width: 14}} />
-            <Text style={styles.statText}>Hoạt động</Text>
+        {isUserFarm ? (
+          <View style={styles.actionButtons}>
+            <TouchableOpacity
+              style={[styles.actionBtn, {backgroundColor: '#3B82F6'}]}>
+              <Text style={styles.actionBtnText}>Cập nhật</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.actionBtn, {backgroundColor: '#EF4444'}]}>
+              <Text style={styles.actionBtnText}>Quản lí</Text>
+            </TouchableOpacity>
           </View>
-          <View style={styles.statItem}>
-            <Water_line_Icon style={{color: '#3B82F6', width: 14}} />
-            <Text style={styles.statText}>Organic</Text>
+        ) : (
+          <View style={styles.statsContainer}>
+            <View style={styles.statItem}>
+              <Pulse_Line_Icon style={{color: '#10B981', width: 14}} />
+              <Text style={styles.statText}>Hoạt động</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Water_line_Icon style={{color: '#3B82F6', width: 14}} />
+              <Text style={styles.statText}>Organic</Text>
+            </View>
           </View>
-        </View>
+        )}
       </View>
     </TouchableOpacity>
   );
@@ -174,6 +185,23 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#6B7280',
     marginLeft: 3,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: scale(6),
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  actionBtn: {
+    flex: 1,
+    paddingVertical: 6,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  actionBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#fff',
   },
 });
 

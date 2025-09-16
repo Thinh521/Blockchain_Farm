@@ -26,6 +26,7 @@ import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
 import ImageCarousel from './components/ImageCarousel';
 import Tabs from './components/Tabs';
 import BottomActionBar from './components/BottomActionBar';
+import {useWishlist} from '../../context/WishlistContext';
 
 const farmData = {
   farmCode: 'F001',
@@ -109,11 +110,11 @@ const FarmDetailScreen = ({navigation}) => {
   const {isConnected} = useAppKitAccount();
   const [farms, setFarms] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [favorites, setFavorites] = useState(new Set());
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const {favorites, toggleFavorite} = useWishlist();
+
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const getAllFarms = useCallback(async () => {
@@ -166,16 +167,6 @@ const FarmDetailScreen = ({navigation}) => {
       getAllFarms();
     }
   }, [isConnected, getAllFarms]);
-
-  const toggleFavorite = farmCode => {
-    const newFavorites = new Set(favorites);
-    if (newFavorites.has(farmCode)) {
-      newFavorites.delete(farmCode);
-    } else {
-      newFavorites.add(farmCode);
-    }
-    setFavorites(newFavorites);
-  };
 
   const handleCall = () => {
     Linking.openURL(`tel:${farmData.phone}`);
@@ -382,14 +373,14 @@ const FarmDetailScreen = ({navigation}) => {
         <Arrow_Left_Line_Icon style={{color: '#fff'}} />
       </TouchableOpacity>
 
-      <View style={styles.floatingActions}>
+      <View style={[styles.floatingActions, ]}>
         <TouchableOpacity
           style={[styles.floatingActionButton, {marginTop: 8}]}
-          onPress={() => setIsFavorite(!isFavorite)}>
+          onPress={() => toggleFavorite(farm.farmCode)}>
           <Ionicons
-            name={isFavorite ? 'heart' : 'heart-outline'}
+            name={favorites.has(farm.farmCode) ? 'heart' : 'heart-outline'}
             size={20}
-            color={isFavorite ? '#EF4444' : '#FFFFFF'}
+            color={favorites.has(farm.farmCode) ? '#EF4444' : '#FFFFFF'}
           />
         </TouchableOpacity>
       </View>
