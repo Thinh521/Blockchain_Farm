@@ -19,6 +19,8 @@ import styles from './FarmRegistration.styles';
 import {Arrow_Right_S_Icon} from '../../assets/icons';
 import {useNavigation} from '@react-navigation/core';
 import {showMessage} from 'react-native-flash-message';
+import {scale} from '../../utils/scaling';
+import Button from '../../components/CustomButton/CustomButton';
 
 const menuItems = [
   {
@@ -26,7 +28,7 @@ const menuItems = [
     label: 'Đăng ký nông trại',
     icon: 'edit-3',
     colors: ['#f472b6', '#db2777'],
-    description: 'Tạo và quản lý thông tin nông trại mới',
+    description: 'Tạo và quản lý nông trại',
     screen: 'RegisterManage',
   },
   {
@@ -120,7 +122,10 @@ const FarmRegistrationScreen = () => {
   const renderMenuScreen = () => (
     <ScrollView
       style={styles.menuScrollView}
-      showsVerticalScrollIndicator={false}>
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{paddingBottom: scale(160)}}
+      keyboardShouldPersistTaps="handled"
+      bounces={true}>
       <View style={styles.menuContainer}>
         {menuItems.map((item, index) => {
           const animationValue = menuAnimations[index] || new Animated.Value(0);
@@ -166,14 +171,13 @@ const FarmRegistrationScreen = () => {
         })}
       </View>
 
-      <View style={styles.bottomDisconnect}>
-        <TouchableOpacity
-          style={styles.bottomDisconnectButton}
-          onPress={disconnect}>
-          <Icon name="log-out" size={20} color="#dc2626" />
-          <Text style={styles.bottomDisconnectText}>Ngắt kết nối</Text>
-        </TouchableOpacity>
-      </View>
+      <Button.Main
+        title="Ngắt kết nối"
+        onPress={disconnect}
+        textStyle={styles.bottomDisconnectText}
+        style={styles.bottomDisconnectButton}
+        iconLeft={<Icon name="log-out" size={20} color="#dc2626" />}
+      />
     </ScrollView>
   );
 
@@ -184,7 +188,7 @@ const FarmRegistrationScreen = () => {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Đăng ký & quản lí nông trại</Text>
           <Text style={styles.headerSubtitle}>
-            Đăng ký nông trại mới và quản lý các nông trại đã tạo
+            Đăng ký nông trại & quản lý các nông trại đã tạo
           </Text>
         </View>
         {renderMenuScreen()}

@@ -207,7 +207,7 @@ const HomeScreen = () => {
               </View>
 
               {isLoading ? (
-                <FarmCardSkeleton count={6} />
+                <FarmCardSkeleton count={4} />
               ) : filteredFarms.length === 0 ? (
                 <View style={styles.emptyContainer}>
                   <Text style={styles.emptyTitle}>
