@@ -198,7 +198,7 @@ const HomeScreen = () => {
                         farms: filteredFarms,
                         favorites,
                         toggleFavorite,
-                        isLoading: isLoading
+                        isLoading: isLoading,
                       },
                     })
                   }>

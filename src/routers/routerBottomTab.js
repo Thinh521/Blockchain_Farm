@@ -3,16 +3,16 @@ import {
   FarmTabIcon,
   Heart_Line_Icon,
   HomeTabIcon,
-  ProductTabIcon,
+  NewTabIcon,         
   QrTabIcon,
   SettingTabIcon,
 } from '../assets/icons';
 import FarmRegistrationScreen from '../screens/FarmRegistration/FarmRegistrationScreen';
 import HomeScreen from '../screens/Home/HomeScreen';
-import ProductScreen from '../screens/Product/ProductScreen';
 import QrScanScreen from '../screens/QrScan/QrScanScreen';
 import SettingScreen from '../screens/Setting/SettingScreen';
 import WishListScreen from '../screens/WishList/WishListScreen';
+import NewScreen from '../screens/New/NewScreen';
 
 export const getRouterBottomTab = t => {
   const {isConnected} = useAppKitAccount();
@@ -28,10 +28,10 @@ export const getRouterBottomTab = t => {
       },
     },
     {
-      name: 'Product',
-      component: ProductScreen,
-      label: 'Sản phẩm',
-      Icon: ProductTabIcon,
+      name: 'New',
+      component: NewScreen,
+      label: 'Tin tức',
+      Icon: NewTabIcon,
       options: {
         headerShown: false,
       },

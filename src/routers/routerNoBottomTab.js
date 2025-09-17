@@ -15,6 +15,7 @@ import {Colors} from '../theme/theme';
 import ManageScreen from '../screens/Manage/ManageScreen';
 import MyFarmScreen from '../screens/MyFarm/MyFarmScreen';
 import WishListScreen from '../screens/WishList/WishListScreen';
+import AddMewsScreen from '../screens/New/AddNewsScreen';
 
 const routerNoBottomTab = [
   {
@@ -101,7 +102,7 @@ const routerNoBottomTab = [
     name: 'RegisterManage',
     component: RegisterManage,
     hasLayout: false,
-     options: {
+    options: {
       title: 'Đăng ký quản lý trang trại',
       headerShown: true,
       headerStyle: {
@@ -201,6 +202,23 @@ const routerNoBottomTab = [
     hasLayout: false,
     options: {
       title: 'Nông trại yêu thích',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'AddMewsScreen',
+    component: AddMewsScreen,
+    hasLayout: false,
+    options: {
+      title: 'Thêm tin tức',
       headerShown: true,
       headerStyle: {
         backgroundColor: Colors.green,
