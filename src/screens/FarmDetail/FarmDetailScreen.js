@@ -118,9 +118,6 @@ const FarmDetailScreen = ({navigation}) => {
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const getAllFarms = useCallback(async () => {
-    if (!isConnected) {
-      return;
-    }
     setIsLoading(true);
 
     try {
@@ -163,10 +160,8 @@ const FarmDetailScreen = ({navigation}) => {
   }, [isConnected]);
 
   useEffect(() => {
-    if (isConnected) {
-      getAllFarms();
-    }
-  }, [isConnected, getAllFarms]);
+    getAllFarms();
+  }, [getAllFarms]);
 
   const handleCall = () => {
     Linking.openURL(`tel:${farmData.phone}`);
@@ -383,7 +378,7 @@ const FarmDetailScreen = ({navigation}) => {
         <Arrow_Left_Line_Icon style={{color: '#fff'}} />
       </TouchableOpacity>
 
-      <View style={[styles.floatingActions, ]}>
+      <View style={[styles.floatingActions]}>
         <TouchableOpacity
           style={[styles.floatingActionButton, {marginTop: 8}]}
           onPress={() => toggleFavorite(farm.farmCode)}>

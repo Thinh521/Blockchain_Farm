@@ -1,6 +1,16 @@
 // WishlistContext.js
-import React, {createContext, useContext, useEffect, useState, useCallback} from 'react';
-import {getWishlistFarms, addWishlistFarm, removeWishlistFarm} from '../api/wishlist/wishlistApi';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from 'react';
+import {
+  getWishlistFarms,
+  addWishlistFarm,
+  removeWishlistFarm,
+} from '../api/wishlist/wishlistApi';
 import {ethers} from 'ethers';
 import {CONTRACT_ADDRESS} from '@env';
 import contractArtifact from '../screens/SmartConctract/contractABI.json';
@@ -16,14 +26,18 @@ export const WishlistProvider = ({children}) => {
 
   // lấy wishlist + farms blockchain
   const fetchWishlist = useCallback(async () => {
-    if (!isConnected) return;
-
     try {
       setLoading(true);
 
       // blockchain farms
-      const rpcProvider = new ethers.JsonRpcProvider('https://rpc.zeroscan.org');
-      const contractRead = new ethers.Contract(CONTRACT_ADDRESS, contractArtifact.abi, rpcProvider);
+      const rpcProvider = new ethers.JsonRpcProvider(
+        'https://rpc.zeroscan.org',
+      );
+      const contractRead = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        contractArtifact.abi,
+        rpcProvider,
+      );
       const allFarms = await contractRead.getAllFarms();
 
       const formattedFarms = allFarms.map(farm => ({
@@ -36,7 +50,9 @@ export const WishlistProvider = ({children}) => {
         description: farm.description || farm[6],
         location: farm.location || farm[7],
         area: farm.area?.toString?.() || farm[8]?.toString?.() || '',
-        image: Array.isArray(farm.images || farm[9]) ? farm.images || farm[9] : [],
+        image: Array.isArray(farm.images || farm[9])
+          ? farm.images || farm[9]
+          : [],
       }));
 
       // wishlist từ API
@@ -45,7 +61,9 @@ export const WishlistProvider = ({children}) => {
       const wishlistCodes = new Set(wishlistFarms.map(f => f.farmCode));
 
       // filter
-      const matchedFarms = formattedFarms.filter(f => wishlistCodes.has(f.farmCode));
+      const matchedFarms = formattedFarms.filter(f =>
+        wishlistCodes.has(f.farmCode),
+      );
 
       setWishlistFarms(matchedFarms);
       setFavorites(new Set(matchedFarms.map(f => f.farmCode)));
@@ -83,7 +101,13 @@ export const WishlistProvider = ({children}) => {
 
   return (
     <WishlistContext.Provider
-      value={{favorites, wishlistFarms, loading, toggleFavorite, fetchWishlist}}>
+      value={{
+        favorites,
+        wishlistFarms,
+        loading,
+        toggleFavorite,
+        fetchWishlist,
+      }}>
       {children}
     </WishlistContext.Provider>
   );
