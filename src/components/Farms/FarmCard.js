@@ -74,12 +74,19 @@ const FarmCard = ({farm, favorites, toggleFavorite, isUserFarm}) => {
 
         {isUserFarm ? (
           <View style={styles.actionButtons}>
+
             <TouchableOpacity
               style={[styles.actionBtn, {backgroundColor: '#3B82F6'}]}>
               <Text style={styles.actionBtnText}>Cập nhật</Text>
             </TouchableOpacity>
+
             <TouchableOpacity
-              style={[styles.actionBtn, {backgroundColor: '#EF4444'}]}>
+              style={[styles.actionBtn, {backgroundColor: '#EF4444'}]}
+              onPress={() =>
+                navigation.navigate('Categories', {
+                  farmCode: farm.farmCode, 
+                })
+              }>
               <Text style={styles.actionBtnText}>Quản lí</Text>
             </TouchableOpacity>
           </View>

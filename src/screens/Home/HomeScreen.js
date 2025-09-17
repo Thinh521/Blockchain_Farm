@@ -50,11 +50,11 @@ const HomeScreen = () => {
   ];
 
   const getAllFarms = useCallback(async () => {
-    if (!isConnected) return;
-
     setIsLoading(true);
     try {
-      const rpcProvider = new ethers.JsonRpcProvider('https://rpc.zeroscan.org');
+      const rpcProvider = new ethers.JsonRpcProvider(
+        'https://rpc.zeroscan.org',
+      );
       const contractRead = new ethers.Contract(
         CONTRACT_ADDRESS,
         contractArtifact.abi,
@@ -63,7 +63,7 @@ const HomeScreen = () => {
 
       const farmsData = await contractRead.getAllFarms();
 
-      const formattedFarms = farmsData.map((farm) => ({
+      const formattedFarms = farmsData.map(farm => ({
         farmCode: farm.farmCode || farm[0],
         fullname: farm.fullname || farm[1],
         nameFarm: farm.nameFarm || farm[2],
@@ -73,7 +73,9 @@ const HomeScreen = () => {
         description: farm.description || farm[6],
         location: farm.location || farm[7],
         area: farm.area?.toString?.() || farm[8]?.toString?.() || '',
-        image: Array.isArray(farm.images || farm[9]) ? farm.images || farm[9] : [],
+        image: Array.isArray(farm.images || farm[9])
+          ? farm.images || farm[9]
+          : [],
       }));
 
       setFarms(formattedFarms);
@@ -83,16 +85,14 @@ const HomeScreen = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isConnected]);
+  }, []);
 
   useEffect(() => {
-    if (isConnected) {
-      getAllFarms();
-    }
-  }, [isConnected, getAllFarms]);
+    getAllFarms();
+  }, [getAllFarms]);
 
   const filteredFarms = farms.filter(
-    (farm) =>
+    farm =>
       farm.nameFarm.toLowerCase().includes(searchQuery.toLowerCase()) ||
       farm.location.toLowerCase().includes(searchQuery.toLowerCase()),
   );
