@@ -8,6 +8,7 @@ import {
   Dimensions,
   TextInput,
   Text,
+  Alert,
 } from 'react-native';
 import styles from './New.styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -17,9 +18,10 @@ import {Search_Line_Icon} from '../../assets/icons';
 import {scale} from '../../utils/scaling';
 import {useIsFocused, useNavigation} from '@react-navigation/core';
 import {useQuery} from '@tanstack/react-query';
-import {getAllNewsApi} from '../../api/newsApi';
+import {deleteNewsApi, getAllNewsApi} from '../../api/newsApi';
 import {getUser} from '../../utils/storage/authStorage';
 import NewsCardSkeleton from '../../components/CustomSkeleton/NewsCardSkeleton';
+import {showMessage} from 'react-native-flash-message';
 
 const NewScreen = () => {
   const navigation = useNavigation();
@@ -47,6 +49,33 @@ const NewScreen = () => {
       refetch();
     }
   }, [isFocused, refetch]);
+
+  const handleDelete = async id => {
+    Alert.alert('Xác nhận', 'Bạn có chắc chắn muốn xóa bài viết này?', [
+      {text: 'Hủy', style: 'cancel'},
+      {
+        text: 'Xóa',
+        style: 'destructive',
+        onPress: async () => {
+          const res = await deleteNewsApi(id, accessToken);
+          if (res.success) {
+            showMessage({
+              message: 'Thành công',
+              description: 'Bài viết đã được xóa',
+              type: 'success',
+            });
+            refetch();
+          } else {
+            showMessage({
+              message: 'Thất bại',
+              description: 'Không thể xóa bài viết',
+              type: 'danger',
+            });
+          }
+        },
+      },
+    ]);
+  };
 
   const openImageViewer = (images, index) => {
     setSelectedImages(images);
@@ -76,7 +105,7 @@ const NewScreen = () => {
         }}
         renderItem={() => (
           <>
-            <View style={styles.newHeader}>
+            <View style={styles.header}>
               <View style={styles.searchContainer}>
                 <View style={styles.searchWrapper}>
                   <Search_Line_Icon style={{color: '#9CA3AF', width: 20}} />
@@ -115,6 +144,7 @@ const NewScreen = () => {
                 expandedId={expandedId}
                 onToggleExpand={toggleExpand}
                 onOpenImageViewer={openImageViewer}
+                onDelete={handleDelete}
               />
             )}
           </>

@@ -7,7 +7,6 @@ import {
   Image,
   ScrollView,
   SafeAreaView,
-  ActivityIndicator,
 } from 'react-native';
 import {useAppKitAccount} from '@reown/appkit-ethers-react-native';
 import {ethers} from 'ethers';
@@ -19,7 +18,10 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import {createNewsApi} from '../../api/newsApi';
 import {getUser} from '../../utils/storage/authStorage';
 import {showMessage} from 'react-native-flash-message';
-import {useIsFocused, useNavigation} from '@react-navigation/core';
+import {Colors} from '../../theme/theme';
+import Input from '../../components/CustomInput/CustomInput';
+import Button from '../../components/CustomButton/CustomButton';
+import {useNavigation} from '@react-navigation/core';
 
 const AddNewsScreen = () => {
   const navigation = useNavigation();
@@ -109,8 +111,6 @@ const AddNewsScreen = () => {
     formData.append('title', title);
     formData.append('description', description);
 
-    console.log('formData', formData);
-
     images.forEach((img, index) => {
       formData.append('images', {
         uri: img.uri,
@@ -157,15 +157,15 @@ const AddNewsScreen = () => {
         style={styles.dropdownButton}
         onPress={() => setShowFarmDropdown(!showFarmDropdown)}>
         <View style={styles.dropdownButtonContent}>
-          <Icon name="storefront-outline" size={20} color="#4ade80" />
+          <Icon name="storefront-outline" size={20} color={Colors.inputText} />
           <Text style={styles.dropdownButtonText}>
             {selectedFarm ? selectedFarm.nameFarm : 'Chọn nông trại'}
           </Text>
         </View>
         <Icon
           name={showFarmDropdown ? 'chevron-up' : 'chevron-down'}
-          size={20}
-          color="#666"
+          size={16}
+          color={Colors.inputText}
         />
       </TouchableOpacity>
 
@@ -183,7 +183,7 @@ const AddNewsScreen = () => {
                 setSelectedFarm(farm);
                 setShowFarmDropdown(false);
               }}>
-              <Icon name="leaf-outline" size={16} color="#4ade80" />
+              <Icon name="leaf-outline" size={16} color={Colors.primary} />
               <Text
                 style={[
                   styles.dropdownItemText,
@@ -201,11 +201,17 @@ const AddNewsScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContainer}>
         {/* Header */}
         <View style={styles.headerContainer}>
-          <Icon name="newspaper-outline" size={32} color="#4ade80" />
-          <Text style={styles.header}>Chia sẻ tin tức nông sản</Text>
+          <View style={styles.iconContainer}>
+            <View style={styles.iconBackground}>
+              <Icon name="newspaper-outline" size={32} color={Colors.primary} />
+            </View>
+          </View>
+          <Text style={styles.headerTitle}>Chia sẻ tin tức nông sản</Text>
           <Text style={styles.headerSubtitle}>
             Kết nối cộng đồng nông nghiệp xanh
           </Text>
@@ -219,10 +225,9 @@ const AddNewsScreen = () => {
 
         {/* Tiêu đề */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Tiêu đề</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Nhập tiêu đề..."
+          <Input
+            label="Tiêu đề"
+            placeholder="Nhập tiêu đề"
             value={title}
             onChangeText={setTitle}
           />
@@ -232,8 +237,8 @@ const AddNewsScreen = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Mô tả</Text>
           <TextInput
-            style={[styles.input, {height: 100, textAlignVertical: 'top'}]}
-            placeholder="Nhập mô tả chi tiết..."
+            style={styles.input}
+            placeholder="Nhập mô tả chi tiết"
             value={description}
             onChangeText={setDescription}
             multiline
@@ -266,24 +271,12 @@ const AddNewsScreen = () => {
           )}
         </View>
 
-        {/* Nút gửi */}
-        <TouchableOpacity
-          style={[
-            styles.submitButton,
-            (!selectedFarm || !title || !description) &&
-              styles.submitButtonDisabled,
-          ]}
+        <Button.Main
+          title={isLoading ? 'Đang đăng tin...' : 'Đăng tin'}
+          iconLeft={!isLoading && <Icon name="send" size={20} color="#fff" />}
+          disabled={!selectedFarm || !title || !description || isLoading}
           onPress={handleSubmit}
-          disabled={!selectedFarm || !title || !description || isLoading}>
-          {isLoading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <View style={styles.submitButtonContent}>
-              <Icon name="send" size={20} color="#fff" />
-              <Text style={styles.submitButtonText}>Đăng tin</Text>
-            </View>
-          )}
-        </TouchableOpacity>
+        />
       </ScrollView>
     </SafeAreaView>
   );

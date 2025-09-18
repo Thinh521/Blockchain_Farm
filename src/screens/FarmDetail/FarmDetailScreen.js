@@ -1,4 +1,4 @@
-import React, {useState, useRef, useCallback, useEffect} from 'react';
+import React, {useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -11,21 +11,18 @@ import {
   Modal,
   Linking,
 } from 'react-native';
-import {ethers} from 'ethers';
-import {CONTRACT_ADDRESS} from '@env';
-import contractArtifact from '../SmartConctract/contractABI.json';
 import styles from './FarmDetail.styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {Arrow_Left_Line_Icon} from '../../assets/icons';
 import {useRoute} from '@react-navigation/core';
 import Button from '../../components/CustomButton/CustomButton';
 import FastImage from 'react-native-fast-image';
-import {useAppKitAccount} from '@reown/appkit-ethers-react-native';
 import FarmSlider from '../../components/Farms/FarmSlider';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
 import ImageCarousel from './components/ImageCarousel';
 import Tabs from './components/Tabs';
 import BottomActionBar from './components/BottomActionBar';
+import {useFarms} from '../../hooks/useFarms';
 
 const farmData = {
   farmCode: 'F001',
@@ -106,9 +103,6 @@ const farmData = {
 
 const FarmDetailScreen = ({navigation}) => {
   const {farm} = useRoute().params;
-  const {isConnected} = useAppKitAccount();
-  const [farms, setFarms] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [favorites, setFavorites] = useState(new Set());
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -116,56 +110,7 @@ const FarmDetailScreen = ({navigation}) => {
   const [activeTab, setActiveTab] = useState('overview');
   const scrollY = useRef(new Animated.Value(0)).current;
 
-  const getAllFarms = useCallback(async () => {
-    if (!isConnected) {
-      return;
-    }
-    setIsLoading(true);
-
-    try {
-      const rpcProvider = new ethers.JsonRpcProvider(
-        'https://rpc.zeroscan.org',
-      );
-
-      const contractRead = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        contractArtifact.abi,
-        rpcProvider,
-      );
-
-      const farmsData = await contractRead.getAllFarms();
-
-      const formattedFarms = farmsData.map((farm, idx) => {
-        return {
-          farmCode: farm.farmCode || farm[0],
-          fullname: farm.fullname || farm[1],
-          nameFarm: farm.nameFarm || farm[2],
-          userId: farm.userId || farm[3],
-          email: farm.email || farm[4],
-          phone: farm.phone || farm[5],
-          description: farm.description || farm[6],
-          location: farm.location || farm[7],
-          area: farm.area?.toString?.() || farm[8]?.toString?.() || '',
-          image: Array.isArray(farm.images || farm[9])
-            ? farm.images || farm[9]
-            : [],
-        };
-      });
-
-      setFarms(formattedFarms);
-    } catch (error) {
-      console.log('Lỗi getAllFarms:', error);
-      setFarms([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isConnected]);
-
-  useEffect(() => {
-    if (isConnected) {
-      getAllFarms();
-    }
-  }, [isConnected, getAllFarms]);
+  const {farms, isLoading, error, refetch} = useFarms();
 
   const toggleFavorite = farmCode => {
     const newFavorites = new Set(favorites);

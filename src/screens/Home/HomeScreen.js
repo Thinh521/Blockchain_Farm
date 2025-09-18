@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, { useState} from 'react';
 import {
   View,
   Text,
@@ -17,10 +17,6 @@ import {
   User_Line_Icon,
   UserIcon,
 } from '../../assets/icons';
-import {ethers} from 'ethers';
-import {CONTRACT_ADDRESS} from '@env';
-import contractArtifact from '../SmartConctract/contractABI.json';
-import {useAppKitAccount} from '@reown/appkit-ethers-react-native';
 import Carousel from './components/Carousel';
 import styles from './Home.styles';
 import Features from './components/Features';
@@ -29,15 +25,15 @@ import Categories from './components/Categories';
 import FarmList from '../../components/Farms/FarmList';
 import {useNavigation} from '@react-navigation/core';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
+import {useFarms} from '../../hooks/useFarms';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const {isConnected} = useAppKitAccount();
-  const [farms, setFarms] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [favorites, setFavorites] = useState(new Set());
+
+  const {farms, isLoading, error, refetch} = useFarms();
 
   const categories = [
     {id: 'all', name: 'Tất cả', icon: Leaf_Line_Icon},
@@ -45,57 +41,6 @@ const HomeScreen = () => {
     {id: 'fruit', name: 'Trái cây', icon: Sun_Line_Icon},
     {id: 'livestock', name: 'Chăn nuôi', icon: User_Line_Icon},
   ];
-
-  const getAllFarms = useCallback(async () => {
-    if (!isConnected) {
-      return;
-    }
-    setIsLoading(true);
-
-    try {
-      const rpcProvider = new ethers.JsonRpcProvider(
-        'https://rpc.zeroscan.org',
-      );
-
-      const contractRead = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        contractArtifact.abi,
-        rpcProvider,
-      );
-
-      const farmsData = await contractRead.getAllFarms();
-
-      const formattedFarms = farmsData.map((farm, idx) => {
-        return {
-          farmCode: farm.farmCode || farm[0],
-          fullname: farm.fullname || farm[1],
-          nameFarm: farm.nameFarm || farm[2],
-          userId: farm.userId || farm[3],
-          email: farm.email || farm[4],
-          phone: farm.phone || farm[5],
-          description: farm.description || farm[6],
-          location: farm.location || farm[7],
-          area: farm.area?.toString?.() || farm[8]?.toString?.() || '',
-          image: Array.isArray(farm.images || farm[9])
-            ? farm.images || farm[9]
-            : [],
-        };
-      });
-
-      setFarms(formattedFarms);
-    } catch (error) {
-      console.log('Lỗi getAllFarms:', error);
-      setFarms([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [isConnected]);
-
-  useEffect(() => {
-    if (isConnected) {
-      getAllFarms();
-    }
-  }, [isConnected, getAllFarms]);
 
   const filteredFarms = farms.filter(
     farm =>
@@ -208,6 +153,15 @@ const HomeScreen = () => {
 
               {isLoading ? (
                 <FarmCardSkeleton count={4} />
+              ) : error ? (
+                <View style={styles.errorContainer}>
+                  <Text style={{color: 'red'}}>Không thể tải trang trại</Text>
+                  <TouchableOpacity
+                    onPress={refetch}
+                    style={styles.retryButton}>
+                    <Text style={styles.retryText}>Thử lại</Text>
+                  </TouchableOpacity>
+                </View>
               ) : filteredFarms.length === 0 ? (
                 <View style={styles.emptyContainer}>
                   <Text style={styles.emptyTitle}>

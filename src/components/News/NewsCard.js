@@ -1,12 +1,18 @@
 import React, {useState} from 'react';
-import {Text, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FastImage from 'react-native-fast-image';
-import styles from '../../screens/New/New.styles';
-import {Colors} from '../../theme/theme';
+import {Colors, FontSizes, FontWeights} from '../../theme/theme';
 import {getUser} from '../../utils/storage/authStorage';
+import {scale} from '../../utils/scaling';
 
-const NewsCard = ({item, isExpanded, onToggleExpand, onOpenImageViewer}) => {
+const NewsCard = ({
+  item,
+  isExpanded,
+  onToggleExpand,
+  onOpenImageViewer,
+  onDelete,
+}) => {
   const currentUserId = getUser()?.userId;
   const [showMenu, setShowMenu] = useState(false);
 
@@ -158,7 +164,7 @@ const NewsCard = ({item, isExpanded, onToggleExpand, onOpenImageViewer}) => {
                     style={styles.menuItem}
                     onPress={() => {
                       setShowMenu(false);
-                      onEdit?.(item);
+                      onEdit?.(item._id);
                     }}>
                     <View style={styles.menubox}>
                       <Ionicons name="create-outline" size={20} color="#000" />
@@ -169,7 +175,7 @@ const NewsCard = ({item, isExpanded, onToggleExpand, onOpenImageViewer}) => {
                     style={styles.menuItem}
                     onPress={() => {
                       setShowMenu(false);
-                      onDelete?.(item);
+                      onDelete?.(item._id);
                     }}>
                     <View style={styles.menubox}>
                       <Ionicons name="trash-outline" size={20} color="red" />
@@ -226,3 +232,238 @@ const NewsCard = ({item, isExpanded, onToggleExpand, onOpenImageViewer}) => {
 };
 
 export default NewsCard;
+
+const styles = StyleSheet.create({
+  card: {
+    position: 'relative',
+    backgroundColor: Colors.white,
+    borderRadius: scale(16),
+    marginBottom: scale(20),
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.border_2,
+  },
+  trendingBadge: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    backgroundColor: '#FF6B35',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    zIndex: 10,
+  },
+  trendingText: {
+    color: Colors.white,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  imagesContainer: {
+    flexDirection: 'row',
+    gap: scale(5),
+    padding: scale(12),
+  },
+  singleImage: {
+    width: '100%',
+    height: scale(180),
+    borderRadius: 16,
+  },
+  twoImagesRow: {
+    flexDirection: 'row',
+    gap: scale(5),
+  },
+  twoImage: {
+    width: '100%',
+    height: scale(150),
+    borderRadius: 16,
+    resizeMode: 'cover',
+  },
+  bigImageContainer: {
+    flex: 1,
+    position: 'relative',
+  },
+  bigImage: {
+    width: '100%',
+    height: scale(150),
+    borderRadius: 16,
+  },
+  imagesBox: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  smallImageContainer: {
+    position: 'relative',
+  },
+  smallImage: {
+    width: '100%',
+    height: scale(72),
+    borderRadius: 16,
+    backgroundColor: '#f0f0f0',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+  },
+  overlayText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  cardContent: {
+    padding: scale(12),
+    paddingTop: scale(2),
+  },
+  cardBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  cardContentHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: scale(12),
+    gap: scale(12),
+    flex: 1,
+  },
+  avatarContainer: {
+    position: 'relative',
+  },
+  cardAvatar: {
+    width: scale(44),
+    height: scale(44),
+    borderRadius: 24,
+    borderWidth: 3,
+    borderColor: Colors.green,
+  },
+  avatarBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: Colors.green,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: Colors.white,
+  },
+  avatarBadgeText: {
+    color: Colors.white,
+    fontSize: FontSizes.xsmall,
+    fontWeight: FontWeights.semiBold,
+  },
+  authorInfo: {
+    flex: 1,
+  },
+  authorName: {
+    fontSize: FontSizes.medium,
+    fontWeight: FontWeights.semiBold,
+    color: Colors.title,
+    marginBottom: scale(2),
+  },
+  metaInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dateText: {
+    fontSize: FontSizes.small,
+    color: Colors.gray,
+  },
+  dot: {
+    marginHorizontal: scale(5),
+  },
+  cardTitle: {
+    fontSize: FontSizes.regular,
+    fontWeight: FontWeights.bold,
+    marginBottom: scale(6),
+    color: Colors.title,
+  },
+  cardDescription: {
+    fontSize: FontSizes.small,
+    color: Colors.gray,
+    lineHeight: scale(18),
+  },
+  menuContainer: {
+    position: 'absolute',
+    top: 45,
+    right: 8,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
+    paddingVertical: 6,
+    minWidth: 140,
+    zIndex: 10,
+  },
+  menuItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  menubox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(4),
+  },
+  menuText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: '#f1f3f4',
+    paddingTop: 16,
+  },
+  seeMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(76, 175, 80, 0.1)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(76, 175, 80, 0.2)',
+  },
+  seeMore: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.green,
+    marginRight: 4,
+  },
+  arrow: {
+    fontSize: 12,
+    color: Colors.green,
+    fontWeight: FontWeights.semiBold,
+  },
+  engagement: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  engagementButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: '#f8f9fa',
+  },
+  engagementIcon: {
+    fontSize: 16,
+    marginRight: 4,
+  },
+  engagementCount: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#5a6c7d',
+    marginLeft: scale(4),
+  },
+});
