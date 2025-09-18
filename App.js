@@ -16,12 +16,7 @@ const queryClient = new QueryClient();
 
 const AppContent = () => {
   const {data, isLoading, error} = useUser();
-
-  if (isLoading) return null;
-  if (error) {
-    console.log('Lỗi load user:', error.message);
-  }
-
+  
   return (
     <NavigationContainer>
       <AppKit />
