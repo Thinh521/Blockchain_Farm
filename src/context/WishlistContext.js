@@ -34,8 +34,8 @@ export const WishlistProvider = ({children}) => {
     try {
       setLoading(true);
 
-      // blockchain farms
       const rpcProvider = new ethers.JsonRpcProvider('https://rpc.zeroscan.org');
+
       const contractRead = new ethers.Contract(
         CONTRACT_ADDRESS,
         contractArtifact.abi,
@@ -53,7 +53,9 @@ export const WishlistProvider = ({children}) => {
         description: farm.description || farm[6],
         location: farm.location || farm[7],
         area: farm.area?.toString?.() || farm[8]?.toString?.() || '',
-        image: Array.isArray(farm.images || farm[9]) ? farm.images || farm[9] : [],
+        image: Array.isArray(farm.images || farm[9])
+          ? farm.images || farm[9]
+          : [],
       }));
 
       // wishlist từ API
