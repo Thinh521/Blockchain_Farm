@@ -10,8 +10,26 @@ import FlashMessage from 'react-native-flash-message';
 import {AppKit} from '@reown/appkit-ethers-react-native';
 import './src/Metamask/appkit';
 import {WishlistProvider} from './src/context/WishlistContext';
+import {useUser} from './src/hooks/useUser';
 
 const queryClient = new QueryClient();
+
+const AppContent = () => {
+  const {data, isLoading, error} = useUser();
+
+  if (isLoading) return null;
+  if (error) {
+    console.log('Lỗi load user:', error.message);
+  }
+
+  return (
+    <NavigationContainer>
+      <AppKit />
+      <FlashMessage position="top" />
+      <AppNavigator />
+    </NavigationContainer>
+  );
+};
 
 export default function App() {
   return (
@@ -20,11 +38,7 @@ export default function App() {
         <QueryClientProvider client={queryClient}>
           <SafeAreaProvider>
             <WishlistProvider>
-              <NavigationContainer>
-                <AppKit />
-                <FlashMessage position="top" />
-                <AppNavigator />
-              </NavigationContainer>
+              <AppContent />
             </WishlistProvider>
           </SafeAreaProvider>
         </QueryClientProvider>

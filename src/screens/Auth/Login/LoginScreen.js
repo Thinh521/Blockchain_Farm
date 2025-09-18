@@ -19,8 +19,10 @@ import {useForm} from '../../../components/useForm/useForm';
 import {showMessage} from 'react-native-flash-message';
 import LoadingOverlay from '../../../components/CustomLoading/LoadingOverlay';
 import {ErrorMap} from '../../../utils/errorMapper/errorMapper';
+import {useQueryClient} from '@tanstack/react-query';
 
 const LoginScreen = ({navigation}) => {
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
 
   const {values, handleChange, validateForm, getFieldError, isError} = useForm(
@@ -32,11 +34,11 @@ const LoginScreen = ({navigation}) => {
   );
 
   const handleLogin = async () => {
-    Keyboard.dismiss(); // 
+    Keyboard.dismiss();
     const isValid = validateForm();
     if (!isValid) {
       showMessage({
-        message:'Lỗi',
+        message: 'Lỗi',
         description: 'Vui lòng nhập đúng thông tin',
         type: 'danger',
       });
@@ -50,12 +52,12 @@ const LoginScreen = ({navigation}) => {
       console.log('Kết quả login:', data);
 
       if (data.success) {
+        queryClient.invalidateQueries(['user']);
         showMessage({
           message: 'Thành công',
           description: 'Đăng nhập thành công',
           type: 'success',
         });
-
         navigation.replace('BottomTab', {screen: 'Home'});
       } else {
         showMessage({
@@ -65,7 +67,6 @@ const LoginScreen = ({navigation}) => {
         });
       }
     } catch (err) {
-
       let message = 'Đăng nhập thất bại';
       if (err?.code && ErrorMap[err.code]) {
         message = ErrorMap[err.code];
@@ -73,7 +74,7 @@ const LoginScreen = ({navigation}) => {
 
       showMessage({
         message: 'Thất bại',
-        description:message,
+        description: message,
         type: 'danger',
       });
     } finally {
