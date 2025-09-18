@@ -39,8 +39,6 @@ const MyFarmScreen = () => {
 
       const farmsData = await contractRead.getFarmByUserId(userId);
 
-      console.log('farmByUserId data:', farmsData);
-
       const formattedFarms = farmsData.map((farm, idx) => ({
         farmCode: farm.farmCode || farm[0],
         fullname: farm.fullname || farm[1],

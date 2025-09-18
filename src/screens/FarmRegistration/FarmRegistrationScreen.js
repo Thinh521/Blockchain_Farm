@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Animated,
-  StatusBar,
 } from 'react-native';
 import {
   useAppKitAccount,
@@ -14,13 +13,13 @@ import {
 } from '@reown/appkit-ethers-react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Feather';
-import {Colors} from '../../theme/theme';
 import styles from './FarmRegistration.styles';
 import {Arrow_Right_S_Icon} from '../../assets/icons';
 import {useNavigation} from '@react-navigation/core';
 import {showMessage} from 'react-native-flash-message';
 import {scale} from '../../utils/scaling';
 import Button from '../../components/CustomButton/CustomButton';
+import Header from '../../components/Header/Header';
 
 const menuItems = [
   {
@@ -183,14 +182,12 @@ const FarmRegistrationScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={Colors.green} barStyle="light-content" />
       <View style={{flex: 1}}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Đăng ký & quản lí nông trại</Text>
-          <Text style={styles.headerSubtitle}>
-            Đăng ký nông trại & quản lý các nông trại đã tạo
-          </Text>
-        </View>
+        <Header
+          title="Đăng ký & quản lí nông trại"
+          subtitle="Đăng ký nông trại & quản lý các nông trại đã tạo"
+          emoji="🌾"
+        />
         {renderMenuScreen()}
       </View>
     </SafeAreaView>

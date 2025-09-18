@@ -6,7 +6,6 @@ import {
   ScrollView,
   TouchableOpacity,
   Switch,
-  StatusBar,
   Alert,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
@@ -29,7 +28,8 @@ import {deleteUser, getUser} from '../../utils/storage/authStorage';
 import {showMessage} from 'react-native-flash-message';
 import styles from './Setting.styles';
 import {useAppKitAccount} from '@reown/appkit-ethers-react-native';
-import { useWishlist } from '../../context/WishlistContext';
+import Header from '../../components/Header/Header';
+import {useWishlist} from '../../context/WishlistContext';
 
 const SettingsScreen = () => {
   const navigation = useNavigation();
@@ -40,7 +40,7 @@ const SettingsScreen = () => {
   const [pushNoti, setPushNoti] = useState(true);
   const [emailNoti, setEmailNoti] = useState(true);
   const [orderUpdates, setOrderUpdates] = useState(false);
-   const {resetWishlist} = useWishlist();
+  const {resetWishlist} = useWishlist();
 
   const storedUser = getUser();
 
@@ -66,6 +66,9 @@ const SettingsScreen = () => {
   const handleLogout = async () => {
     try {
       const res = await logoutApi();
+
+      console.log('res', res);
+
       if (res.success) {
         resetWishlist();
         await deleteUser();
@@ -183,18 +186,14 @@ const SettingsScreen = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.green} />
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{paddingBottom: 120}}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Cài đặt</Text>
-          <Text style={styles.headerSubtitle}>
-            Quản lý tài khoản và tùy chỉnh ứng dụng
-          </Text>
-        </View>
+        <Header
+          title="Cài đặt"
+          subtitle="Quản lý tài khoản và tùy chỉnh ứng dụng"
+          emoji="🌱"
+        />
 
         <View style={styles.content}>
           <View style={styles.profileCard}>
@@ -417,6 +416,31 @@ const SettingsScreen = () => {
           />
           <Button.Main title="Đổi tài khoản" style={{flex: 1}} />
         </View>
+
+        <Button.Main
+          title="LoginRequired"
+          onPress={() => {
+            navigation.navigate('NoBottomTab', {screen: 'LoginRequired'});
+          }}
+        />
+        <Button.Main
+          title="Login"
+          onPress={() => {
+            navigation.navigate('NoBottomTab', {screen: 'Login'});
+          }}
+        />
+        <Button.Main
+          title="FarmDetail"
+          onPress={() => {
+            navigation.navigate('NoBottomTab', {screen: 'FarmDetail'});
+          }}
+        />
+        <Button.Main
+          title="Farm"
+          onPress={() => {
+            navigation.navigate('NoBottomTab', {screen: 'RegisterManage'});
+          }}
+        />
       </ScrollView>
     </View>
   );

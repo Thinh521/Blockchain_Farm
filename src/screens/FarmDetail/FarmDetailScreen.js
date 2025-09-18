@@ -1,4 +1,4 @@
-import React, {useState, useRef, useCallback, useEffect} from 'react';
+import React, {useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -11,21 +11,18 @@ import {
   Modal,
   Linking,
 } from 'react-native';
-import {ethers} from 'ethers';
-import {CONTRACT_ADDRESS} from '@env';
-import contractArtifact from '../SmartConctract/contractABI.json';
 import styles from './FarmDetail.styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {Arrow_Left_Line_Icon} from '../../assets/icons';
 import {useRoute} from '@react-navigation/core';
 import Button from '../../components/CustomButton/CustomButton';
 import FastImage from 'react-native-fast-image';
-import {useAppKitAccount} from '@reown/appkit-ethers-react-native';
 import FarmSlider from '../../components/Farms/FarmSlider';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
 import ImageCarousel from './components/ImageCarousel';
 import Tabs from './components/Tabs';
 import BottomActionBar from './components/BottomActionBar';
+import {useFarms} from '../../hooks/useFarms';
 import {useWishlist} from '../../context/WishlistContext';
 import {
   getWishlistFarms,
@@ -112,7 +109,7 @@ const farmData = {
 
 const FarmDetailScreen = ({navigation}) => {
   const {farm} = useRoute().params;
-  const [farms, setFarms] = useState([]);
+  const [favorites, setFavorites] = useState(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
@@ -122,6 +119,8 @@ const FarmDetailScreen = ({navigation}) => {
   const [loading, setLoading] = useState(false);
 
   const scrollY = useRef(new Animated.Value(0)).current;
+
+  const {farms, isLoading: farmsLoading, error, refetch} = useFarms();
 
   useEffect(() => {
     const fetchWishlist = async () => {
@@ -165,52 +164,6 @@ const FarmDetailScreen = ({navigation}) => {
       setLoading(false);
     }
   };
-
-  const getAllFarms = useCallback(async () => {
-    setIsLoading(true);
-
-    try {
-      const rpcProvider = new ethers.JsonRpcProvider(
-        'https://rpc.zeroscan.org',
-      );
-
-      const contractRead = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        contractArtifact.abi,
-        rpcProvider,
-      );
-
-      const farmsData = await contractRead.getAllFarms();
-
-      const formattedFarms = farmsData.map((farm, idx) => {
-        return {
-          farmCode: farm.farmCode || farm[0],
-          fullname: farm.fullname || farm[1],
-          nameFarm: farm.nameFarm || farm[2],
-          userId: farm.userId || farm[3],
-          email: farm.email || farm[4],
-          phone: farm.phone || farm[5],
-          description: farm.description || farm[6],
-          location: farm.location || farm[7],
-          area: farm.area?.toString?.() || farm[8]?.toString?.() || '',
-          image: Array.isArray(farm.images || farm[9])
-            ? farm.images || farm[9]
-            : [],
-        };
-      });
-
-      setFarms(formattedFarms);
-    } catch (error) {
-      console.log('Lỗi getAllFarms:', error);
-      setFarms([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    getAllFarms();
-  }, [getAllFarms]);
 
   const handleCall = () => {
     Linking.openURL(`tel:${farmData.phone}`);
@@ -277,22 +230,28 @@ const FarmDetailScreen = ({navigation}) => {
           <View style={styles.infoItem}>
             <Ionicons name="resize-outline" size={16} color="#6B7280" />
             <Text style={styles.infoLabel}>Diện tích</Text>
-            <Text style={styles.infoValue}>{farm.area} hecta</Text>
+            <Text style={styles.infoValue}>{farm.area || '1000'} hecta</Text>
           </View>
           <View style={styles.infoItem}>
             <Ionicons name="calendar-outline" size={16} color="#6B7280" />
             <Text style={styles.infoLabel}>Thành lập</Text>
-            <Text style={styles.infoValue}>{farmData.established}</Text>
+            <Text style={styles.infoValue}>
+              {farmData.established || '2015'}
+            </Text>
           </View>
           <View style={styles.infoItem}>
             <Ionicons name="time-outline" size={16} color="#6B7280" />
             <Text style={styles.infoLabel}>Giờ mở cửa</Text>
-            <Text style={styles.infoValue}>{farmData.openHours}</Text>
+            <Text style={styles.infoValue}>
+              {farmData.openHours || '6:00 - 18:00 (Thứ 2 - Chủ nhật)'}
+            </Text>
           </View>
           <View style={styles.infoItem}>
             <Ionicons name="cash-outline" size={16} color="#6B7280" />
             <Text style={styles.infoLabel}>Phí tham quan</Text>
-            <Text style={styles.infoValue}>{farmData.visitPrice}</Text>
+            <Text style={styles.infoValue}>
+              {farmData.visitPrice || '50,000 VNĐ/người'}
+            </Text>
           </View>
         </View>
       </View>
@@ -348,7 +307,11 @@ const FarmDetailScreen = ({navigation}) => {
           {farmData.products.map((product, index) => (
             <TouchableOpacity key={index} style={styles.productCard}>
               <FastImage
-                source={{uri: product.image}}
+                source={{
+                  uri:
+                    product.image ||
+                    'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=300',
+                }}
                 style={styles.productImage}
               />
               <View style={styles.productInfo}>
