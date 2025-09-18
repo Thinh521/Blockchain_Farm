@@ -27,6 +27,11 @@ import ImageCarousel from './components/ImageCarousel';
 import Tabs from './components/Tabs';
 import BottomActionBar from './components/BottomActionBar';
 import {useWishlist} from '../../context/WishlistContext';
+import {
+  getWishlistFarms,
+  addWishlistFarm,
+  removeWishlistFarm,
+} from '../../api/wishlist/wishlistApi';
 
 const farmData = {
   farmCode: 'F001',
@@ -107,15 +112,59 @@ const farmData = {
 
 const FarmDetailScreen = ({navigation}) => {
   const {farm} = useRoute().params;
-  const {isConnected} = useAppKitAccount();
   const [farms, setFarms] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [wishlist, setWishlist] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
-  const {favorites, toggleFavorite} = useWishlist();
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const scrollY = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const res = await getWishlistFarms();
+        const wishlistFarms = res?.wishlist?.farms || [];
+        setWishlist(wishlistFarms);
+
+        const hasFarm = wishlistFarms.some(
+          f => String(f.farmCode) === String(farm.farmCode),
+        );
+        setIsFavorite(hasFarm);
+      } catch (err) {
+        console.log('Lỗi lấy wishlist:', err);
+      }
+    };
+
+    fetchWishlist();
+  }, [farm.farmCode]);
+
+  // 🔹 Toggle favorite
+  const handleToggleFavorite = async farmCode => {
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      if (wishlist.some(f => String(f.farmCode) === String(farmCode))) {
+        await removeWishlistFarm(farmCode);
+        setWishlist(prev =>
+          prev.filter(f => String(f.farmCode) !== String(farmCode)),
+        );
+        if (farmCode === farm.farmCode) setIsFavorite(false);
+      } else {
+        await addWishlistFarm(farmCode);
+        setWishlist(prev => [...prev, {farmCode}]);
+        if (farmCode === farm.farmCode) setIsFavorite(true);
+      }
+    } catch (err) {
+      console.log('Lỗi toggle favorite:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getAllFarms = useCallback(async () => {
     setIsLoading(true);
@@ -157,7 +206,7 @@ const FarmDetailScreen = ({navigation}) => {
     } finally {
       setIsLoading(false);
     }
-  }, [isConnected]);
+  }, []);
 
   useEffect(() => {
     getAllFarms();
@@ -381,11 +430,12 @@ const FarmDetailScreen = ({navigation}) => {
       <View style={[styles.floatingActions]}>
         <TouchableOpacity
           style={[styles.floatingActionButton, {marginTop: 8}]}
-          onPress={() => toggleFavorite(farm.farmCode)}>
+          onPress={() => handleToggleFavorite(farm.farmCode)} // ✅ truyền đúng farmCode
+          disabled={loading}>
           <Ionicons
-            name={favorites.has(farm.farmCode) ? 'heart' : 'heart-outline'}
+            name={isFavorite ? 'heart' : 'heart-outline'}
             size={20}
-            color={favorites.has(farm.farmCode) ? '#EF4444' : '#FFFFFF'}
+            color={isFavorite ? '#EF4444' : '#FFFFFF'}
           />
         </TouchableOpacity>
       </View>
@@ -439,8 +489,8 @@ const FarmDetailScreen = ({navigation}) => {
                   screen: 'AllFarms',
                   params: {
                     farms: farms,
-                    favorites,
-                    toggleFavorite,
+                    isFavorite,
+                    handleToggleFavorite,
                   },
                 })
               }>
@@ -464,8 +514,8 @@ const FarmDetailScreen = ({navigation}) => {
             <>
               <FarmSlider
                 farms={farms}
-                favorites={favorites}
-                toggleFavorite={toggleFavorite}
+                favorites={new Set(wishlist.map(f => String(f.farmCode)))}
+                toggleFavorite={handleToggleFavorite}
               />
             </>
           )}

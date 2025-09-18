@@ -29,6 +29,7 @@ import {deleteUser, getUser} from '../../utils/storage/authStorage';
 import {showMessage} from 'react-native-flash-message';
 import styles from './Setting.styles';
 import {useAppKitAccount} from '@reown/appkit-ethers-react-native';
+import { useWishlist } from '../../context/WishlistContext';
 
 const SettingsScreen = () => {
   const navigation = useNavigation();
@@ -39,6 +40,7 @@ const SettingsScreen = () => {
   const [pushNoti, setPushNoti] = useState(true);
   const [emailNoti, setEmailNoti] = useState(true);
   const [orderUpdates, setOrderUpdates] = useState(false);
+   const {resetWishlist} = useWishlist();
 
   const storedUser = getUser();
 
@@ -65,6 +67,7 @@ const SettingsScreen = () => {
     try {
       const res = await logoutApi();
       if (res.success) {
+        resetWishlist();
         await deleteUser();
 
         navigation.reset({

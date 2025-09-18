@@ -27,9 +27,10 @@ import Features from './components/Features';
 import Footer from './components/Footer';
 import Categories from './components/Categories';
 import FarmList from '../../components/Farms/FarmList';
-import {useNavigation} from '@react-navigation/core';
+import {useFocusEffect, useNavigation} from '@react-navigation/core';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
 import {useWishlist} from '../../context/WishlistContext';
+import {getWishlistFarms} from '../../api/wishlist/wishlistApi';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -38,9 +39,9 @@ const HomeScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [favorites, setFavorites] = useState(new Set());
 
   // lấy từ context
-  const {favorites, toggleFavorite, loading} = useWishlist();
 
   const categories = [
     {id: 'all', name: 'Tất cả', icon: Leaf_Line_Icon},
@@ -90,6 +91,27 @@ const HomeScreen = () => {
   useEffect(() => {
     getAllFarms();
   }, [getAllFarms]);
+
+  const fetchWishlist = useCallback(async () => {
+    try {
+      const res = await getWishlistFarms();
+      const wishlistFarmsApi = res?.wishlist?.farms || [];
+      setFavorites(new Set(wishlistFarmsApi.map(f => f.farmCode)));
+    } catch (err) {
+      console.log('Lỗi fetch wishlist:', err);
+      setFavorites(new Set());
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchWishlist();
+  }, [fetchWishlist]);
+
+  useFocusEffect(
+  useCallback(() => {
+    fetchWishlist();
+  }, [fetchWishlist])
+);
 
   const filteredFarms = farms.filter(
     farm =>
@@ -206,7 +228,6 @@ const HomeScreen = () => {
                   farms={filteredFarms.slice(0, 6)}
                   favorites={favorites}
                   isLoading={isLoading}
-                  toggleFavorite={toggleFavorite}
                 />
               )}
             </View>

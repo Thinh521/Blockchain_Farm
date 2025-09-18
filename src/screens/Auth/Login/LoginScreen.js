@@ -6,6 +6,7 @@ import {
   View,
   Platform,
   ScrollView,
+  Keyboard,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import FastImage from 'react-native-fast-image';
@@ -17,7 +18,7 @@ import {loginApi} from '../../../api/auth/auth';
 import {useForm} from '../../../components/useForm/useForm';
 import {showMessage} from 'react-native-flash-message';
 import LoadingOverlay from '../../../components/CustomLoading/LoadingOverlay';
-import { ErrorMap } from '../../../utils/errorMapper/errorMapper';
+import {ErrorMap} from '../../../utils/errorMapper/errorMapper';
 
 const LoginScreen = ({navigation}) => {
   const [loading, setLoading] = useState(false);
@@ -31,12 +32,13 @@ const LoginScreen = ({navigation}) => {
   );
 
   const handleLogin = async () => {
+    Keyboard.dismiss(); // 
     const isValid = validateForm();
     if (!isValid) {
       showMessage({
-        message: 'Vui lòng nhập đúng thông tin',
+        message:'Lỗi',
+        description: 'Vui lòng nhập đúng thông tin',
         type: 'danger',
-        icon: 'danger',
       });
       return;
     }
@@ -48,24 +50,21 @@ const LoginScreen = ({navigation}) => {
       console.log('Kết quả login:', data);
 
       if (data.success) {
-        console.log('✅ Đăng nhập thành công:', data);
-
         showMessage({
-          message: 'Đăng nhập thành công',
+          message: 'Thành công',
+          description: 'Đăng nhập thành công',
           type: 'success',
-          icon: 'success',
         });
 
         navigation.replace('BottomTab', {screen: 'Home'});
       } else {
         showMessage({
-          message: data.message || 'Đăng nhập thất bại',
+          message: 'Thất bại',
+          description: data.message || 'Đăng nhập thất bại',
           type: 'danger',
-          icon: 'danger',
         });
       }
     } catch (err) {
-      console.log('❌ Login error:', err);
 
       let message = 'Đăng nhập thất bại';
       if (err?.code && ErrorMap[err.code]) {
@@ -73,9 +72,9 @@ const LoginScreen = ({navigation}) => {
       }
 
       showMessage({
-        message,
+        message: 'Thất bại',
+        description:message,
         type: 'danger',
-        icon: 'danger',
       });
     } finally {
       setLoading(false);
@@ -98,7 +97,7 @@ const LoginScreen = ({navigation}) => {
             </Text>
             <Text style={styles.subtitle}>
               Vui lòng đăng nhập vào tài khoản của bạn
-</Text>
+            </Text>
 
             <View style={styles.inputContainer}>
               <Input
@@ -138,6 +137,7 @@ const LoginScreen = ({navigation}) => {
             <Button.Main
               title="Đăng nhập"
               onPress={handleLogin}
+              disabled={loading}
               style={styles.authButton}
             />
             <View style={styles.divider}>
@@ -181,7 +181,7 @@ const LoginScreen = ({navigation}) => {
             <View style={styles.switchContainer}>
               <Text style={styles.switchText}>Chưa có tài khoản? </Text>
               <Button.Text
-title="Đăng ký"
+                title="Đăng ký"
                 onPress={() => navigation.navigate('Register')}
                 textStyle={styles.switchLink}
               />

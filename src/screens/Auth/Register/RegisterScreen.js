@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
+  Keyboard,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import {useForm, Controller} from 'react-hook-form';
@@ -43,15 +44,17 @@ const RegisterScreen = ({navigation}) => {
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async data => {
+    Keyboard.dismiss();
     if (!agree) {
       return showMessage({
-        message: 'Bạn phải đồng ý với điều khoản để tiếp tục',
+        message:'Cảnh báo',
+        description: 'Bạn phải đồng ý với điều khoản để tiếp tục',
         type: 'warning',
       });
     }
 
     try {
-      setLoading(true); // ✅ bật loading
+      setLoading(true); 
       const payload = {
         userName: data.username,
         email: data.email,
@@ -63,25 +66,26 @@ const RegisterScreen = ({navigation}) => {
 
       if (res.success) {
         showMessage({
-          message: 'Đăng ký thành công',
+          message:'Thành công',
+          description: 'Đăng ký thành công',
           type: 'success',
         });
         navigation.navigate('OTP', {type: 'register', email: data.email});
       } else {
         showMessage({
-          message: 'Đăng ký thất bại',
+          message:'Thất bại',
           description: res.message,
           type: 'danger',
         });
       }
     } catch (err) {
       showMessage({
-        message: 'Có lỗi xảy ra',
+        message:'Lỗi',
         description: err.message,
         type: 'danger',
       });
     } finally {
-      setLoading(false); // ✅ tắt loading
+      setLoading(false);
     }
   };
 
@@ -202,6 +206,7 @@ const RegisterScreen = ({navigation}) => {
 
             <Button.Main
               title="Đăng ký"
+              disabled={loading}
               onPress={handleSubmit(onSubmit)}
               style={styles.authButton}
             />

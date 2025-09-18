@@ -1,4 +1,3 @@
-// WishlistContext.js
 import React, {
   createContext,
   useContext,
@@ -14,25 +13,29 @@ import {
 import {ethers} from 'ethers';
 import {CONTRACT_ADDRESS} from '@env';
 import contractArtifact from '../screens/SmartConctract/contractABI.json';
-import {useAppKitAccount} from '@reown/appkit-ethers-react-native';
 
 const WishlistContext = createContext();
 
 export const WishlistProvider = ({children}) => {
-  const {isConnected} = useAppKitAccount();
+  
   const [favorites, setFavorites] = useState(new Set());
   const [wishlistFarms, setWishlistFarms] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // 👉 Hàm reset state khi logout
+  const resetWishlist = useCallback(() => {
+    setFavorites(new Set());
+    setWishlistFarms([]);
+    setLoading(false);
+  }, []);
 
   // lấy wishlist + farms blockchain
   const fetchWishlist = useCallback(async () => {
     try {
       setLoading(true);
 
-      // blockchain farms
-      const rpcProvider = new ethers.JsonRpcProvider(
-        'https://rpc.zeroscan.org',
-      );
+      const rpcProvider = new ethers.JsonRpcProvider('https://rpc.zeroscan.org');
+
       const contractRead = new ethers.Contract(
         CONTRACT_ADDRESS,
         contractArtifact.abi,
@@ -72,7 +75,7 @@ export const WishlistProvider = ({children}) => {
     } finally {
       setLoading(false);
     }
-  }, [isConnected]);
+  }, []);
 
   useEffect(() => {
     fetchWishlist();
@@ -87,7 +90,9 @@ export const WishlistProvider = ({children}) => {
           newSet.delete(farmCode);
           return newSet;
         });
-        setWishlistFarms(prev => prev.filter(f => f.farmCode !== farmCode));
+        setWishlistFarms(prev =>
+          prev.filter(f => f.farmCode !== farmCode),
+        );
       } else {
         await addWishlistFarm(farmCode);
         setFavorites(prev => new Set([...prev, farmCode]));
@@ -107,6 +112,7 @@ export const WishlistProvider = ({children}) => {
         loading,
         toggleFavorite,
         fetchWishlist,
+        resetWishlist, // 👈 expose hàm reset ra ngoài
       }}>
       {children}
     </WishlistContext.Provider>
