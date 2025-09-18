@@ -27,9 +27,10 @@ import Features from './components/Features';
 import Footer from './components/Footer';
 import Categories from './components/Categories';
 import FarmList from '../../components/Farms/FarmList';
-import {useNavigation} from '@react-navigation/core';
+import {useFocusEffect, useNavigation} from '@react-navigation/core';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
 import {useWishlist} from '../../context/WishlistContext';
+import {getWishlistFarms} from '../../api/wishlist/wishlistApi';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -38,9 +39,9 @@ const HomeScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [favorites, setFavorites] = useState(new Set());
 
   // lấy từ context
-  const {favorites, toggleFavorite, loading} = useWishlist();
 
   const categories = [
     {id: 'all', name: 'Tất cả', icon: Leaf_Line_Icon},
@@ -50,11 +51,11 @@ const HomeScreen = () => {
   ];
 
   const getAllFarms = useCallback(async () => {
-    if (!isConnected) return;
-
     setIsLoading(true);
     try {
-      const rpcProvider = new ethers.JsonRpcProvider('https://rpc.zeroscan.org');
+      const rpcProvider = new ethers.JsonRpcProvider(
+        'https://rpc.zeroscan.org',
+      );
       const contractRead = new ethers.Contract(
         CONTRACT_ADDRESS,
         contractArtifact.abi,
@@ -63,7 +64,7 @@ const HomeScreen = () => {
 
       const farmsData = await contractRead.getAllFarms();
 
-      const formattedFarms = farmsData.map((farm) => ({
+      const formattedFarms = farmsData.map(farm => ({
         farmCode: farm.farmCode || farm[0],
         fullname: farm.fullname || farm[1],
         nameFarm: farm.nameFarm || farm[2],
@@ -73,7 +74,9 @@ const HomeScreen = () => {
         description: farm.description || farm[6],
         location: farm.location || farm[7],
         area: farm.area?.toString?.() || farm[8]?.toString?.() || '',
-        image: Array.isArray(farm.images || farm[9]) ? farm.images || farm[9] : [],
+        image: Array.isArray(farm.images || farm[9])
+          ? farm.images || farm[9]
+          : [],
       }));
 
       setFarms(formattedFarms);
@@ -83,16 +86,35 @@ const HomeScreen = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isConnected]);
+  }, []);
 
   useEffect(() => {
-    if (isConnected) {
-      getAllFarms();
+    getAllFarms();
+  }, [getAllFarms]);
+
+  const fetchWishlist = useCallback(async () => {
+    try {
+      const res = await getWishlistFarms();
+      const wishlistFarmsApi = res?.wishlist?.farms || [];
+      setFavorites(new Set(wishlistFarmsApi.map(f => f.farmCode)));
+    } catch (err) {
+      console.log('Lỗi fetch wishlist:', err);
+      setFavorites(new Set());
     }
-  }, [isConnected, getAllFarms]);
+  }, []);
+
+  useEffect(() => {
+    fetchWishlist();
+  }, [fetchWishlist]);
+
+  useFocusEffect(
+  useCallback(() => {
+    fetchWishlist();
+  }, [fetchWishlist])
+);
 
   const filteredFarms = farms.filter(
-    (farm) =>
+    farm =>
       farm.nameFarm.toLowerCase().includes(searchQuery.toLowerCase()) ||
       farm.location.toLowerCase().includes(searchQuery.toLowerCase()),
   );
@@ -206,7 +228,6 @@ const HomeScreen = () => {
                   farms={filteredFarms.slice(0, 6)}
                   favorites={favorites}
                   isLoading={isLoading}
-                  toggleFavorite={toggleFavorite}
                 />
               )}
             </View>
