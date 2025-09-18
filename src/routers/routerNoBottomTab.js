@@ -16,6 +16,8 @@ import ManageScreen from '../screens/Manage/ManageScreen';
 import MyFarmScreen from '../screens/MyFarm/MyFarmScreen';
 import WishListScreen from '../screens/WishList/WishListScreen';
 import AddMewsScreen from '../screens/New/AddNewsScreen';
+import CategoriesScreen from '../screens/Categories/CategoriesScreen';
+import AddProductScreen from '../screens/AddProduct/AddProductScreen';
 
 const routerNoBottomTab = [
   {
@@ -219,6 +221,40 @@ const routerNoBottomTab = [
     hasLayout: false,
     options: {
       title: 'Thêm tin tức',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'Categories',
+    component: CategoriesScreen,
+    hasLayout: false,
+    options: {
+      title: 'Danh mục nông sản',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'AddProduct',
+    component: AddProductScreen,
+    hasLayout: false,
+    options: {
+      title: 'Thêm sản phẩm',
       headerShown: true,
       headerStyle: {
         backgroundColor: Colors.green,

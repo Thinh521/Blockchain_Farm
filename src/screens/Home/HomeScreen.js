@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -23,9 +23,11 @@ import Features from './components/Features';
 import Footer from './components/Footer';
 import Categories from './components/Categories';
 import FarmList from '../../components/Farms/FarmList';
-import {useNavigation} from '@react-navigation/core';
+import {useFocusEffect, useNavigation} from '@react-navigation/core';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
 import {useFarms} from '../../hooks/useFarms';
+import {useWishlist} from '../../context/WishlistContext';
+import {getWishlistFarms} from '../../api/wishlist/wishlistApi';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -42,26 +44,38 @@ const HomeScreen = () => {
     {id: 'livestock', name: 'Chăn nuôi', icon: User_Line_Icon},
   ];
 
+  const fetchWishlist = useCallback(async () => {
+    try {
+      const res = await getWishlistFarms();
+      const wishlistFarmsApi = res?.wishlist?.farms || [];
+      setFavorites(new Set(wishlistFarmsApi.map(f => f.farmCode)));
+    } catch (err) {
+      console.log('Lỗi fetch wishlist:', err);
+      setFavorites(new Set());
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchWishlist();
+  }, [fetchWishlist]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchWishlist();
+    }, [fetchWishlist]),
+  );
+
   const filteredFarms = farms.filter(
     farm =>
       farm.nameFarm.toLowerCase().includes(searchQuery.toLowerCase()) ||
       farm.location.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const toggleFavorite = farmCode => {
-    const newFavorites = new Set(favorites);
-    if (newFavorites.has(farmCode)) {
-      newFavorites.delete(farmCode);
-    } else {
-      newFavorites.add(farmCode);
-    }
-    setFavorites(newFavorites);
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#059669" />
 
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.welcomeSection}>
@@ -117,14 +131,14 @@ const HomeScreen = () => {
               </View>
             </View>
 
-            {/* Enhanced Categories */}
+            {/* Categories */}
             <Categories
               categories={categories}
               selectedCategory={selectedCategory}
               onSelectCategory={setSelectedCategory}
             />
 
-            {/* Main Content */}
+            {/* Farms */}
             <View style={styles.mainContent}>
               <View style={styles.resultsHeader}>
                 <View>
@@ -142,7 +156,6 @@ const HomeScreen = () => {
                       params: {
                         farms: filteredFarms,
                         favorites,
-                        toggleFavorite,
                         isLoading: isLoading,
                       },
                     })
@@ -173,21 +186,16 @@ const HomeScreen = () => {
                   </Text>
                 </View>
               ) : (
-                <>
-                  <FarmList
-                    farms={filteredFarms.slice(0, 6)}
-                    favorites={favorites}
-                    isLoading={isLoading}
-                    toggleFavorite={toggleFavorite}
-                  />
-                </>
+                <FarmList
+                  farms={filteredFarms.slice(0, 6)}
+                  favorites={favorites}
+                  isLoading={isLoading}
+                />
               )}
             </View>
 
-            {/* Features Section */}
+            {/* Features + Footer */}
             <Features />
-
-            {/* Footer Section */}
             <Footer />
           </>
         )}

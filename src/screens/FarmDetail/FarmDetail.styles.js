@@ -49,12 +49,16 @@ export default StyleSheet.create({
     justifyContent: 'center',
     zIndex: 100,
   },
-  floatingActions: {
-    position: 'absolute',
-    top: scale(10),
-    right: scale(20),
-    zIndex: 100,
-  },
+floatingActions: {
+  position: 'absolute',
+  top: 60,  // chỉnh lại tùy UI
+  right: 16,
+  flexDirection: 'column',
+  alignItems: 'center',
+  zIndex: 999,
+  elevation: 5,
+},
+
   floatingActionButton: {
     width: scale(40),
     height: scale(40),

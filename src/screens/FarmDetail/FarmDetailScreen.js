@@ -23,6 +23,12 @@ import ImageCarousel from './components/ImageCarousel';
 import Tabs from './components/Tabs';
 import BottomActionBar from './components/BottomActionBar';
 import {useFarms} from '../../hooks/useFarms';
+import {useWishlist} from '../../context/WishlistContext';
+import {
+  getWishlistFarms,
+  addWishlistFarm,
+  removeWishlistFarm,
+} from '../../api/wishlist/wishlistApi';
 
 const farmData = {
   farmCode: 'F001',
@@ -104,22 +110,59 @@ const farmData = {
 const FarmDetailScreen = ({navigation}) => {
   const {farm} = useRoute().params;
   const [favorites, setFavorites] = useState(new Set());
+  const [isLoading, setIsLoading] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [wishlist, setWishlist] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const scrollY = useRef(new Animated.Value(0)).current;
 
-  const {farms, isLoading, error, refetch} = useFarms();
+  const {farms, isLoading: farmsLoading, error, refetch} = useFarms();
 
-  const toggleFavorite = farmCode => {
-    const newFavorites = new Set(favorites);
-    if (newFavorites.has(farmCode)) {
-      newFavorites.delete(farmCode);
-    } else {
-      newFavorites.add(farmCode);
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const res = await getWishlistFarms();
+        const wishlistFarms = res?.wishlist?.farms || [];
+        setWishlist(wishlistFarms);
+
+        const hasFarm = wishlistFarms.some(
+          f => String(f.farmCode) === String(farm.farmCode),
+        );
+        setIsFavorite(hasFarm);
+      } catch (err) {
+        console.log('Lỗi lấy wishlist:', err);
+      }
+    };
+
+    fetchWishlist();
+  }, [farm.farmCode]);
+
+  // 🔹 Toggle favorite
+  const handleToggleFavorite = async farmCode => {
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      if (wishlist.some(f => String(f.farmCode) === String(farmCode))) {
+        await removeWishlistFarm(farmCode);
+        setWishlist(prev =>
+          prev.filter(f => String(f.farmCode) !== String(farmCode)),
+        );
+        if (farmCode === farm.farmCode) setIsFavorite(false);
+      } else {
+        await addWishlistFarm(farmCode);
+        setWishlist(prev => [...prev, {farmCode}]);
+        if (farmCode === farm.farmCode) setIsFavorite(true);
+      }
+    } catch (err) {
+      console.log('Lỗi toggle favorite:', err);
+    } finally {
+      setLoading(false);
     }
-    setFavorites(newFavorites);
   };
 
   const handleCall = () => {
@@ -187,22 +230,28 @@ const FarmDetailScreen = ({navigation}) => {
           <View style={styles.infoItem}>
             <Ionicons name="resize-outline" size={16} color="#6B7280" />
             <Text style={styles.infoLabel}>Diện tích</Text>
-            <Text style={styles.infoValue}>{farm.area} hecta</Text>
+            <Text style={styles.infoValue}>{farm.area || '1000'} hecta</Text>
           </View>
           <View style={styles.infoItem}>
             <Ionicons name="calendar-outline" size={16} color="#6B7280" />
             <Text style={styles.infoLabel}>Thành lập</Text>
-            <Text style={styles.infoValue}>{farmData.established}</Text>
+            <Text style={styles.infoValue}>
+              {farmData.established || '2015'}
+            </Text>
           </View>
           <View style={styles.infoItem}>
             <Ionicons name="time-outline" size={16} color="#6B7280" />
             <Text style={styles.infoLabel}>Giờ mở cửa</Text>
-            <Text style={styles.infoValue}>{farmData.openHours}</Text>
+            <Text style={styles.infoValue}>
+              {farmData.openHours || '6:00 - 18:00 (Thứ 2 - Chủ nhật)'}
+            </Text>
           </View>
           <View style={styles.infoItem}>
             <Ionicons name="cash-outline" size={16} color="#6B7280" />
             <Text style={styles.infoLabel}>Phí tham quan</Text>
-            <Text style={styles.infoValue}>{farmData.visitPrice}</Text>
+            <Text style={styles.infoValue}>
+              {farmData.visitPrice || '50,000 VNĐ/người'}
+            </Text>
           </View>
         </View>
       </View>
@@ -258,7 +307,11 @@ const FarmDetailScreen = ({navigation}) => {
           {farmData.products.map((product, index) => (
             <TouchableOpacity key={index} style={styles.productCard}>
               <FastImage
-                source={{uri: product.image}}
+                source={{
+                  uri:
+                    product.image ||
+                    'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=300',
+                }}
                 style={styles.productImage}
               />
               <View style={styles.productInfo}>
@@ -337,10 +390,11 @@ const FarmDetailScreen = ({navigation}) => {
         <Arrow_Left_Line_Icon style={{color: '#fff'}} />
       </TouchableOpacity>
 
-      <View style={styles.floatingActions}>
+      <View style={[styles.floatingActions]}>
         <TouchableOpacity
           style={[styles.floatingActionButton, {marginTop: 8}]}
-          onPress={() => setIsFavorite(!isFavorite)}>
+          onPress={() => handleToggleFavorite(farm.farmCode)} // ✅ truyền đúng farmCode
+          disabled={loading}>
           <Ionicons
             name={isFavorite ? 'heart' : 'heart-outline'}
             size={20}
@@ -398,8 +452,8 @@ const FarmDetailScreen = ({navigation}) => {
                   screen: 'AllFarms',
                   params: {
                     farms: farms,
-                    favorites,
-                    toggleFavorite,
+                    isFavorite,
+                    handleToggleFavorite,
                   },
                 })
               }>
@@ -423,8 +477,8 @@ const FarmDetailScreen = ({navigation}) => {
             <>
               <FarmSlider
                 farms={farms}
-                favorites={favorites}
-                toggleFavorite={toggleFavorite}
+                favorites={new Set(wishlist.map(f => String(f.farmCode)))}
+                toggleFavorite={handleToggleFavorite}
               />
             </>
           )}
