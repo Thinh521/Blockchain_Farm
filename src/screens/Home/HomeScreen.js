@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -26,7 +26,6 @@ import FarmList from '../../components/Farms/FarmList';
 import {useFocusEffect, useNavigation} from '@react-navigation/core';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
 import {useFarms} from '../../hooks/useFarms';
-import {useWishlist} from '../../context/WishlistContext';
 import {getWishlistFarms} from '../../api/wishlist/wishlistApi';
 
 const HomeScreen = () => {

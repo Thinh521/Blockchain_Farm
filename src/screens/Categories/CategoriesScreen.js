@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -10,15 +10,15 @@ import {
   SafeAreaView,
   StatusBar,
 } from 'react-native';
-import { ethers } from 'ethers';
+import {ethers} from 'ethers';
 import contractArtifact from '../SmartConctract/contractABI.json';
 import Images from '../../assets/images/images';
-import { CONTRACT_ADDRESS } from '@env';
+import {CONTRACT_ADDRESS} from '@env';
 import {API_URL} from '@env';
 import styles from './Categories.styles';
 
-const CategoriesScreen = ({ navigation, route }) => {
-  const { farmCode } = route.params || {};
+const CategoriesScreen = ({navigation, route}) => {
+  const {farmCode} = route.params || {};
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,11 +34,13 @@ const CategoriesScreen = ({ navigation, route }) => {
         }
 
         console.log('📤 Calling getProductsByFarm for:', farmCode);
-        const rpcProvider = new ethers.JsonRpcProvider('https://rpc.zeroscan.org');
+        const rpcProvider = new ethers.JsonRpcProvider(
+          'https://rpc.zeroscan.org',
+        );
         const contractRead = new ethers.Contract(
           CONTRACT_ADDRESS,
           contractArtifact.abi,
-          rpcProvider
+          rpcProvider,
         );
 
         const productsData = await contractRead.getProductByFarmCode(farmCode);
@@ -79,7 +81,10 @@ const CategoriesScreen = ({ navigation, route }) => {
         console.error('❌ Error in getProductsByFarm:', err);
         if (isMounted) {
           setError(err.message || 'Không thể tải danh sách nông sản.');
-          Alert.alert('Lỗi', err.message || 'Không thể tải danh sách nông sản.');
+          Alert.alert(
+            'Lỗi',
+            err.message || 'Không thể tải danh sách nông sản.',
+          );
         }
       } finally {
         if (isMounted) {
@@ -101,12 +106,12 @@ const CategoriesScreen = ({ navigation, route }) => {
   }, [farmCode, navigation]);
 
   const handleProductPress = productItem => {
-    navigation.navigate('ProductDetail', { product: productItem });
+    navigation.navigate('Product', {productCode: productItem.productCode});
   };
 
-  const renderProductItem = ({ item }) => {
+  const renderProductItem = ({item}) => {
     const imageSource =
-      item.image?.length > 0 ? { uri: item.image[0] } : Images.bg;
+      item.image?.length > 0 ? {uri: item.image[0]} : Images.bg;
 
     return (
       <TouchableOpacity
@@ -156,9 +161,7 @@ const CategoriesScreen = ({ navigation, route }) => {
       <FlatList
         data={products}
         renderItem={renderProductItem}
-        keyExtractor={(item, index) =>
-          item.productCode || `product-${index}`
-        }
+        keyExtractor={(item, index) => item.productCode || `product-${index}`}
         numColumns={2}
         contentContainerStyle={styles.list}
         columnWrapperStyle={styles.row}
@@ -174,7 +177,7 @@ const CategoriesScreen = ({ navigation, route }) => {
         <Text style={styles.headerTitle}>Danh mục nông sản</Text>
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => navigation.navigate('AddProduct', { farmCode })}>
+          onPress={() => navigation.navigate('AddProduct', {farmCode})}>
           <Text style={styles.addButtonText}>+</Text>
         </TouchableOpacity>
       </View>
@@ -182,7 +185,5 @@ const CategoriesScreen = ({ navigation, route }) => {
     </SafeAreaView>
   );
 };
-
-
 
 export default CategoriesScreen;

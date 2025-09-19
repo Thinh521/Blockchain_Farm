@@ -441,6 +441,12 @@ const SettingsScreen = () => {
             navigation.navigate('NoBottomTab', {screen: 'RegisterManage'});
           }}
         />
+        <Button.Main
+          title="Product"
+          onPress={() => {
+            navigation.navigate('NoBottomTab', {screen: 'Product'});
+          }}
+        />
       </ScrollView>
     </View>
   );
