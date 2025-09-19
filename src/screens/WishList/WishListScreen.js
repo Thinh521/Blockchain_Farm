@@ -7,11 +7,14 @@ import {ethers} from 'ethers';
 import {CONTRACT_ADDRESS} from '@env';
 import contractArtifact from '../SmartConctract/contractABI.json';
 import {getWishlistFarms} from '../../api/wishlist/wishlistApi';
+import { useIsFocused } from '@react-navigation/core';
 
 const WishlistScreen = () => {
   const [wishlistFarms, setWishlistFarms] = useState([]);
   const [favorites, setFavorites] = useState(new Set());
   const [loading, setLoading] = useState(false);
+    const isFocused = useIsFocused();
+
 
   const fetchWishlist = useCallback(async () => {
     try {
@@ -58,9 +61,12 @@ const WishlistScreen = () => {
     }
   }, []);
 
+
   useEffect(() => {
-    fetchWishlist();
-  }, [fetchWishlist]);
+    if (isFocused) {
+      fetchWishlist();
+    }
+  }, [isFocused, fetchWishlist]);
 
   return (
     <View style={styles.container}>

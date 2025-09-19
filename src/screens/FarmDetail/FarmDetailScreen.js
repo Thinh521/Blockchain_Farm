@@ -10,6 +10,7 @@ import {
   Animated,
   Modal,
   Linking,
+  FlatList,
 } from 'react-native';
 import styles from './FarmDetail.styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -24,11 +25,15 @@ import Tabs from './components/Tabs';
 import BottomActionBar from './components/BottomActionBar';
 import {useFarms} from '../../hooks/useFarms';
 import {useWishlist} from '../../context/WishlistContext';
+import {CONTRACT_ADDRESS} from '@env';
+import contractArtifact from '../SmartConctract/contractABI.json';
+
 import {
   getWishlistFarms,
   addWishlistFarm,
   removeWishlistFarm,
 } from '../../api/wishlist/wishlistApi';
+import {ethers} from 'ethers';
 
 const farmData = {
   farmCode: 'F001',
@@ -117,31 +122,67 @@ const FarmDetailScreen = ({navigation}) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
 
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const {farms, isLoading: farmsLoading, error, refetch} = useFarms();
 
   useEffect(() => {
-    const fetchWishlist = async () => {
-      try {
-        const res = await getWishlistFarms();
-        const wishlistFarms = res?.wishlist?.farms || [];
-        setWishlist(wishlistFarms);
+    let isMounted = true;
 
-        const hasFarm = wishlistFarms.some(
-          f => String(f.farmCode) === String(farm.farmCode),
+    const fetchProducts = async () => {
+      try {
+        setLoadingProducts(true);
+        const rpcProvider = new ethers.JsonRpcProvider(
+          'https://rpc.zeroscan.org',
         );
-        setIsFavorite(hasFarm);
+        const contractRead = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          contractArtifact.abi,
+          rpcProvider,
+        );
+
+        const productsData = await contractRead.getProductByFarmCode(
+          farm.farmCode,
+        );
+
+        const formattedProducts = productsData.map((product, index) => {
+          const images =
+            typeof product.image === 'string'
+              ? product.image
+                  .split(/[,|]/)
+                  .map(url => url.trim())
+                  .filter(Boolean)
+              : [];
+
+          return {
+            farmCode: product.farmCode,
+            productCode: product.productCode,
+            categoryName: product.categoryName,
+            name: product.name,
+            quantity: product.quantity,
+            price: product.price,
+            area: product.area,
+            image: images,
+            description: product.description,
+          };
+        });
+
+        if (isMounted) setProducts(formattedProducts);
       } catch (err) {
-        console.log('Lỗi lấy wishlist:', err);
+        console.error('❌ Error fetchProducts:', err);
+      } finally {
+        if (isMounted) setLoadingProducts(false);
       }
     };
 
-    fetchWishlist();
-  }, [farm.farmCode]);
-
-  // 🔹 Toggle favorite
+    fetchProducts();
+    return () => {
+      isMounted = false;
+    };
+  }, [farm.farmCode]); // 🔹 Toggle favorite
   const handleToggleFavorite = async farmCode => {
     if (loading) return;
     setLoading(true);
@@ -303,28 +344,76 @@ const FarmDetailScreen = ({navigation}) => {
           <Text style={styles.cardTitle}>Sản phẩm nổi bật</Text>
         </View>
 
-        <View style={styles.productsGrid}>
-          {farmData.products.map((product, index) => (
-            <TouchableOpacity key={index} style={styles.productCard}>
-              <FastImage
-                source={{
-                  uri:
-                    product.image ||
-                    'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=300',
-                }}
-                style={styles.productImage}
-              />
-              <View style={styles.productInfo}>
-                <Text style={styles.productName} numberOfLines={1}>
-                  {product.name}
-                </Text>
-                <Text style={styles.productPrice}>
-                  {product.price} VNĐ/{product.unit}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {loadingProducts ? (
+          <Text style={{textAlign: 'center', margin: 10}}>
+            Đang tải sản phẩm...
+          </Text>
+        ) : products.length === 0 ? (
+          <Text style={{textAlign: 'center', marginTop: 10}}>
+            Chưa có nông sản nào.
+          </Text>
+        ) : products.length > 4 ? (
+          <FlatList
+            data={products}
+            keyExtractor={(item, index) => String(item.productCode || index)}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{paddingHorizontal: 8}}
+            renderItem={({item}) => (
+              <TouchableOpacity
+                style={[styles.productCard, {width: 160, marginRight: 12}]}
+                onPress={() =>
+                  navigation.navigate('Product', {
+                    productCode: item.productCode,
+                  })
+                }>
+                <FastImage
+                  source={{
+                    uri:
+                      item.image?.[0] ||
+                      'https://via.placeholder.com/300x200.png?text=No+Image',
+                  }}
+                  style={styles.productImage}
+                />
+                <View style={styles.productInfo}>
+                  <Text style={styles.productName} numberOfLines={1}>
+                    {item.name}
+                  </Text>
+                  <Text style={styles.productPrice}>{item.price} VNĐ</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+          />
+        ) : (
+          // 🔹 Nếu ≤ 4 thì giữ grid như cũ
+          <View style={styles.productsGrid}>
+            {products.map((product, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.productCard}
+                onPress={() =>
+                  navigation.navigate('Product', {
+                    productCode: product.productCode,
+                  })
+                }>
+                <FastImage
+                  source={{
+                    uri:
+                      product.image?.[0] ||
+                      'https://via.placeholder.com/300x200.png?text=No+Image',
+                  }}
+                  style={styles.productImage}
+                />
+                <View style={styles.productInfo}>
+                  <Text style={styles.productName} numberOfLines={1}>
+                    {product.name}
+                  </Text>
+                  <Text style={styles.productPrice}>{product.price} VNĐ</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </View>
     </View>
   );
