@@ -18,6 +18,7 @@ import WishListScreen from '../screens/WishList/WishListScreen';
 import AddMewsScreen from '../screens/New/AddNewsScreen';
 import CategoriesScreen from '../screens/Categories/CategoriesScreen';
 import AddProductScreen from '../screens/AddProduct/AddProductScreen';
+import ProductScreen from '../screens/Product/ProductScreen';
 
 const routerNoBottomTab = [
   {
@@ -252,6 +253,23 @@ const routerNoBottomTab = [
   {
     name: 'AddProduct',
     component: AddProductScreen,
+    hasLayout: false,
+    options: {
+      title: 'Thêm sản phẩm',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'Product',
+    component: ProductScreen,
     hasLayout: false,
     options: {
       title: 'Thêm sản phẩm',

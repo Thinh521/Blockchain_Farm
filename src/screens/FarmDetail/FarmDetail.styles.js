@@ -273,7 +273,7 @@ floatingActions: {
   },
   productImage: {
     width: '100%',
-    height: 80,
+    height: 100,
     borderRadius: 8,
   },
   productInfo: {
