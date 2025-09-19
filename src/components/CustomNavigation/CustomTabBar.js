@@ -175,15 +175,14 @@ const CustomTabBar = ({state, descriptors, navigation, config = {}}) => {
   const handleTabPress = (index, route) => {
     const user = getUser();
     const isHome = route.name === 'Home';
+    const isQrScan = route.name === 'QrScan';
 
-    if (!user && !isHome) {
+    if (!user && !isHome && !isQrScan) {
       navigation.navigate('NoBottomTab', {
         screen: 'LoginRequired',
       });
       return;
     }
-
-    const {options} = descriptors[route.key];
 
     const event = navigation.emit({
       type: 'tabPress',

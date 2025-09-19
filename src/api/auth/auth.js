@@ -31,7 +31,7 @@ export const loginApi = async ({emailPhone, password}) => {
   try {
     const res = await api.post('/api/auth/login', {emailPhone, password}, { withCredentials: true });
 
-    if (res.data?.errorCodes?.code !== '200') {
+    if (res.data?.code !== '200') {
       return {
         success: false,
         message: ErrorMap[res.data?.errorCodes?.code] || 'Đăng nhập thất bại',
