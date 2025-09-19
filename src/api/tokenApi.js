@@ -1,6 +1,6 @@
 import axios from 'axios';
 import {API_URL} from '@env';
-import {storage} from '../utils/storage/storage'; // dùng MMKV hoặc AsyncStorage
+import {storage} from '../utils/storage/storage';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -21,13 +21,11 @@ api.interceptors.request.use(async config => {
 api.interceptors.response.use(
   response => response,
   async error => {
-    console.log('🔥 Error Response từ BE:', error.response?.data);
-    console.log('🔥 Status Code:', error.response?.status);
     const originalRequest = error.config;
 
     if (
       error.response?.status === 401 &&
-      error.response?.data?.code === '401-3' && // ACCESS_TOKEN_EXPIRED
+      error.response?.data?.code === '401-3' &&
       !originalRequest._retry
     ) {
       originalRequest._retry = true;
@@ -50,7 +48,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  },
+  }
 );
 
 export default api;

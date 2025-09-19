@@ -1,157 +1,131 @@
-import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet, Alert} from 'react-native';
-import {Camera, useCameraDevices} from 'react-native-vision-camera';
+import React, {useState} from 'react';
+import {View, Text, Modal, TouchableOpacity, Alert} from 'react-native';
+import {Camera, useCameraDevice} from 'react-native-vision-camera';
+import {useCodeScanner} from 'react-native-vision-camera';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {launchImageLibrary} from 'react-native-image-picker';
+import RNQRGenerator from 'rn-qr-generator';
+import Clipboard from '@react-native-clipboard/clipboard';
+import styles from './QrScan.styles';
+import Button from '../../components/CustomButton/CustomButton';
+import LoadingOverlay from '../../components/CustomLoading/LoadingOverlay';
 
 const QrScanScreen = () => {
-  const [hasPermission, setHasPermission] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const devices = useCameraDevices();
-  const device = devices.back;
+  const [scannedCode, setScannedCode] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const device = useCameraDevice('back');
 
-  useEffect(() => {
-    const requestCameraPermission = async () => {
-      try {
-        setIsLoading(true);
-        const status = await Camera.requestCameraPermission();
-        console.log('Camera permission status:', status);
-
-        if (status === 'authorized') {
-          setHasPermission(true);
-        } else if (status === 'denied') {
-          setHasPermission(false);
-          Alert.alert(
-            'Quyền camera bị từ chối',
-            'Vui lòng vào Settings để cấp quyền camera cho ứng dụng',
-          );
-        } else {
-          setHasPermission(false);
-        }
-      } catch (error) {
-        console.error('Error requesting camera permission:', error);
-        setHasPermission(false);
-      } finally {
-        setIsLoading(false);
+  // Scan dicectly with camera
+  const scanner = useCodeScanner({
+    codeTypes: ['qr'],
+    onCodeScanned: codes => {
+      if (codes.length > 0) {
+        const code = codes[0];
+        const value = code.value || code.rawValue || code.displayValue;
+        setScannedCode(value);
+        setModalVisible(true);
       }
-    };
+    },
+  });
 
-    requestCameraPermission();
-  }, []);
+  // Select images and decode QR code
+  const pickImageAndScan = async () => {
+    try {
+      const result = await launchImageLibrary({mediaType: 'photo'});
+      if (result.assets && result.assets.length > 0) {
+        const {uri} = result.assets[0];
+        if (!uri) return;
 
-  // Hiển thị loading khi đang xin quyền
-  if (isLoading) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.loadingText}>Đang xin quyền camera...</Text>
-      </View>
-    );
-  }
+        const response = await RNQRGenerator.detect({uri});
+        if (response.values && response.values.length > 0) {
+          setScannedCode(response.values[0]);
+          setModalVisible(true);
+        } else {
+          Alert.alert('Thông báo', 'Không tìm thấy QR Code trong ảnh này');
+        }
+      }
+    } catch (error) {
+      console.error('Lỗi decode QR:', error);
+    }
+  };
 
-  // Hiển thị loading khi chưa có thiết bị camera
-  if (!device) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.loadingText}>Đang tải camera...</Text>
-      </View>
-    );
-  }
-
-  // Hiển thị thông báo khi chưa có quyền
-  if (!hasPermission) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>Chưa cấp quyền camera</Text>
-        <Text style={styles.subText}>
-          Vui lòng vào Settings để cấp quyền camera cho ứng dụng
-        </Text>
-      </View>
-    );
+  if (device == null) {
+    return <LoadingOverlay />;
   }
 
   return (
-    <View style={styles.container}>
+    <View style={{flex: 1}}>
       <Camera
-        style={StyleSheet.absoluteFill}
+        style={{flex: 1}}
         device={device}
-        isActive={true}
-        // Thêm các props này để tối ưu hiệu suất
-        format={device.formats.find(
-          format => format.videoWidth === 1920 && format.videoHeight === 1080,
-        )}
-        fps={30}
-        // Để chuẩn bị cho việc scan QR code sau này
-        frameProcessor={undefined} // Sẽ thêm frameProcessor để scan QR
+        isActive={!modalVisible}
+        codeScanner={scanner}
       />
-
-      {/* Overlay UI cho QR scanner */}
       <View style={styles.overlay}>
-        <View style={styles.scanArea}>
-          <View style={styles.scanFrame} />
+        <View style={styles.header}>
+          <View style={styles.textContainer}>
+            <Text style={styles.title}>Quét mọi mã QR</Text>
+            <Text style={styles.subtitle}>Đặt mã QR vào khung để quét</Text>
+          </View>
         </View>
-        <Text style={styles.instructionText}>
-          Hướng camera vào mã QR để quét
-        </Text>
+        <View style={styles.content}>
+          <View style={styles.frame}>
+            <View style={[styles.corner, styles.topLeft]} />
+            <View style={[styles.corner, styles.topRight]} />
+            <View style={[styles.corner, styles.bottomLeft]} />
+            <View style={[styles.corner, styles.bottomRight]} />
+          </View>
+        </View>
+        <View style={styles.footer}>
+          <View style={styles.footerButton}>
+            <TouchableOpacity style={styles.button} onPress={pickImageAndScan}>
+              <Ionicons name="image-outline" size={24} color="white" />
+            </TouchableOpacity>
+            <Text style={styles.footerText}>Ảnh có sẵn</Text>
+          </View>
+          <View style={styles.footerButton}>
+            <TouchableOpacity style={styles.button}>
+              <Ionicons name="time-outline" size={24} color="white" />
+            </TouchableOpacity>
+            <Text style={styles.footerText}>Gần đây</Text>
+          </View>
+        </View>
       </View>
+
+      <Modal
+        transparent={true}
+        visible={modalVisible}
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}>
+        <TouchableOpacity
+          style={styles.modalBackground}
+          activeOpacity={1}
+          onPressOut={() => setModalVisible(false)}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <View style={{width: 24}} />
+              <Text style={styles.modalTitle}>Kết quả QR Code</Text>
+              <TouchableOpacity
+                style={styles.closeIcon}
+                onPress={() => setModalVisible(false)}>
+                <Ionicons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.modalContentWrapper}>
+              <Text style={styles.modalContent}>{scannedCode}</Text>
+            </View>
+            <Button.Main
+              title="Sao chép"
+              style={styles.copyButton}
+              onPress={() => {
+                Clipboard.setString(scannedCode || '');
+              }}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
 
 export default QrScanScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'black',
-  },
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'black',
-    padding: 20,
-  },
-  loadingText: {
-    color: 'white',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-  errorText: {
-    color: '#FF6B6B',
-    fontSize: 18,
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  subText: {
-    color: '#CCCCCC',
-    fontSize: 14,
-    textAlign: 'center',
-  },
-  overlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scanArea: {
-    width: 250,
-    height: 250,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scanFrame: {
-    width: 200,
-    height: 200,
-    borderWidth: 2,
-    borderColor: '#00FF00',
-    borderRadius: 10,
-    backgroundColor: 'transparent',
-  },
-  instructionText: {
-    color: 'white',
-    fontSize: 16,
-    marginTop: 30,
-    textAlign: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    padding: 10,
-    borderRadius: 5,
-  },
-});
-

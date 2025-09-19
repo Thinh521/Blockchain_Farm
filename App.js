@@ -1,5 +1,5 @@
 import '@walletconnect/react-native-compat';
-import React from 'react';
+import React, {useEffect} from 'react';
 import AppNavigator from './src/navigation/AppNavigator';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
@@ -11,12 +11,17 @@ import {AppKit} from '@reown/appkit-ethers-react-native';
 import './src/Metamask/appkit';
 import {WishlistProvider} from './src/context/WishlistContext';
 import {useUser} from './src/hooks/useUser';
+import {requestCameraPermission} from './src/permissions/cameraPermission';
 
 const queryClient = new QueryClient();
 
 const AppContent = () => {
   const {data, isLoading, error} = useUser();
-  
+
+  useEffect(() => {
+    requestCameraPermission();
+  }, []);
+
   return (
     <NavigationContainer>
       <AppKit />
