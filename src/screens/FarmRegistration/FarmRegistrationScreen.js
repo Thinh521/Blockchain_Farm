@@ -41,7 +41,7 @@ const menuItems = [
   {
     id: 3,
     label: 'Quy trình nông nghiệp',
-    icon: 'leaf',
+    icon: 'feather',
     colors: ['#34d399', '#059669'],
     description: 'Theo dõi chu trình sản xuất',
   },

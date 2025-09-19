@@ -27,6 +27,9 @@ import {useFocusEffect, useNavigation} from '@react-navigation/core';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
 import {useFarms} from '../../hooks/useFarms';
 import {getWishlistFarms} from '../../api/wishlist/wishlistApi';
+import {useUser} from '../../hooks/useUser';
+import FastImage from 'react-native-fast-image';
+import Images from '../../assets/images/images';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -35,6 +38,7 @@ const HomeScreen = () => {
   const [favorites, setFavorites] = useState(new Set());
 
   const {farms, isLoading, error, refetch} = useFarms();
+  const {data: user} = useUser();
 
   const categories = [
     {id: 'all', name: 'Tất cả', icon: Leaf_Line_Icon},
@@ -91,8 +95,27 @@ const HomeScreen = () => {
                   <View style={styles.notificationDot} />
                   <NotificationTabIcon style={{color: '#fff', width: 18}} />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.profileButton}>
-                  <UserIcon style={{color: '#fff', width: 18}} />
+                <TouchableOpacity
+                  style={styles.profileButton}
+                  activeOpacity={user ? 0.7 : 1}
+                  onPress={() => {
+                    if (user) {
+                      navigation.navigate('BottomTab', {screen: 'Setting'});
+                    }
+                  }}>
+                  {user ? (
+                    <FastImage
+                      source={
+                        user?.avatar
+                          ? {uri: `${API_URL}/api/images/${user.avatar}`}
+                          : Images.avatar
+                      }
+                      style={{width: 32, height: 32, borderRadius: 16}}
+                      resizeMode={FastImage.resizeMode.contain}
+                    />
+                  ) : (
+                    <UserIcon style={{color: '#fff', width: 18}} />
+                  )}
                 </TouchableOpacity>
               </View>
             </View>

@@ -1,64 +1,15 @@
-import {Dimensions, StyleSheet} from 'react-native';
+import {StyleSheet} from 'react-native';
 import {scale} from '../../utils/scaling';
-import {Colors} from '../../theme/theme';
-
-const {height} = Dimensions.get('window');
+import {Colors, FontSizes, FontWeights} from '../../theme/theme';
 
 export default StyleSheet.create({
   container: {
     flex: 1,
-  },
-  connectContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  floatingIcon1: {
-    position: 'absolute',
-    top: height * 0.15,
-    left: 40,
-  },
-  floatingIcon2: {
-    position: 'absolute',
-    top: height * 0.25,
-    right: 60,
-  },
-  floatingIcon3: {
-    position: 'absolute',
-    bottom: height * 0.1,
-    left: 60,
-  },
-  header: {
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: scale(20),
-    backgroundColor: Colors.green,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: scale(2),
-  },
-  headerSubtitle: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.8)',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: Colors.gray,
-    textAlign: 'center',
-    lineHeight: scale(20),
-    paddingHorizontal: 20,
-  },
-  buttonContainer: {
-    width: '100%',
-    marginBottom: 64,
+    backgroundColor: Colors.background,
   },
   menuScrollView: {
     flex: 1,
-    padding: 20,
+    padding: scale(20),
   },
   menuContainer: {
     maxWidth: 600,
@@ -66,14 +17,14 @@ export default StyleSheet.create({
     width: '100%',
   },
   menuItemContainer: {
-    marginBottom: 16,
+    marginBottom: scale(16),
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: Colors.white,
     borderRadius: 16,
-    padding: 20,
+    padding: scale(16),
     borderWidth: 1,
     borderColor: Colors.border_2,
   },
@@ -88,20 +39,20 @@ export default StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    marginRight: scale(14),
   },
   menuTextContainer: {
     flex: 1,
   },
   menuTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1f2937',
-    marginBottom: 4,
+    marginBottom: scale(2),
+    color: Colors.title,
+    fontSize: FontSizes.regular,
+    fontWeight: FontWeights.semiBold,
   },
   menuDescription: {
-    fontSize: 14,
-    color: '#6b7280',
+    color: Colors.gray,
+    fontSize: FontSizes.small,
   },
   bottomDisconnectButton: {
     marginTop: scale(40),
