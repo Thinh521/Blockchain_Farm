@@ -56,8 +56,8 @@ export const FarmTabIcon = ({style = {}}) => {
 };
 
 export const QrTabIcon = ({style = {}}) => {
-  const width = style?.width || 24;
-  const height = style?.height || 24;
+  const width = style?.width || 34;
+  const height = style?.height || 34;
   const color = style?.color || 'black';
 
   return (
