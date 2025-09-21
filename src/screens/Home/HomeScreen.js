@@ -11,7 +11,7 @@ import {
 import {
   Flower_Line_Icon,
   Leaf_Line_Icon,
-  NotificationTabIcon,
+  NotificationIcon,
   Search_Line_Icon,
   Sun_Line_Icon,
   User_Line_Icon,
@@ -93,7 +93,7 @@ const HomeScreen = () => {
               <View style={styles.headerActions}>
                 <TouchableOpacity style={styles.notificationButton}>
                   <View style={styles.notificationDot} />
-                  <NotificationTabIcon style={{color: '#fff', width: 18}} />
+                  <NotificationIcon style={{color: '#fff', width: 18}} />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.profileButton}
@@ -209,7 +209,7 @@ const HomeScreen = () => {
                 </View>
               ) : (
                 <FarmList
-                  farms={filteredFarms.slice(0, 6)}
+                  farms={filteredFarms.slice(4, 10)}
                   favorites={favorites}
                   isLoading={isLoading}
                 />

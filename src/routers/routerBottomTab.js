@@ -1,9 +1,9 @@
 import {useAppKitAccount} from '@reown/appkit-ethers-react-native';
 import {
   FarmTabIcon,
-  Heart_Line_Icon,
+  HeartTabIcon,
   HomeTabIcon,
-  NewTabIcon,         
+  NewsTabIcon,
   QrTabIcon,
   SettingTabIcon,
 } from '../assets/icons';
@@ -31,7 +31,7 @@ export const getRouterBottomTab = t => {
       name: 'New',
       component: NewScreen,
       label: 'Tin tức',
-      Icon: NewTabIcon,
+      Icon: NewsTabIcon,
       options: {
         headerShown: false,
       },
@@ -47,7 +47,7 @@ export const getRouterBottomTab = t => {
       ? {
           name: 'FarmRegistration',
           component: FarmRegistrationScreen,
-          label: 'Quản lí nông trại',
+          label: 'Nông trại',
           Icon: FarmTabIcon,
           options: {headerShown: false},
         }
@@ -55,7 +55,7 @@ export const getRouterBottomTab = t => {
           name: 'WishList',
           component: WishListScreen,
           label: 'Yêu thích',
-          Icon: Heart_Line_Icon,
+          Icon: HeartTabIcon,
           options: {headerShown: false},
         },
     {

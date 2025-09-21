@@ -149,25 +149,6 @@ const CustomTabBar = ({state, descriptors, navigation, config = {}}) => {
     activeLabel: {
       color: activeColor,
     },
-    badgeContainer: {
-      position: 'absolute',
-      top: -8,
-      left: '20%',
-      backgroundColor: '#FF3B30',
-      borderRadius: scale(999),
-      minWidth: scale(18),
-      height: scale(18),
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: scale(6),
-      zIndex: 1,
-    },
-    badgeText: {
-      textAlign: 'center',
-      color: Colors.white,
-      fontSize: FontSizes.xsmall,
-      fontWeight: FontWeights.semiBold,
-    },
     iconContainer: {
       position: 'relative',
     },
@@ -238,7 +219,7 @@ const CustomTabBar = ({state, descriptors, navigation, config = {}}) => {
                   justifyContent: 'center',
                   alignItems: 'center',
                   borderWidth: 1,
-                  borderColor: Colors.border_2,
+                  borderColor: focused ? Colors.green : Colors.border_2,
                   ...Shadows.light,
                 }}
                 onPress={handlePress}>
