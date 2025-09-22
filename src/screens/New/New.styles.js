@@ -81,4 +81,13 @@ export default StyleSheet.create({
     right: 20,
     padding: 10,
   },
+  emptyWrapper: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: Colors.title,
+  },
 });

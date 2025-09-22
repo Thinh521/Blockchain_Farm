@@ -24,16 +24,18 @@ import ImageCarousel from './components/ImageCarousel';
 import Tabs from './components/Tabs';
 import BottomActionBar from './components/BottomActionBar';
 import {useFarms} from '../../hooks/useFarms';
-import {useWishlist} from '../../context/WishlistContext';
 import {CONTRACT_ADDRESS} from '@env';
 import contractArtifact from '../SmartConctract/contractABI.json';
-
 import {
-  getWishlistFarms,
   addWishlistFarm,
   removeWishlistFarm,
 } from '../../api/wishlist/wishlistApi';
 import {ethers} from 'ethers';
+import NewsSlider from '../../components/News/NewsSlider';
+import {useNews} from '../../hooks/useNews';
+import {scale} from '../../utils/scaling';
+import NewsCardSkeleton from '../../components/CustomSkeleton/NewsCardSkeleton';
+import ImageViewerModal from '../../components/ImageViewerModal/ImageViewerModal';
 
 const farmData = {
   farmCode: 'F001',
@@ -114,8 +116,6 @@ const farmData = {
 
 const FarmDetailScreen = ({navigation}) => {
   const {farm} = useRoute().params;
-  const [favorites, setFavorites] = useState(new Set());
-  const [isLoading, setIsLoading] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
   const [wishlist, setWishlist] = useState([]);
@@ -124,10 +124,26 @@ const FarmDetailScreen = ({navigation}) => {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [farmImageViewerVisible, setFarmImageViewerVisible] = useState(false);
+  const [farmImageIndex, setFarmImageIndex] = useState(0);
 
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const {farms, isLoading: farmsLoading, error, refetch} = useFarms();
+
+  const farmCode = farm?.farmCode;
+
+  const {
+    news,
+    isLoading,
+    expandedId,
+    selectedImageIndex,
+    selectedImages,
+    handleDelete,
+    closeImageViewer,
+    openImageViewer,
+    toggleExpand,
+  } = useNews({farmCode});
 
   useEffect(() => {
     let isMounted = true;
@@ -182,7 +198,8 @@ const FarmDetailScreen = ({navigation}) => {
     return () => {
       isMounted = false;
     };
-  }, [farm.farmCode]); // 🔹 Toggle favorite
+  }, [farm.farmCode]);
+
   const handleToggleFavorite = async farmCode => {
     if (loading) return;
     setLoading(true);
@@ -313,7 +330,7 @@ const FarmDetailScreen = ({navigation}) => {
         </View>
       </View>
 
-      <View style={styles.infoCard}>
+      {/* <View style={styles.infoCard}>
         <View style={styles.cardHeader}>
           <Ionicons name="construct" size={24} color="#059669" />
           <Text style={styles.cardTitle}>Cơ sở vật chất</Text>
@@ -332,7 +349,7 @@ const FarmDetailScreen = ({navigation}) => {
             </View>
           </View>
         ))}
-      </View>
+      </View> */}
     </View>
   );
 
@@ -471,6 +488,16 @@ const FarmDetailScreen = ({navigation}) => {
         <Text style={styles.headerTitle} numberOfLines={1}>
           {farm.nameFarm}
         </Text>
+        <TouchableOpacity
+          style={styles.headerHeart}
+          onPress={() => handleToggleFavorite(farm.farmCode)}
+          disabled={loading}>
+          <Ionicons
+            name={isFavorite ? 'heart' : 'heart-outline'}
+            size={20}
+            color={isFavorite ? '#EF4444' : '#FFFFFF'}
+          />
+        </TouchableOpacity>
       </Animated.View>
 
       <TouchableOpacity
@@ -482,7 +509,7 @@ const FarmDetailScreen = ({navigation}) => {
       <View style={[styles.floatingActions]}>
         <TouchableOpacity
           style={[styles.floatingActionButton, {marginTop: 8}]}
-          onPress={() => handleToggleFavorite(farm.farmCode)} // ✅ truyền đúng farmCode
+          onPress={() => handleToggleFavorite(farm.farmCode)}
           disabled={loading}>
           <Ionicons
             name={isFavorite ? 'heart' : 'heart-outline'}
@@ -492,122 +519,147 @@ const FarmDetailScreen = ({navigation}) => {
         </TouchableOpacity>
       </View>
 
-      <Animated.ScrollView
+      <Animated.FlatList
+        data={[1]}
+        keyExtractor={(_, index) => index.toString()}
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
         onScroll={Animated.event(
           [{nativeEvent: {contentOffset: {y: scrollY}}}],
           {useNativeDriver: false},
         )}
-        scrollEventThrottle={16}>
-        <ImageCarousel
-          farm={farm}
-          imageScale={imageScale}
-          setCurrentImageIndex={setCurrentImageIndex}
-          setShowImageModal={setShowImageModal}
-          currentImageIndex={currentImageIndex}
-        />
+        contentContainerStyle={{paddingBottom: scale(40)}}
+        renderItem={() => (
+          <>
+            <ImageCarousel
+              farm={farm}
+              imageScale={imageScale}
+              setCurrentImageIndex={setCurrentImageIndex}
+              onOpenImageViewer={index => {
+                setFarmImageIndex(index);
+                setFarmImageViewerVisible(true);
+              }}
+              currentImageIndex={currentImageIndex}
+            />
 
-        <View style={styles.content}>
-          <View style={styles.titleSection}>
-            <Text style={styles.farmName}>{farm.nameFarm}</Text>
-            <View style={styles.location}>
-              <Ionicons name="location-outline" size={16} color="#EF4444" />
-              <Text style={styles.locationText}>{farm.location}</Text>
+            <View style={styles.content}>
+              <View style={styles.titleSection}>
+                <Text style={styles.farmName}>{farm.nameFarm}</Text>
+                <View style={styles.location}>
+                  <Ionicons name="location-outline" size={16} color="#EF4444" />
+                  <Text style={styles.locationText}>{farm.location}</Text>
+                </View>
+                <Text style={styles.description}>{farm.description}</Text>
+              </View>
+
+              <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+
+              {activeTab === 'overview' && renderOverviewTab()}
+              {activeTab === 'products' && renderProductsTab()}
+              {activeTab === 'contact' && renderContactTab()}
             </View>
-            <Text style={styles.description}>{farm.description}</Text>
-          </View>
 
-          <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
+            <View style={{paddingHorizontal: scale(20)}}>
+              <View style={styles.resultsHeader}>
+                <View>
+                  <Text style={styles.sectionTitle}>Tin tức nông trại</Text>
+                  <Text style={styles.resultsCount}>
+                    Tìm thấy {news.length} tin tức phù hợp
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.seeAllButton}
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    navigation.navigate('NoBottomTab', {
+                      screen: 'AllNews',
+                      params: {farmCode: farmCode},
+                    })
+                  }>
+                  <Text style={styles.seeAllText}>Xem tất cả</Text>
+                </TouchableOpacity>
+              </View>
 
-          {activeTab === 'overview' && renderOverviewTab()}
-          {activeTab === 'products' && renderProductsTab()}
-          {activeTab === 'contact' && renderContactTab()}
-        </View>
-
-        <View style={styles.mainContent}>
-          <View style={styles.resultsHeader}>
-            <View>
-              <Text style={styles.sectionTitle}>Trang Trại Nổi Bật</Text>
-              <Text style={styles.resultsCount}>
-                Tìm thấy {farms.length} trang trại phù hợp
-              </Text>
+              {isLoading ? (
+                <NewsCardSkeleton count={1} />
+              ) : news.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyTitle}>
+                    Không tìm thấy tin tức nào
+                  </Text>
+                </View>
+              ) : (
+                <NewsSlider
+                  news={news}
+                  expandedId={expandedId}
+                  onToggleExpand={toggleExpand}
+                  onOpenImageViewer={openImageViewer}
+                  onDelete={handleDelete}
+                />
+              )}
             </View>
-            <TouchableOpacity
-              style={styles.seeAllButton}
-              activeOpacity={0.7}
-              onPress={() =>
-                navigation.navigate('NoBottomTab', {
-                  screen: 'AllFarms',
-                  params: {
-                    farms: farms,
-                    isFavorite,
-                    handleToggleFavorite,
-                  },
-                })
-              }>
-              <Text style={styles.seeAllText}>Xem tất cả</Text>
-            </TouchableOpacity>
-          </View>
 
-          {isLoading ? (
-            <FarmCardSkeleton count={2} />
-          ) : farms.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyTitle}>
-                Không tìm thấy trang trại nào
-              </Text>
-              <Text style={styles.emptySubtitle}>
-                Thử thay đổi từ khóa tìm kiếm hoặc chọn danh mục khác để khám
-                phá thêm nhiều trang trại
-              </Text>
+            <View style={styles.mainContent}>
+              <View style={styles.resultsHeader}>
+                <View>
+                  <Text style={styles.sectionTitle}>Trang Trại Nổi Bật</Text>
+                  <Text style={styles.resultsCount}>
+                    Tìm thấy {farms.length} trang trại phù hợp
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.seeAllButton}
+                  activeOpacity={0.7}
+                  onPress={() =>
+                    navigation.navigate('NoBottomTab', {
+                      screen: 'AllFarms',
+                      params: {
+                        farms: farms,
+                        isFavorite,
+                        handleToggleFavorite,
+                      },
+                    })
+                  }>
+                  <Text style={styles.seeAllText}>Xem tất cả</Text>
+                </TouchableOpacity>
+              </View>
+
+              {farmsLoading ? (
+                <FarmCardSkeleton count={2} />
+              ) : farms.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <Text style={styles.emptyTitle}>
+                    Không tìm thấy trang trại nào
+                  </Text>
+                </View>
+              ) : (
+                <>
+                  <FarmSlider
+                    farms={farms}
+                    favorites={new Set(wishlist.map(f => String(f.farmCode)))}
+                    toggleFavorite={handleToggleFavorite}
+                  />
+                </>
+              )}
             </View>
-          ) : (
-            <>
-              <FarmSlider
-                farms={farms}
-                favorites={new Set(wishlist.map(f => String(f.farmCode)))}
-                toggleFavorite={handleToggleFavorite}
-              />
-            </>
-          )}
-        </View>
-      </Animated.ScrollView>
+          </>
+        )}></Animated.FlatList>
 
       <BottomActionBar handleCall={handleCall} />
 
-      <Modal
-        visible={showImageModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowImageModal(false)}>
-        <View style={styles.modalContainer}>
-          <TouchableOpacity
-            style={styles.modalOverlay}
-            onPress={() => setShowImageModal(false)}>
-            <ScrollView
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              style={styles.modalImageScroll}>
-              {farmData.images.map((image, index) => (
-                <Image
-                  key={index}
-                  source={{uri: image}}
-                  style={styles.modalImage}
-                  resizeMode="contain"
-                />
-              ))}
-            </ScrollView>
-          </TouchableOpacity>
+      <ImageViewerModal
+        visible={farmImageViewerVisible}
+        images={farm.image}
+        startIndex={farmImageIndex}
+        onClose={() => setFarmImageViewerVisible(false)}
+      />
 
-          <TouchableOpacity
-            style={styles.modalCloseButton}
-            onPress={() => setShowImageModal(false)}>
-            <Ionicons name="close" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
-      </Modal>
+      <ImageViewerModal
+        visible={selectedImageIndex !== null}
+        images={selectedImages}
+        startIndex={selectedImageIndex || 0}
+        onClose={closeImageViewer}
+      />
     </SafeAreaView>
   );
 };
