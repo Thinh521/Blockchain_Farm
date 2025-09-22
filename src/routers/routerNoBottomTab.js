@@ -19,6 +19,7 @@ import AddMewsScreen from '../screens/New/AddNewsScreen';
 import CategoriesScreen from '../screens/Categories/CategoriesScreen';
 import AddProductScreen from '../screens/AddProduct/AddProductScreen';
 import ProductScreen from '../screens/Product/ProductScreen';
+import AllNewsScreen from '../screens/New/AllNewsScreen';
 
 const routerNoBottomTab = [
   {
@@ -273,6 +274,23 @@ const routerNoBottomTab = [
     hasLayout: false,
     options: {
       title: 'Thêm sản phẩm',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'AllNews',
+    component: AllNewsScreen,
+    hasLayout: false,
+    options: {
+      title: 'Tất cả tin tức',
       headerShown: true,
       headerStyle: {
         backgroundColor: Colors.green,

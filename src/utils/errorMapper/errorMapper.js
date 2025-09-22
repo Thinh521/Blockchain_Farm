@@ -21,4 +21,7 @@ export const ErrorMap = {
   '409-3': 'userName đã tồn tại',
 
   '500-1': 'Lỗi server',
+
+  // Lỗi news
+  '401-3': 'Chưa có news tin tức ',
 };

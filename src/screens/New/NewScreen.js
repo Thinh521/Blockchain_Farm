@@ -1,90 +1,35 @@
-import React, {useEffect, useState} from 'react';
-import {
-  View,
-  TouchableOpacity,
-  Image,
-  FlatList,
-  Modal,
-  Dimensions,
-  TextInput,
-  Text,
-  Alert,
-} from 'react-native';
-import styles from './New.styles';
+import React from 'react';
+import {View, TouchableOpacity, FlatList, TextInput, Text} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import NewsList from '../../components/News/NewsList';
+import {useNavigation} from '@react-navigation/core';
+
 import Header from '../../components/Header/Header';
-import {Search_Line_Icon} from '../../assets/icons';
-import {scale} from '../../utils/scaling';
-import {useIsFocused, useNavigation} from '@react-navigation/core';
-import {useQuery} from '@tanstack/react-query';
-import {deleteNewsApi, getAllNewsApi} from '../../api/newsApi';
-import {getUser} from '../../utils/storage/authStorage';
+import NewsList from '../../components/News/NewsList';
 import NewsCardSkeleton from '../../components/CustomSkeleton/NewsCardSkeleton';
-import {showMessage} from 'react-native-flash-message';
+import ImageViewerModal from '../../components/ImageViewerModal/ImageViewerModal';
+import {Search_Line_Icon} from '../../assets/icons';
+
+import {useNews} from '../../hooks/useNews';
+
+import {scale} from '../../utils/scaling';
+import styles from './New.styles';
 
 const NewScreen = () => {
   const navigation = useNavigation();
-  const isFocused = useIsFocused();
-  const accessToken = getUser()?.accessToken;
-
-  const [expandedId, setExpandedId] = useState(null);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(null);
-  const [selectedImages, setSelectedImages] = useState([]);
 
   const {
-    data: mockNews = [],
+    news,
     isLoading,
-    error,
-    refetch,
-  } = useQuery({
-    queryKey: ['News'],
-    queryFn: () => getAllNewsApi(accessToken),
-    staleTime: 10 * 60 * 1000,
-    retry: 1,
-  });
-
-  useEffect(() => {
-    if (isFocused) {
-      refetch();
-    }
-  }, [isFocused, refetch]);
-
-  const handleDelete = async id => {
-    Alert.alert('Xác nhận', 'Bạn có chắc chắn muốn xóa bài viết này?', [
-      {text: 'Hủy', style: 'cancel'},
-      {
-        text: 'Xóa',
-        style: 'destructive',
-        onPress: async () => {
-          const res = await deleteNewsApi(id, accessToken);
-          if (res.success) {
-            showMessage({
-              message: 'Thành công',
-              description: 'Bài viết đã được xóa',
-              type: 'success',
-            });
-            refetch();
-          } else {
-            showMessage({
-              message: 'Thất bại',
-              description: 'Không thể xóa bài viết',
-              type: 'danger',
-            });
-          }
-        },
-      },
-    ]);
-  };
-
-  const openImageViewer = (images, index) => {
-    setSelectedImages(images);
-    setSelectedImageIndex(index);
-  };
-
-  const toggleExpand = id => {
-    setExpandedId(prev => (prev === id ? null : id));
-  };
+    loadMore,
+    hasMore,
+    expandedId,
+    selectedImageIndex,
+    selectedImages,
+    handleDelete,
+    openImageViewer,
+    closeImageViewer,
+    toggleExpand,
+  } = useNews();
 
   return (
     <View style={styles.container}>
@@ -121,9 +66,7 @@ const NewScreen = () => {
               </View>
 
               <View style={styles.infoRow}>
-                <Text style={styles.totalPosts}>
-                  {mockNews.length} bài viết
-                </Text>
+                <Text style={styles.totalPosts}>{news.length} bài viết</Text>
                 <TouchableOpacity
                   onPress={() => {
                     navigation.navigate('NoBottomTab', {
@@ -138,46 +81,43 @@ const NewScreen = () => {
 
             {isLoading ? (
               <NewsCardSkeleton count={2} />
+            ) : !isLoading && news.length === 0 ? (
+              <View style={styles.emptyWrapper}>
+                <Text style={styles.emptyText}>Không có tin tức nào</Text>
+              </View>
             ) : (
-              <NewsList
-                data={mockNews}
-                expandedId={expandedId}
-                onToggleExpand={toggleExpand}
-                onOpenImageViewer={openImageViewer}
-                onDelete={handleDelete}
+              <FlatList
+                data={news}
+                keyExtractor={item => item._id.toString()}
+                showsVerticalScrollIndicator={false}
+                renderItem={({item}) => (
+                  <NewsList
+                    data={[item]}
+                    expandedId={expandedId}
+                    onToggleExpand={toggleExpand}
+                    onOpenImageViewer={openImageViewer}
+                    onDelete={handleDelete}
+                  />
+                )}
+                onEndReached={() => {
+                  if (hasMore) loadMore();
+                }}
+                onEndReachedThreshold={0.5}
+                ListFooterComponent={
+                  hasMore ? <NewsCardSkeleton count={1} /> : null
+                }
               />
             )}
           </>
         )}
       />
 
-      <Modal visible={selectedImageIndex !== null} transparent={true}>
-        <View style={styles.modalContainer}>
-          <FlatList
-            data={selectedImages}
-            horizontal
-            pagingEnabled
-            initialScrollIndex={selectedImageIndex}
-            showsHorizontalScrollIndicator={false}
-            getItemLayout={(data, index) => ({
-              length: Dimensions.get('window').width,
-              offset: Dimensions.get('window').width * index,
-              index,
-            })}
-            renderItem={({item}) => (
-              <View style={styles.fullImageWrapper}>
-                <Image source={{uri: item}} style={styles.modalImage} />
-              </View>
-            )}
-          />
-
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setSelectedImageIndex(null)}>
-            <Ionicons name="close" size={32} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      </Modal>
+      <ImageViewerModal
+        visible={selectedImageIndex !== null}
+        images={selectedImages}
+        startIndex={selectedImageIndex || 0}
+        onClose={closeImageViewer}
+      />
     </View>
   );
 };

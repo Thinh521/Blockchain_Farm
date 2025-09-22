@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   },
   singleImage: {
     width: '100%',
-    height: scale(180),
+    height: scale(160),
     borderRadius: 16,
   },
   twoImagesRow: {
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
   },
   twoImage: {
     width: '100%',
-    height: scale(150),
+    height: scale(160),
     borderRadius: 16,
     resizeMode: 'cover',
   },
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   },
   bigImage: {
     width: '100%',
-    height: scale(150),
+    height: scale(160),
     borderRadius: 16,
   },
   imagesBox: {
@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
   },
   smallImage: {
     width: '100%',
-    height: scale(72),
+    height: scale(78),
     borderRadius: 16,
     backgroundColor: '#f0f0f0',
   },
