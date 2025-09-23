@@ -215,14 +215,15 @@ const NewsCard = ({
           <View style={styles.engagement}>
             <TouchableOpacity style={styles.engagementButton}>
               <Ionicons name="heart-outline" size={18} color="#333" />
-              <Text style={styles.engagementCount}>24</Text>
+              <Text style={styles.engagementCount}>{item.likes}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.engagementButton}>
               <Ionicons name="chatbubble-outline" size={18} color="#333" />
-              <Text style={styles.engagementCount}>8</Text>
+              <Text style={styles.engagementCount}>{item.comments}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.engagementButton}>
               <Ionicons name="share-social-outline" size={18} color="#333" />
+              <Text style={styles.engagementCount}>{item.shares}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -446,7 +447,7 @@ const styles = StyleSheet.create({
   engagement: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: scale(8),
   },
   engagementButton: {
     flexDirection: 'row',
@@ -456,13 +457,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: '#f8f9fa',
   },
-  engagementIcon: {
-    fontSize: 16,
-    marginRight: 4,
-  },
   engagementCount: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: FontSizes.xsmall,
+    fontWeight: FontWeights.semiBold,
     color: '#5a6c7d',
     marginLeft: scale(4),
   },

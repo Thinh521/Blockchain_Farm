@@ -90,4 +90,82 @@ export default StyleSheet.create({
     fontSize: 16,
     color: Colors.title,
   },
+  bottomSheetContainer: {
+    backgroundColor: Colors.white,
+    borderTopLeftRadius: scale(20),
+    borderTopRightRadius: scale(20),
+  },
+  bottomSheetHandle: {
+    backgroundColor: Colors.bottomSheetHandle,
+  },
+  bottomSheetContent: {
+    flex: 1,
+  },
+  bottomSheetHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(16),
+    borderBottomWidth: 0.5,
+    borderBottomColor: Colors.border,
+  },
+  bottomSheetHeaderTitle: {
+    color: Colors.title,
+    fontSize: FontSizes.regular,
+    fontWeight: FontWeights.semiBold,
+  },
+  tabNavigation: {
+    flexDirection: 'row',
+    paddingHorizontal: scale(20),
+    paddingTop: scale(8),
+    marginBottom: scale(16),
+  },
+  tabItem: {
+    flex: 1,
+    gap: scale(8),
+    flexDirection: 'row',
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+    justifyContent: 'center',
+  },
+  tabItemActive: {
+    borderBottomColor: Colors.green,
+  },
+  tabText: {
+    fontSize: 16,
+    fontWeight: 'normal',
+    color: '#666',
+  },
+  tabTextActive: {
+    fontWeight: '600',
+    color: Colors.green,
+  },
+  filterContent: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  bottomSheetActions: {
+    flexDirection: 'row',
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(20),
+    borderTopWidth: 1,
+    borderTopColor: Colors.border_2,
+    gap: scale(10),
+    marginTop: 'auto',
+  },
+  cancelButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    backgroundColor: '#F5F5F5',
+  },
+  cancelButtonText: {
+    color: '#666',
+  },
+  applyButton: {
+    flex: 1,
+  },
 });
