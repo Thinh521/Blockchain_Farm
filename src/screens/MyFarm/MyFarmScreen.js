@@ -1,23 +1,27 @@
-import React, {useCallback, useEffect, useState} from 'react';
-import {Text, TouchableOpacity, View} from 'react-native';
+import React, {useCallback, useState} from 'react';
+import {FlatList, Text, TouchableOpacity, View} from 'react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/core';
-import styles from './MyFarm.styles';
 import {useAppKitAccount} from '@reown/appkit-ethers-react-native';
-import {ethers} from 'ethers';
 import {CONTRACT_ADDRESS} from '@env';
+import {ethers} from 'ethers';
+
 import contractArtifact from '../SmartConctract/contractABI.json';
-import {getUser} from '../../utils/storage/authStorage';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
 import FarmList from '../../components/Farms/FarmList';
-import { useWishlist } from "../../hooks/useWishlist";
+import Header from '../../components/Header/Header';
 
+import {getUser} from '../../utils/storage/authStorage';
+import {useWishlist} from '../../hooks/useWishlist';
+
+import {scale} from '../../utils/scaling';
+import styles from './MyFarm.styles';
 
 const MyFarmScreen = () => {
   const navigation = useNavigation();
   const {isConnected} = useAppKitAccount();
   const [farms, setFarms] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { favorites, fetchWishlist } = useWishlist();
+  const {favorites, fetchWishlist} = useWishlist();
 
   const userId = getUser()?.userId;
 
@@ -65,65 +69,83 @@ const MyFarmScreen = () => {
     }
   }, [isConnected, userId]);
 
-
-useFocusEffect(
-  useCallback(() => {
-    if (isConnected) {
-      getAllFarmsUserID();
-      fetchWishlist();
-    }
-  }, [isConnected, getAllFarmsUserID, fetchWishlist])
-);
+  useFocusEffect(
+    useCallback(() => {
+      if (isConnected) {
+        getAllFarmsUserID();
+        fetchWishlist();
+      }
+    }, [isConnected, getAllFarmsUserID, fetchWishlist]),
+  );
   return (
-    <View style={styles.mainContent}>
-      <View style={styles.resultsHeader}>
-        <View>
-          <Text style={styles.sectionTitle}>Trang Trại Nổi Bật</Text>
-          <Text style={styles.resultsCount}>
-            Tìm thấy {farms.length} trang trại phù hợp
-          </Text>
-        </View>
-        <TouchableOpacity
-          style={styles.seeAllButton}
-          activeOpacity={0.7}
-          onPress={() =>
-            navigation.navigate('NoBottomTab', {
-              screen: 'AllFarms',
-              params: {
-                farms: farms,
-                favorites,
-                isLoading: isLoading,
-              },
-            })
-          }>
-          <Text style={styles.seeAllText}>Xem tất cả</Text>
-        </TouchableOpacity>
-      </View>
+    <View style={styles.contaiber}>
+      <Header
+        title="Nông trại của tôi"
+        subtitle="Quản lý & cập nhật các nông trại của bạn"
+        emoji="🏡"
+        showBack={true}
+      />
 
-      {isLoading ? (
-        <FarmCardSkeleton count={4} />
-      ) : farms.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyTitle}>Không tìm thấy trang trại nào</Text>
-          <Text style={styles.emptySubtitle}>
-            Thử thay đổi từ khóa tìm kiếm hoặc chọn danh mục khác để khám phá
-            thêm nhiều trang trại
-          </Text>
-        </View>
-      ) : (
-        <FarmList
-          farms={farms}
-          favorites={favorites}
-          isLoading={isLoading}
-          isUserFarm={true}
-          onPressFarm={farm =>
-            navigation.navigate('FarmDetail', {
-              farm,
-              isFavorite: favorites.has(farm.farmCode),
-            })
-          }
-        />
-      )}
+      <FlatList
+        data={[1]}
+        keyExtractor={(_, index) => index.toString()}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{paddingBottom: 80, padding: scale(20)}}
+        renderItem={() => (
+          <>
+            <View style={styles.resultsHeader}>
+              <View>
+                <Text style={styles.sectionTitle}>Trang Trại Nổi Bật</Text>
+                <Text style={styles.resultsCount}>
+                  Tìm thấy {farms.length} trang trại phù hợp
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={styles.seeAllButton}
+                activeOpacity={0.7}
+                onPress={() =>
+                  navigation.navigate('NoBottomTab', {
+                    screen: 'AllFarms',
+                    params: {
+                      farms: farms,
+                      favorites,
+                      isLoading: isLoading,
+                    },
+                  })
+                }>
+                <Text style={styles.seeAllText}>Xem tất cả</Text>
+              </TouchableOpacity>
+            </View>
+
+            {isLoading ? (
+              <FarmCardSkeleton count={4} />
+            ) : farms.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyTitle}>
+                  Không tìm thấy trang trại nào
+                </Text>
+                <Text style={styles.emptySubtitle}>
+                  Thử thay đổi từ khóa tìm kiếm hoặc chọn danh mục khác để khám
+                  phá thêm nhiều trang trại
+                </Text>
+              </View>
+            ) : (
+              <FarmList
+                farms={farms}
+                favorites={favorites}
+                isLoading={isLoading}
+                isUserFarm={true}
+                onPressFarm={farm =>
+                  navigation.navigate('FarmDetail', {
+                    farm,
+                    isFavorite: favorites.has(farm.farmCode),
+                  })
+                }
+              />
+            )}
+          </>
+        )}
+      />
     </View>
   );
 };

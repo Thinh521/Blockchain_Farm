@@ -7,6 +7,7 @@ const {width, height} = Dimensions.get('window');
 export default StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: Colors.background,
   },
   connectContainer: {
     flex: 1,

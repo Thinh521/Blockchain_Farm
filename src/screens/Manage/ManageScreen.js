@@ -1,15 +1,17 @@
 import React, {useEffect, useRef} from 'react';
-import {Text, View, SafeAreaView, Animated, StatusBar} from 'react-native';
+import {Text, View, SafeAreaView, Animated} from 'react-native';
 import {
   AppKitButton,
   useAppKitAccount,
 } from '@reown/appkit-ethers-react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import FastImage from 'react-native-fast-image';
-import Images from '../../assets/images/images';
-import {Colors} from '../../theme/theme';
-import styles from './ManageScreen.styles';
 import {useNavigation} from '@react-navigation/core';
+
+import Header from '../../components/Header/Header';
+import Images from '../../assets/images/images';
+
+import styles from './ManageScreen.styles';
 
 const FloatingIcon = ({name, style, animationDelay = 0}) => {
   const bounceAnim = useRef(new Animated.Value(0)).current;
@@ -136,7 +138,13 @@ const ManageScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={Colors.green} barStyle="light-content" />
+      <Header
+        title="Kết nối ví"
+        subtitle="Liên kết ví để sử dụng đầy đủ tính năng"
+        emoji="👛"
+        showBack={true}
+      />
+
       <View style={{flex: 1}}>{renderConnectScreen()}</View>
     </SafeAreaView>
   );

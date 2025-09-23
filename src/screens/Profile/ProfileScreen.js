@@ -193,6 +193,7 @@ const ProfileScreen = () => {
         title="Cập nhật thông tin"
         subtitle="Chỉnh sửa và quản lý thông tin của bạn"
         emoji="📝"
+        showBack={true}
       />
       <ScrollView
         style={styles.container}

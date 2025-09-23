@@ -81,6 +81,7 @@ const ChangePasswordScreen = () => {
         title="Đổi mật khẩu"
         subtitle="Bảo mật tài khoản của bạn an toàn hơn"
         emoji="🔒"
+        showBack={true}
       />
 
       <ScrollView

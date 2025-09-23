@@ -1,16 +1,38 @@
 import React from 'react';
-import {StatusBar, StyleSheet, Text, View} from 'react-native';
-import {Colors, FontWeights} from '../../theme/theme';
+import {
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import {useNavigation} from '@react-navigation/core';
+
+import {Colors, FontSizes, FontWeights} from '../../theme/theme';
 import {scale} from '../../utils/scaling';
 
-const Header = ({title, subtitle, emoji = '🌱'}) => {
+const Header = ({title, subtitle, emoji = '🌱', showBack = false}) => {
+  const navigation = useNavigation();
+
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor={Colors.green} />
 
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>{title}</Text>
-        <Text style={styles.headerSubtitle}>{subtitle}</Text>
+        {showBack && (
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}>
+            <Ionicons name="chevron-back" size={24} color={Colors.white} />
+          </TouchableOpacity>
+        )}
+
+        <View>
+          <Text style={styles.headerTitle}>{title}</Text>
+          <Text style={styles.headerSubtitle}>{subtitle}</Text>
+        </View>
+
         <View style={styles.headerDecoration}>
           <Text style={styles.decorEmoji}>{emoji}</Text>
         </View>
@@ -23,15 +45,26 @@ export default Header;
 
 const styles = StyleSheet.create({
   header: {
-    paddingHorizontal: 24,
-    paddingTop: 20,
-    paddingBottom: scale(20),
+    paddingHorizontal: scale(20),
+    paddingTop: scale(18),
+    paddingBottom: scale(18),
     backgroundColor: Colors.green,
     position: 'relative',
     overflow: 'hidden',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    width: scale(40),
+    height: scale(40),
+    borderRadius: scale(20),
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: scale(14),
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: FontSizes.large,
     fontWeight: FontWeights.semiBold,
     color: Colors.white,
     marginBottom: scale(2),

@@ -107,16 +107,8 @@ const routerNoBottomTab = [
     component: RegisterManage,
     hasLayout: false,
     options: {
-      title: 'Đăng ký quản lý trang trại',
-      headerShown: true,
-      headerStyle: {
-        backgroundColor: Colors.green,
-      },
-      headerTintColor: Colors.white,
-      headerTitleStyle: {
-        fontWeight: 'bold',
-        fontSize: 18,
-      },
+      title: 'Đăng ký quản lý nông trại',
+      headerShown: false,
     },
   },
   {
@@ -172,15 +164,7 @@ const routerNoBottomTab = [
     hasLayout: false,
     options: {
       title: 'Quản lí nông trại',
-      headerShown: true,
-      headerStyle: {
-        backgroundColor: Colors.green,
-      },
-      headerTintColor: Colors.white,
-      headerTitleStyle: {
-        fontWeight: 'bold',
-        fontSize: 18,
-      },
+      headerShown: false,
     },
   },
   {
@@ -189,15 +173,7 @@ const routerNoBottomTab = [
     hasLayout: false,
     options: {
       title: 'Nông trại của tôi',
-      headerShown: true,
-      headerStyle: {
-        backgroundColor: Colors.green,
-      },
-      headerTintColor: Colors.white,
-      headerTitleStyle: {
-        fontWeight: 'bold',
-        fontSize: 18,
-      },
+      headerShown: false,
     },
   },
   {
@@ -206,15 +182,7 @@ const routerNoBottomTab = [
     hasLayout: false,
     options: {
       title: 'Nông trại yêu thích',
-      headerShown: true,
-      headerStyle: {
-        backgroundColor: Colors.green,
-      },
-      headerTintColor: Colors.white,
-      headerTitleStyle: {
-        fontWeight: 'bold',
-        fontSize: 18,
-      },
+      headerShown: false,
     },
   },
   {

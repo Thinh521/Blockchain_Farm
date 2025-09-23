@@ -5,10 +5,7 @@ import {Colors, FontSizes, FontWeights} from '../../theme/theme';
 export default StyleSheet.create({
   contaiber: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f5f5f5',
-    padding: scale(20),
+    backgroundColor: Colors.background,
   },
   sectionTitle: {
     fontSize: FontSizes.regular,
@@ -26,44 +23,12 @@ export default StyleSheet.create({
     fontSize: FontSizes.small,
     fontWeight: FontWeights.medium,
   },
-  mainContent: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    backgroundColor: '#F9FAFB',
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 40,
-  },
-  loadingSpinner: {
-    width: 60,
-    height: 60,
-    backgroundColor: '#ECFDF5',
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  loadingEmoji: {
-    fontSize: 28,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#6B7280',
-  },
   emptyContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 40,
     paddingVertical: 40,
-  },
-  emptyEmoji: {
-    fontSize: 48,
-    marginBottom: 16,
   },
   emptyTitle: {
     fontSize: 18,
