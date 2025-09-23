@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  Keyboard,
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {showMessage} from 'react-native-flash-message';
@@ -64,51 +65,63 @@ const OTPScreen = ({navigation, route}) => {
     }
   };
 
-  const handleContinue = async () => {
-    const code = otpCode.join('');
-    if (code.length !== 6) {
-      return showMessage({
+const handleContinue = async () => {
+  Keyboard.dismiss();
+  const code = otpCode.join('');
+  if (code.length !== 6) {
+    return showMessage({
+      message: 'Lỗi',
+      description: 'Vui lòng nhập đầy đủ mã OTP',
+      type: 'danger',
+    });
+  }
+
+  try {
+    setLoading(true); 
+    const payload = {email, type, otp: code};
+    const res = await verifyOtpApi(payload);
+
+    if (res.success) {
+      if (type === 'resetPassword') {
+        showMessage({
+          message: 'Thành công',
+          description: 'Xác thực OTP thành công',
+          type: 'success',
+        });
+        navigation.navigate('ResetPassword', {email});
+      } else if (type === 'updateEmail') {
+        showMessage({
+          message: 'Thành công',
+          description: 'Xác thực OTP thành công',
+          type: 'success',
+        });
+        navigation.goBack();
+      } else {
+        showMessage({
+          message: 'Thành công',
+          description: res.message || 'Xác thực OTP thành công',
+          type: 'success',
+        });
+        navigation.navigate('Login');
+      }
+    } else {
+      showMessage({
         message: 'Lỗi',
-        description: 'Vui lòng nhập đầy đủ mã OTP',
+        description: res.message || 'Xác thực OTP thất bại',
         type: 'danger',
       });
     }
+  } catch (err) {
+    showMessage({
+      message: 'Lỗi',
+      description: 'Không thể xác thực OTP',
+      type: 'danger',
+    });
+  } finally {
+    setLoading(false); 
+  }
+};
 
-    try {
-      setLoading(true); // ✅ bật loading
-      const payload = {email, type, otp: code};
-      const res = await verifyOtpApi(payload);
-
-      if (res.success) {
-        if (type === 'resetPassword') {
-          Alert.alert('Thành công', 'Xác thực OTP thành công', [
-            {
-              text: 'OK',
-              onPress: () => navigation.navigate('ResetPassword', {email}),
-            },
-          ]);
-        } else if (type === 'updateEmail') {
-          showMessage({
-            message: 'Xác thực OTP thành công',
-            type: 'success',
-            icon: 'success',
-          });
-          navigation.goBack();
-        } else {
-          Alert.alert('Thành công', res.message, [
-            {text: 'OK', onPress: () => navigation.navigate('Login')},
-          ]);
-        }
-      } else {
-        Alert.alert('Lỗi', res.message || 'Xác thực OTP thất bại');
-      }
-    } catch (err) {
-      console.log('❌ OTP error:', err);
-      Alert.alert('Lỗi', 'Không thể xác thực OTP');
-    } finally {
-      setLoading(false); // ✅ tắt loading
-    }
-  };
 
   const handleResend = async () => {
     if (canResend) {

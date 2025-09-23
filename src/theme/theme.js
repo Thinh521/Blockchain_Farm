@@ -1,9 +1,9 @@
 import {scale} from '../utils/scaling';
 
 export const Colors = {
-  primary: '#007E2F',
+  primary: '#059669',
   secondary: '#10b981',
-  background: '#F5F5F5',
+  background: '#F9FAFB',
   gray: '#6B7280',
   white: '#FFFFFF',
   black: '#000000',
@@ -12,7 +12,7 @@ export const Colors = {
   border_2: '#E5E7EB',
   title: '#212121',
   green: '#059669',
-  
+  inputText: 'A8A8A9',
 };
 
 export const FontSizes = {

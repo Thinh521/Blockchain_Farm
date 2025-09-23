@@ -31,7 +31,7 @@ export default StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: FontSizes.medium,
+    fontSize: FontSizes.small,
     paddingVertical: 0,
     height: '100%',
   },

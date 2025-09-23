@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Keyboard,
   Platform,
+  Text,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {CommonActions} from '@react-navigation/native';
@@ -115,8 +116,8 @@ const CustomTabBar = ({state, descriptors, navigation, config = {}}) => {
       bottom: 0,
       height: tabBarHeight,
       backgroundColor,
-      borderTopWidth: 0.5,
-      borderTopColor: '#CCC',
+      borderTopWidth: 1,
+      borderTopColor: Colors.border_2,
       ...Shadows.medium,
       transform: [
         {
@@ -148,25 +149,6 @@ const CustomTabBar = ({state, descriptors, navigation, config = {}}) => {
     activeLabel: {
       color: activeColor,
     },
-    badgeContainer: {
-      position: 'absolute',
-      top: -8,
-      left: '20%',
-      backgroundColor: '#FF3B30',
-      borderRadius: scale(999),
-      minWidth: scale(18),
-      height: scale(18),
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: scale(6),
-      zIndex: 1,
-    },
-    badgeText: {
-      textAlign: 'center',
-      color: Colors.white,
-      fontSize: FontSizes.xsmall,
-      fontWeight: FontWeights.semiBold,
-    },
     iconContainer: {
       position: 'relative',
     },
@@ -175,15 +157,14 @@ const CustomTabBar = ({state, descriptors, navigation, config = {}}) => {
   const handleTabPress = (index, route) => {
     const user = getUser();
     const isHome = route.name === 'Home';
+    const isQrScan = route.name === 'QrScan';
 
-    if (!user && !isHome) {
+    if (!user && !isHome && !isQrScan) {
       navigation.navigate('NoBottomTab', {
         screen: 'LoginRequired',
       });
       return;
     }
-
-    const {options} = descriptors[route.key];
 
     const event = navigation.emit({
       type: 'tabPress',
@@ -228,19 +209,22 @@ const CustomTabBar = ({state, descriptors, navigation, config = {}}) => {
                 key={route.key}
                 style={{
                   position: 'relative',
-                  top: -20,
+                  top: -10,
                   width: 70,
                   height: 70,
-                  borderRadius: 35,
+                  borderRadius: 999,
                   backgroundColor: focused
                     ? centerActiveColor
                     : centerInactiveColor,
                   justifyContent: 'center',
                   alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: focused ? Colors.green : Colors.border_2,
+                  ...Shadows.light,
                 }}
                 onPress={handlePress}>
                 <Icon
-                  size={32}
+                  size={36}
                   style={{color: focused ? Colors.white : activeColor}}
                 />
               </TouchableOpacity>
@@ -258,16 +242,6 @@ const CustomTabBar = ({state, descriptors, navigation, config = {}}) => {
             onPressOut: () => handlePressOut(index, focused),
           };
 
-          const icon = (
-            <Animated.View style={{transform: [{scale: iconScales[index]}]}}>
-              <Icon
-                style={{color: focused ? activeColor : inactiveColor}}
-                focused={focused}
-                size={iconSize}
-              />
-            </Animated.View>
-          );
-
           return (
             <TouchableOpacity
               key={route.key}
@@ -277,11 +251,17 @@ const CustomTabBar = ({state, descriptors, navigation, config = {}}) => {
                 <Animated.View
                   style={{transform: [{scale: iconScales[index]}]}}>
                   <Icon
-                    size={24}
+                    focused={focused}
+                    size={iconSize}
+                    activeColor={activeColor}
+                    inactiveColor={inactiveColor}
                     style={{color: focused ? activeColor : inactiveColor}}
                   />
                 </Animated.View>
               </View>
+              <Text style={[styles.tabLabel, focused && styles.activeLabel]}>
+                {label}
+              </Text>
             </TouchableOpacity>
           );
         })}

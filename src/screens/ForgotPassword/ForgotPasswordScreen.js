@@ -31,7 +31,7 @@ const ForgotPasswordScreen = ({navigation}) => {
 
   const [loading, setLoading] = useState(false);
 
-  const onSubmit = async (data) => {
+  const onSubmit = async data => {
     try {
       setLoading(true);
       const res = await forgotPasswordApi({email: data.email});
@@ -55,7 +55,7 @@ const ForgotPasswordScreen = ({navigation}) => {
         });
       }
     } catch (err) {
-      console.log('❌ Forgot password error:', err);
+      console.log(' Forgot password error:', err);
       showMessage({
         message: 'Lỗi',
         description: 'Không thể gửi email',
@@ -78,10 +78,10 @@ const ForgotPasswordScreen = ({navigation}) => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}>
           <View style={styles.container}>
-            <Text style={styles.title}>Forgot password?</Text>
+            <Text style={styles.title}>Quên mật khẩu?</Text>
             <Text style={styles.subtitle}>
-              Enter your email address and we'll send you{'\n'}confirmation code
-              to reset your password
+              Nhập địa chỉ email của bạn và chúng tôi sẽ gửi {'\n'}cho bạn mã
+              xác nhận để đặt lại mật khẩu
             </Text>
 
             <Controller
@@ -89,17 +89,17 @@ const ForgotPasswordScreen = ({navigation}) => {
               name="email"
               rules={{
                 required: 'Email là bắt buộc',
-                validate: (val) => validateEmail(val) || 'Email không hợp lệ',
+                validate: val => validateEmail(val) || 'Email không hợp lệ',
               }}
               render={({field: {onChange, value}}) => (
                 <Input
-                style={styles.inputContainer}
-                  label="Email Address"
-                  placeholder="Albertstevano@gmail.com"
+                  style={styles.inputContainer}
+                  label="Email "
+                  placeholder="nguyenvana@gmail.com"
                   placeholderTextColor="#ccc"
                   value={value}
                   onChangeText={onChange}
-                  keyboardType="email-address"
+                  keyboardType="Email"
                   autoCapitalize="none"
                   autoComplete="email"
                   textContentType="emailAddress"
@@ -110,7 +110,7 @@ const ForgotPasswordScreen = ({navigation}) => {
             />
 
             <Button.Main
-              title="Continue"
+              title="Tiếp tục"
               onPress={handleSubmit(onSubmit)}
               style={styles.continueButton}
               loading={loading}

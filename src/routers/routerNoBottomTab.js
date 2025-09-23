@@ -15,6 +15,11 @@ import {Colors} from '../theme/theme';
 import ManageScreen from '../screens/Manage/ManageScreen';
 import MyFarmScreen from '../screens/MyFarm/MyFarmScreen';
 import WishListScreen from '../screens/WishList/WishListScreen';
+import AddMewsScreen from '../screens/New/AddNewsScreen';
+import CategoriesScreen from '../screens/Categories/CategoriesScreen';
+import AddProductScreen from '../screens/AddProduct/AddProductScreen';
+import ProductScreen from '../screens/Product/ProductScreen';
+import ProcessScreen from '../screens/Process/ProcessSreen';
 
 const routerNoBottomTab = [
   {
@@ -101,7 +106,7 @@ const routerNoBottomTab = [
     name: 'RegisterManage',
     component: RegisterManage,
     hasLayout: false,
-     options: {
+    options: {
       title: 'Đăng ký quản lý trang trại',
       headerShown: true,
       headerStyle: {
@@ -201,6 +206,91 @@ const routerNoBottomTab = [
     hasLayout: false,
     options: {
       title: 'Nông trại yêu thích',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'AddMewsScreen',
+    component: AddMewsScreen,
+    hasLayout: false,
+    options: {
+      title: 'Thêm tin tức',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'Categories',
+    component: CategoriesScreen,
+    hasLayout: false,
+    options: {
+      title: 'Danh mục nông sản',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'AddProduct',
+    component: AddProductScreen,
+    hasLayout: false,
+    options: {
+      title: 'Thêm sản phẩm',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'Product',
+    component: ProductScreen,
+    hasLayout: false,
+    options: {
+      title: 'Thêm sản phẩm',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'Process',
+    component: ProcessScreen,
+    hasLayout: false,
+    options: {
+      title: 'Thêm quy trình',
       headerShown: true,
       headerStyle: {
         backgroundColor: Colors.green,

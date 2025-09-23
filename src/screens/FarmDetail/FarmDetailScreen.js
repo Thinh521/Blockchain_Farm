@@ -1,4 +1,4 @@
-import React, {useState, useRef, useCallback, useEffect} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -10,22 +10,31 @@ import {
   Animated,
   Modal,
   Linking,
+  FlatList,
 } from 'react-native';
-import {ethers} from 'ethers';
-import {CONTRACT_ADDRESS} from '@env';
-import contractArtifact from '../SmartConctract/contractABI.json';
 import styles from './FarmDetail.styles';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {Arrow_Left_Line_Icon} from '../../assets/icons';
 import {useRoute} from '@react-navigation/core';
 import Button from '../../components/CustomButton/CustomButton';
 import FastImage from 'react-native-fast-image';
-import {useAppKitAccount} from '@reown/appkit-ethers-react-native';
 import FarmSlider from '../../components/Farms/FarmSlider';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
 import ImageCarousel from './components/ImageCarousel';
 import Tabs from './components/Tabs';
 import BottomActionBar from './components/BottomActionBar';
+import {useFarms} from '../../hooks/useFarms';
+import {useWishlist} from '../../context/WishlistContext';
+import {CONTRACT_ADDRESS} from '@env';
+import contractArtifact from '../SmartConctract/contractABI.json';
+
+import {
+  getWishlistFarms,
+  addWishlistFarm,
+  removeWishlistFarm,
+} from '../../api/wishlist/wishlistApi';
+import {ethers} from 'ethers';
+import api from '../../api/tokenApi';
 
 const farmData = {
   farmCode: 'F001',
@@ -106,75 +115,113 @@ const farmData = {
 
 const FarmDetailScreen = ({navigation}) => {
   const {farm} = useRoute().params;
-  const {isConnected} = useAppKitAccount();
-  const [farms, setFarms] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [favorites, setFavorites] = useState(new Set());
+  const [isLoading, setIsLoading] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isFavorite, setIsFavorite] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [wishlist, setWishlist] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
   const scrollY = useRef(new Animated.Value(0)).current;
 
-  const getAllFarms = useCallback(async () => {
-    if (!isConnected) {
-      return;
-    }
-    setIsLoading(true);
+  const {farms, isLoading: farmsLoading, error, refetch} = useFarms();
 
+useEffect(() => {
+  let isMounted = true;
+
+  const fetchProducts = async () => {
     try {
-      const rpcProvider = new ethers.JsonRpcProvider(
-        'https://rpc.zeroscan.org',
-      );
+      setLoadingProducts(true);
 
+      // 1. Lấy danh sách sản phẩm từ Smart Contract
+      const rpcProvider = new ethers.JsonRpcProvider('https://rpc.zeroscan.org');
       const contractRead = new ethers.Contract(
         CONTRACT_ADDRESS,
         contractArtifact.abi,
         rpcProvider,
       );
 
-      const farmsData = await contractRead.getAllFarms();
+      const productsData = await contractRead.getProductByFarmCode(farm.farmCode);
 
-      const formattedFarms = farmsData.map((farm, idx) => {
+      const formattedProducts = productsData.map(product => {
+        const images =
+          typeof product.image === 'string'
+            ? product.image
+                .split(/[,|]/)
+                .map(url => url.trim())
+                .filter(Boolean)
+            : [];
+
         return {
-          farmCode: farm.farmCode || farm[0],
-          fullname: farm.fullname || farm[1],
-          nameFarm: farm.nameFarm || farm[2],
-          userId: farm.userId || farm[3],
-          email: farm.email || farm[4],
-          phone: farm.phone || farm[5],
-          description: farm.description || farm[6],
-          location: farm.location || farm[7],
-          area: farm.area?.toString?.() || farm[8]?.toString?.() || '',
-          image: Array.isArray(farm.images || farm[9])
-            ? farm.images || farm[9]
-            : [],
+          farmCode: product.farmCode,
+          productCode: product.productCode,
+          categoryName: product.categoryName,
+          name: product.name,
+          quantity: product.quantity,
+          price: product.price,
+          area: product.area,
+          image: images,
+          description: product.description,
         };
       });
 
-      setFarms(formattedFarms);
-    } catch (error) {
-      console.log('Lỗi getAllFarms:', error);
-      setFarms([]);
+      // 2. Lấy danh sách sản phẩm từ Backend
+      const backendRes = await api.get(`/api/farms/${farm.farmCode}/products`);
+      console.log('📥 Backend products for farmCode', farm.farmCode, ':', backendRes.data);
+
+      const backendCodes = Array.isArray(backendRes.data.data)
+        ? backendRes.data.data.map(p => p.productCode)
+        : [];
+
+      // 3. Lọc ra sản phẩm có ở cả SC và Backend
+      const syncedProducts = formattedProducts.filter(p =>
+        backendCodes.includes(p.productCode),
+      );
+
+      console.log('✅ Synced products:', syncedProducts);
+
+      if (isMounted) setProducts(syncedProducts);
+    } catch (err) {
+      console.error('❌ Error fetchProducts:', err);
     } finally {
-      setIsLoading(false);
+      if (isMounted) setLoadingProducts(false);
     }
-  }, [isConnected]);
+  };
 
-  useEffect(() => {
-    if (isConnected) {
-      getAllFarms();
-    }
-  }, [isConnected, getAllFarms]);
+  fetchProducts();
 
-  const toggleFavorite = farmCode => {
-    const newFavorites = new Set(favorites);
-    if (newFavorites.has(farmCode)) {
-      newFavorites.delete(farmCode);
-    } else {
-      newFavorites.add(farmCode);
+  return () => {
+    isMounted = false;
+  };
+}, [farm.farmCode]);
+
+
+
+  const handleToggleFavorite = async farmCode => {
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      if (wishlist.some(f => String(f.farmCode) === String(farmCode))) {
+        await removeWishlistFarm(farmCode);
+        setWishlist(prev =>
+          prev.filter(f => String(f.farmCode) !== String(farmCode)),
+        );
+        if (farmCode === farm.farmCode) setIsFavorite(false);
+      } else {
+        await addWishlistFarm(farmCode);
+        setWishlist(prev => [...prev, {farmCode}]);
+        if (farmCode === farm.farmCode) setIsFavorite(true);
+      }
+    } catch (err) {
+      console.log('Lỗi toggle favorite:', err);
+    } finally {
+      setLoading(false);
     }
-    setFavorites(newFavorites);
   };
 
   const handleCall = () => {
@@ -242,22 +289,28 @@ const FarmDetailScreen = ({navigation}) => {
           <View style={styles.infoItem}>
             <Ionicons name="resize-outline" size={16} color="#6B7280" />
             <Text style={styles.infoLabel}>Diện tích</Text>
-            <Text style={styles.infoValue}>{farm.area} hecta</Text>
+            <Text style={styles.infoValue}>{farm.area || '1000'} hecta</Text>
           </View>
           <View style={styles.infoItem}>
             <Ionicons name="calendar-outline" size={16} color="#6B7280" />
             <Text style={styles.infoLabel}>Thành lập</Text>
-            <Text style={styles.infoValue}>{farmData.established}</Text>
+            <Text style={styles.infoValue}>
+              {farmData.established || '2015'}
+            </Text>
           </View>
           <View style={styles.infoItem}>
             <Ionicons name="time-outline" size={16} color="#6B7280" />
             <Text style={styles.infoLabel}>Giờ mở cửa</Text>
-            <Text style={styles.infoValue}>{farmData.openHours}</Text>
+            <Text style={styles.infoValue}>
+              {farmData.openHours || '6:00 - 18:00 (Thứ 2 - Chủ nhật)'}
+            </Text>
           </View>
           <View style={styles.infoItem}>
             <Ionicons name="cash-outline" size={16} color="#6B7280" />
             <Text style={styles.infoLabel}>Phí tham quan</Text>
-            <Text style={styles.infoValue}>{farmData.visitPrice}</Text>
+            <Text style={styles.infoValue}>
+              {farmData.visitPrice || '50,000 VNĐ/người'}
+            </Text>
           </View>
         </View>
       </View>
@@ -309,24 +362,76 @@ const FarmDetailScreen = ({navigation}) => {
           <Text style={styles.cardTitle}>Sản phẩm nổi bật</Text>
         </View>
 
-        <View style={styles.productsGrid}>
-          {farmData.products.map((product, index) => (
-            <TouchableOpacity key={index} style={styles.productCard}>
-              <FastImage
-                source={{uri: product.image}}
-                style={styles.productImage}
-              />
-              <View style={styles.productInfo}>
-                <Text style={styles.productName} numberOfLines={1}>
-                  {product.name}
-                </Text>
-                <Text style={styles.productPrice}>
-                  {product.price} VNĐ/{product.unit}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {loadingProducts ? (
+          <Text style={{textAlign: 'center', margin: 10}}>
+            Đang tải sản phẩm...
+          </Text>
+        ) : products.length === 0 ? (
+          <Text style={{textAlign: 'center', marginTop: 10}}>
+            Chưa có nông sản nào.
+          </Text>
+        ) : products.length > 4 ? (
+          <FlatList
+            data={products}
+            keyExtractor={(item, index) => String(item.productCode || index)}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{paddingHorizontal: 8}}
+            renderItem={({item}) => (
+              <TouchableOpacity
+                style={[styles.productCard, {width: 160, marginRight: 12}]}
+                onPress={() =>
+                  navigation.navigate('Product', {
+                    productCode: item.productCode,
+                  })
+                }>
+                <FastImage
+                  source={{
+                    uri:
+                      item.image?.[0] ||
+                      'https://via.placeholder.com/300x200.png?text=No+Image',
+                  }}
+                  style={styles.productImage}
+                />
+                <View style={styles.productInfo}>
+                  <Text style={styles.productName} numberOfLines={1}>
+                    {item.name}
+                  </Text>
+                  <Text style={styles.productPrice}>{item.price} VNĐ</Text>
+                </View>
+              </TouchableOpacity>
+            )}
+          />
+        ) : (
+          // 🔹 Nếu ≤ 4 thì giữ grid như cũ
+          <View style={styles.productsGrid}>
+            {products.map((product, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.productCard}
+                onPress={() =>
+                  navigation.navigate('Product', {
+                    productCode: product.productCode,
+                  })
+                }>
+                <FastImage
+                  source={{
+                    uri:
+                      product.image?.[0] ||
+                      'https://via.placeholder.com/300x200.png?text=No+Image',
+                  }}
+                  style={styles.productImage}
+                />
+                <View style={styles.productInfo}>
+                  <Text style={styles.productName} numberOfLines={1}>
+                    {product.name}
+                  </Text>
+                  <Text style={styles.productPrice}>{product.price} VNĐ</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
       </View>
     </View>
   );
@@ -392,10 +497,11 @@ const FarmDetailScreen = ({navigation}) => {
         <Arrow_Left_Line_Icon style={{color: '#fff'}} />
       </TouchableOpacity>
 
-      <View style={styles.floatingActions}>
+      <View style={[styles.floatingActions]}>
         <TouchableOpacity
           style={[styles.floatingActionButton, {marginTop: 8}]}
-          onPress={() => setIsFavorite(!isFavorite)}>
+          onPress={() => handleToggleFavorite(farm.farmCode)} // ✅ truyền đúng farmCode
+          disabled={loading}>
           <Ionicons
             name={isFavorite ? 'heart' : 'heart-outline'}
             size={20}
@@ -453,8 +559,8 @@ const FarmDetailScreen = ({navigation}) => {
                   screen: 'AllFarms',
                   params: {
                     farms: farms,
-                    favorites,
-                    toggleFavorite,
+                    isFavorite,
+                    handleToggleFavorite,
                   },
                 })
               }>
@@ -478,8 +584,8 @@ const FarmDetailScreen = ({navigation}) => {
             <>
               <FarmSlider
                 farms={farms}
-                favorites={favorites}
-                toggleFavorite={toggleFavorite}
+                favorites={new Set(wishlist.map(f => String(f.farmCode)))}
+                toggleFavorite={handleToggleFavorite}
               />
             </>
           )}

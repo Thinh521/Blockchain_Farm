@@ -11,33 +11,34 @@ import {
 import {
   Flower_Line_Icon,
   Leaf_Line_Icon,
-  NotificationTabIcon,
+  NotificationIcon,
   Search_Line_Icon,
   Sun_Line_Icon,
   User_Line_Icon,
   UserIcon,
 } from '../../assets/icons';
-import {ethers} from 'ethers';
-import {CONTRACT_ADDRESS} from '@env';
-import contractArtifact from '../SmartConctract/contractABI.json';
-import {useAppKitAccount} from '@reown/appkit-ethers-react-native';
 import Carousel from './components/Carousel';
 import styles from './Home.styles';
 import Features from './components/Features';
 import Footer from './components/Footer';
 import Categories from './components/Categories';
 import FarmList from '../../components/Farms/FarmList';
-import {useNavigation} from '@react-navigation/core';
+import {useFocusEffect, useNavigation} from '@react-navigation/core';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
+import {useFarms} from '../../hooks/useFarms';
+import {getWishlistFarms} from '../../api/wishlist/wishlistApi';
+import {useUser} from '../../hooks/useUser';
+import FastImage from 'react-native-fast-image';
+import Images from '../../assets/images/images';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const {isConnected} = useAppKitAccount();
-  const [farms, setFarms] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [favorites, setFavorites] = useState(new Set());
+
+  const {farms, isLoading, error, refetch} = useFarms();
+  const {data: user} = useUser();
 
   const categories = [
     {id: 'all', name: 'Tất cả', icon: Leaf_Line_Icon},
@@ -46,56 +47,26 @@ const HomeScreen = () => {
     {id: 'livestock', name: 'Chăn nuôi', icon: User_Line_Icon},
   ];
 
-  const getAllFarms = useCallback(async () => {
-    if (!isConnected) {
-      return;
-    }
-    setIsLoading(true);
-
+  const fetchWishlist = useCallback(async () => {
     try {
-      const rpcProvider = new ethers.JsonRpcProvider(
-        'https://rpc.zeroscan.org',
-      );
-
-      const contractRead = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        contractArtifact.abi,
-        rpcProvider,
-      );
-
-      const farmsData = await contractRead.getAllFarms();
-
-      const formattedFarms = farmsData.map((farm, idx) => {
-        return {
-          farmCode: farm.farmCode || farm[0],
-          fullname: farm.fullname || farm[1],
-          nameFarm: farm.nameFarm || farm[2],
-          userId: farm.userId || farm[3],
-          email: farm.email || farm[4],
-          phone: farm.phone || farm[5],
-          description: farm.description || farm[6],
-          location: farm.location || farm[7],
-          area: farm.area?.toString?.() || farm[8]?.toString?.() || '',
-          image: Array.isArray(farm.images || farm[9])
-            ? farm.images || farm[9]
-            : [],
-        };
-      });
-
-      setFarms(formattedFarms);
-    } catch (error) {
-      console.log('Lỗi getAllFarms:', error);
-      setFarms([]);
-    } finally {
-      setIsLoading(false);
+      const res = await getWishlistFarms();
+      const wishlistFarmsApi = res?.wishlist?.farms || [];
+      setFavorites(new Set(wishlistFarmsApi.map(f => f.farmCode)));
+    } catch (err) {
+      console.log('Lỗi fetch wishlist:', err);
+      setFavorites(new Set());
     }
-  }, [isConnected]);
+  }, []);
 
   useEffect(() => {
-    if (isConnected) {
-      getAllFarms();
-    }
-  }, [isConnected, getAllFarms]);
+    fetchWishlist();
+  }, [fetchWishlist]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchWishlist();
+    }, [fetchWishlist]),
+  );
 
   const filteredFarms = farms.filter(
     farm =>
@@ -103,20 +74,11 @@ const HomeScreen = () => {
       farm.location.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const toggleFavorite = farmCode => {
-    const newFavorites = new Set(favorites);
-    if (newFavorites.has(farmCode)) {
-      newFavorites.delete(farmCode);
-    } else {
-      newFavorites.add(farmCode);
-    }
-    setFavorites(newFavorites);
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#059669" />
 
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerContent}>
           <View style={styles.welcomeSection}>
@@ -131,10 +93,29 @@ const HomeScreen = () => {
               <View style={styles.headerActions}>
                 <TouchableOpacity style={styles.notificationButton}>
                   <View style={styles.notificationDot} />
-                  <NotificationTabIcon style={{color: '#fff', width: 18}} />
+                  <NotificationIcon style={{color: '#fff', width: 18}} />
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.profileButton}>
-                  <UserIcon style={{color: '#fff', width: 18}} />
+                <TouchableOpacity
+                  style={styles.profileButton}
+                  activeOpacity={user ? 0.7 : 1}
+                  onPress={() => {
+                    if (user) {
+                      navigation.navigate('BottomTab', {screen: 'Setting'});
+                    }
+                  }}>
+                  {user ? (
+                    <FastImage
+                      source={
+                        user?.avatar
+                          ? {uri: `${API_URL}/api/images/${user.avatar}`}
+                          : Images.avatar
+                      }
+                      style={{width: 32, height: 32, borderRadius: 16}}
+                      resizeMode={FastImage.resizeMode.contain}
+                    />
+                  ) : (
+                    <UserIcon style={{color: '#fff', width: 18}} />
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
@@ -172,14 +153,14 @@ const HomeScreen = () => {
               </View>
             </View>
 
-            {/* Enhanced Categories */}
+            {/* Categories */}
             <Categories
               categories={categories}
               selectedCategory={selectedCategory}
               onSelectCategory={setSelectedCategory}
             />
 
-            {/* Main Content */}
+            {/* Farms */}
             <View style={styles.mainContent}>
               <View style={styles.resultsHeader}>
                 <View>
@@ -197,8 +178,7 @@ const HomeScreen = () => {
                       params: {
                         farms: filteredFarms,
                         favorites,
-                        toggleFavorite,
-                        isLoading: isLoading
+                        isLoading: isLoading,
                       },
                     })
                   }>
@@ -208,6 +188,15 @@ const HomeScreen = () => {
 
               {isLoading ? (
                 <FarmCardSkeleton count={4} />
+              ) : error ? (
+                <View style={styles.errorContainer}>
+                  <Text style={{color: 'red'}}>Không thể tải trang trại</Text>
+                  <TouchableOpacity
+                    onPress={refetch}
+                    style={styles.retryButton}>
+                    <Text style={styles.retryText}>Thử lại</Text>
+                  </TouchableOpacity>
+                </View>
               ) : filteredFarms.length === 0 ? (
                 <View style={styles.emptyContainer}>
                   <Text style={styles.emptyTitle}>
@@ -219,21 +208,16 @@ const HomeScreen = () => {
                   </Text>
                 </View>
               ) : (
-                <>
-                  <FarmList
-                    farms={filteredFarms.slice(0, 6)}
-                    favorites={favorites}
-                    isLoading={isLoading}
-                    toggleFavorite={toggleFavorite}
-                  />
-                </>
+                <FarmList
+                  farms={filteredFarms.slice(4, 10)}
+                  favorites={favorites}
+                  isLoading={isLoading}
+                />
               )}
             </View>
 
-            {/* Features Section */}
+            {/* Features + Footer */}
             <Features />
-
-            {/* Footer Section */}
             <Footer />
           </>
         )}
