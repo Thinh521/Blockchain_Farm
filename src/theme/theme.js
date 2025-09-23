@@ -13,6 +13,7 @@ export const Colors = {
   title: '#212121',
   green: '#059669',
   inputText: 'A8A8A9',
+  bottomSheetHandle: '#D1D5DB',
 };
 
 export const FontSizes = {
