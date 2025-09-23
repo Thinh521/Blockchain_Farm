@@ -29,7 +29,7 @@ const FarmCard = ({farm, favorites, toggleFavorite, isUserFarm}) => {
       onPress={() => {
         navigation.navigate('NoBottomTab', {
           screen: 'FarmDetail',
-          params: {farm},
+          params: {farm, isFavorite: favorites.has(farm.farmCode)},
         });
       }}>
       <View style={styles.imageContainer}>

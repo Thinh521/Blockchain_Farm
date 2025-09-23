@@ -30,12 +30,14 @@ import {getWishlistFarms} from '../../api/wishlist/wishlistApi';
 import {useUser} from '../../hooks/useUser';
 import FastImage from 'react-native-fast-image';
 import Images from '../../assets/images/images';
+import {API_URL} from '@env';
+import { useWishlist } from '../../hooks/useWishlist';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [favorites, setFavorites] = useState(new Set());
+  const { favorites, fetchWishlist } = useWishlist();
 
   const {farms, isLoading, error, refetch} = useFarms();
   const {data: user} = useUser();
@@ -46,22 +48,6 @@ const HomeScreen = () => {
     {id: 'fruit', name: 'Trái cây', icon: Sun_Line_Icon},
     {id: 'livestock', name: 'Chăn nuôi', icon: User_Line_Icon},
   ];
-
-  const fetchWishlist = useCallback(async () => {
-    try {
-      const res = await getWishlistFarms();
-      const wishlistFarmsApi = res?.wishlist?.farms || [];
-      setFavorites(new Set(wishlistFarmsApi.map(f => f.farmCode)));
-    } catch (err) {
-      console.log('Lỗi fetch wishlist:', err);
-      setFavorites(new Set());
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchWishlist();
-  }, [fetchWishlist]);
-
   useFocusEffect(
     useCallback(() => {
       fetchWishlist();
