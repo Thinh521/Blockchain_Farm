@@ -35,10 +35,13 @@ const ResetPasswordScreen = ({navigation, route}) => {
     mode: 'onChange',
   });
 
-  const onSubmit = async (data) => {
+  const onSubmit = async data => {
     try {
       setLoading(true);
-      const res = await resetPasswordApi({email, newPassword: data.newPassword});
+      const res = await resetPasswordApi({
+        email,
+        newPassword: data.newPassword,
+      });
 
       if (res.success) {
         showMessage({
@@ -46,7 +49,9 @@ const ResetPasswordScreen = ({navigation, route}) => {
           description: 'Mật khẩu đã được đặt lại thành công',
           type: 'success',
         });
-        navigation.navigate('Login');
+        navigation.navigate('NobottomTab', {
+          screen: 'Login',
+        });
       } else {
         showMessage({
           message: 'Lỗi',
@@ -55,7 +60,7 @@ const ResetPasswordScreen = ({navigation, route}) => {
         });
       }
     } catch (err) {
-      console.log('❌ Reset password error:', err);
+      console.log('Reset password error:', err);
       let message = 'Đặt lại mật khẩu thất bại';
       if (err?.code && ErrorMap[err.code]) {
         message = ErrorMap[err.code];
@@ -127,8 +132,9 @@ const ResetPasswordScreen = ({navigation, route}) => {
               name="confirmPassword"
               rules={{
                 required: 'Xác nhận mật khẩu là bắt buộc',
-                validate: (val) =>
-                  val === watch('newPassword') || 'Mật khẩu xác nhận không khớp',
+                validate: val =>
+                  val === watch('newPassword') ||
+                  'Mật khẩu xác nhận không khớp',
               }}
               render={({field: {onChange, value}}) => (
                 <Input

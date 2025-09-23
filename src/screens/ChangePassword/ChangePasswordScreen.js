@@ -1,26 +1,25 @@
 import React, {useState} from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import {Text, View, SafeAreaView, ScrollView} from 'react-native';
 import {useForm, Controller} from 'react-hook-form';
+import {useNavigation} from '@react-navigation/core';
+import {showMessage} from 'react-native-flash-message';
+
 import Button from '../../components/CustomButton/CustomButton';
 import Input from '../../components/CustomInput/CustomInput';
-import {Arrow_Left_S_Icon, Keyhole_Icon} from '../../assets/icons';
-import {Colors} from '../../theme/theme';
-import {useNavigation} from '@react-navigation/core';
-import {scale} from '../../utils/scaling';
+import Header from '../../components/Header/Header';
+import {Keyhole_Icon} from '../../assets/icons';
+
 import {changepasswordApi} from '../../api/userApi';
-import {showMessage} from 'react-native-flash-message';
+import {scale} from '../../utils/scaling';
+import {getUser} from '../../utils/storage/authStorage';
+
+import {Colors} from '../../theme/theme';
+import styles from './ChangePassword.styles';
 
 const ChangePasswordScreen = () => {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
+  const accessToken = getUser()?.accessToken;
 
   const {
     control,
@@ -34,9 +33,6 @@ const ChangePasswordScreen = () => {
       confirmPassword: '',
     },
   });
-
-  const accessToken =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YWQ3Y2MzNjRlZTZhMTA5Mzk0YWI3MSIsImlhdCI6MTc1NjI2NjkzNiwiZXhwIjoxNzU2MjY4NzM2fQ.LSfDVzClnQYSBO9ayLAs8o7DC3EQtkyvpz1AUPjmuJ8';
 
   const newPassword = watch('newPassword');
 
@@ -54,6 +50,7 @@ const ChangePasswordScreen = () => {
   const onSubmit = async data => {
     try {
       setLoading(true);
+
       await changepasswordApi({
         accessToken,
         oldPassword: data.currentPassword,
@@ -61,7 +58,8 @@ const ChangePasswordScreen = () => {
       });
 
       showMessage({
-        message: 'Đổi mật khẩu thành công!',
+        message: 'Thành công',
+        description: 'Đổi mật khẩu thành công!',
         type: 'success',
       });
 
@@ -79,21 +77,15 @@ const ChangePasswordScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#4CAF50" barStyle="light-content" />
+      <Header
+        title="Đổi mật khẩu"
+        subtitle="Bảo mật tài khoản của bạn an toàn hơn"
+        emoji="🔒"
+      />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{flexGrow: 1, paddingBottom: 40}}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}>
-            <Arrow_Left_S_Icon style={{color: Colors.white}} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Đổi mật khẩu</Text>
-        </View>
-
         <View style={styles.content}>
           {/* Security Icon */}
           <View style={styles.iconContainer}>
@@ -128,20 +120,11 @@ const ChangePasswordScreen = () => {
                   onChangeText={onChange}
                   isPassword
                   required
-                  containerStyle={[
-                    errors.currentPassword && {
-                      borderColor: 'red',
-                      borderWidth: 1,
-                    },
-                  ]}
+                  error={errors.currentPassword?.message}
+                  isError={!!errors.currentPassword}
                 />
               )}
             />
-            {errors.currentPassword && (
-              <Text style={styles.errorText}>
-                {errors.currentPassword.message}
-              </Text>
-            )}
           </View>
 
           {/* New Password */}
@@ -164,18 +147,11 @@ const ChangePasswordScreen = () => {
                   onChangeText={onChange}
                   isPassword
                   required
-                  containerStyle={[
-                    errors.newPassword && {
-                      borderColor: 'red',
-                      borderWidth: 1,
-                    },
-                  ]}
+                  error={errors.newPassword?.message}
+                  isError={!!errors.newPassword}
                 />
               )}
             />
-            {errors.newPassword && (
-              <Text style={styles.errorText}>{errors.newPassword.message}</Text>
-            )}
           </View>
 
           {/* Confirm Password */}
@@ -196,20 +172,11 @@ const ChangePasswordScreen = () => {
                   onChangeText={onChange}
                   isPassword
                   required
-                  containerStyle={[
-                    errors.confirmPassword && {
-                      borderColor: 'red',
-                      borderWidth: 1,
-                    },
-                  ]}
+                  error={errors.confirmPassword?.message}
+                  isError={!!errors.confirmPassword}
                 />
               )}
             />
-            {errors.confirmPassword && (
-              <Text style={styles.errorText}>
-                {errors.confirmPassword.message}
-              </Text>
-            )}
           </View>
 
           {/* Password Requirements */}
@@ -247,94 +214,3 @@ const ChangePasswordScreen = () => {
 };
 
 export default ChangePasswordScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f8f9fa',
-  },
-  header: {
-    backgroundColor: '#4CAF50',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    elevation: 4,
-  },
-  backButton: {
-    marginRight: 16,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: 'white',
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 30,
-  },
-  iconContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  iconBackground: {
-    width: 70,
-    height: 70,
-    borderRadius: 40,
-    backgroundColor: '#e8f5e8',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 10,
-  },
-  description: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 30,
-    lineHeight: 20,
-  },
-  inputSection: {
-    marginBottom: 20,
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 12,
-    marginTop: 4,
-  },
-  requirementsContainer: {
-    marginBottom: 30,
-  },
-  requirementsList: {
-    backgroundColor: '#f0f8f0',
-    borderRadius: 8,
-    padding: 16,
-  },
-  requirementItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  requirementDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#ccc',
-    marginRight: 12,
-  },
-  requirementDotMet: {
-    backgroundColor: '#4CAF50',
-  },
-  requirementText: {
-    fontSize: 14,
-    color: '#666',
-  },
-  requirementTextMet: {
-    color: '#4CAF50',
-  },
-});
