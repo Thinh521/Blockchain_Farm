@@ -81,28 +81,13 @@ const RelatedProducts = React.memo(
         item.image?.length > 0 ? {uri: item.image[0]} : Images.bg;
       return (
         <TouchableOpacity
-          style={styles.relatedCard}
+          style={styles.relatedRow}
           onPress={() => handleProductPress(item)}
           activeOpacity={0.8}>
-          <View style={styles.relatedImageContainer}>
-            <Image
-              source={imageSource}
-              style={styles.relatedImage}
-              resizeMode="cover"
-            />
-            <View style={styles.relatedBadge}>
-              <Text style={styles.relatedBadgeText}>{item.categoryName}</Text>
-            </View>
-          </View>
-          <View style={styles.relatedContent}>
-            <Text style={styles.relatedName} numberOfLines={2}>
-              {item.name}
-            </Text>
-            <Text style={styles.relatedPrice}>{item.price}</Text>
-            <Text style={styles.relatedStock}>
-              Còn {item.quantity} sản phẩm
-            </Text>
-          </View>
+          <Image source={imageSource} style={styles.relatedCircleImage} />
+          <Text style={styles.relatedRowText} numberOfLines={1}>
+            {item.name}
+          </Text>
         </TouchableOpacity>
       );
     };
@@ -132,8 +117,7 @@ const RelatedProducts = React.memo(
             keyExtractor={item => item.productCode}
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.relatedList}
-            ItemSeparatorComponent={() => <View style={{width: 12}} />}
+            contentContainerStyle={{paddingHorizontal: 16}}
           />
         )}
       </View>
@@ -189,6 +173,10 @@ const ProductScreen = () => {
   useEffect(() => {
     fetchProduct();
   }, [fetchProduct]);
+  // Reset về ảnh đầu tiên khi product thay đổi
+  useEffect(() => {
+    setSelectedImageIndex(0);
+  }, [productCode, product]);
 
   const renderImageGallery = useMemo(() => {
     if (!product?.image || product.image.length === 0) {
@@ -299,7 +287,7 @@ const ProductScreen = () => {
 
         <RelatedProducts
           farmCode={product.farmCode}
-          currentProductCode={product.productCode}
+          currentPuroductCode={product.productCode}
           navigation={navigation}
         />
       </ScrollView>
@@ -308,7 +296,35 @@ const ProductScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: '#fff', paddingBottom: 20},
+  // Related Products (ảnh tròn + tên)
+  relatedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 20,
+    paddingVertical: 8,
+    borderColor: '#d1d2d6ff',
+    borderWidth: 1,
+    borderRadius: 28,
+    paddingHorizontal: 8,
+    backgroundColor: '#fff',
+  },
+  relatedCircleImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#e1e2e4ff',
+    marginRight: 8,
+  },
+  relatedRowText: {
+    paddingHorizontal: 5,
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#111827',
+    maxWidth: 100,
+  },
+
+  // Container
+  container: {flex: 1, backgroundColor: '#fff'},
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -406,44 +422,6 @@ const styles = StyleSheet.create({
   sectionTitle: {fontSize: 18, fontWeight: '600', color: '#111827'},
   sectionSubtitle: {fontSize: 14, color: '#6B7280'},
   description: {fontSize: 16, lineHeight: 22, color: '#4B5563', marginTop: 8},
-
-  // Related Products
-  relatedList: {paddingHorizontal: 16},
-  relatedCard: {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
-    backgroundColor: '#fff',
-    borderWidth:1,
-    borderColor:'#E5E7EB',
-    borderRadius: 12,
-    marginRight:20
-  },
-  relatedImageContainer: {height: 120, position: 'relative'},
-  relatedImage: {width: '100%', height: '100%', backgroundColor: '#e1e2e4ff', borderTopLeftRadius: 12, borderTopRightRadius: 12},
-  relatedBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(16,185,129,0.9)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  relatedBadgeText: {fontSize: 10, fontWeight: '600', color: '#fff'},
-  relatedContent: {padding: 12, flex: 1, justifyContent: 'space-between'},
-  relatedName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#111827',
-    marginBottom: 8,
-  },
-  relatedPrice: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#DC2626',
-    marginBottom: 4,
-  },
-  relatedStock: {fontSize: 12, color: '#6B7280'},
 
   // Loading / Empty
   loadingText: {textAlign: 'center', color: '#6B7280'},

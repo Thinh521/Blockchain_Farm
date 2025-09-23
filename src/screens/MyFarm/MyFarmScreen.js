@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import {Text, TouchableOpacity, View} from 'react-native';
-import {useNavigation} from '@react-navigation/core';
+import {useFocusEffect, useNavigation} from '@react-navigation/core';
 import styles from './MyFarm.styles';
 import {useAppKitAccount} from '@reown/appkit-ethers-react-native';
 import {ethers} from 'ethers';
@@ -9,13 +9,15 @@ import contractArtifact from '../SmartConctract/contractABI.json';
 import {getUser} from '../../utils/storage/authStorage';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
 import FarmList from '../../components/Farms/FarmList';
+import { useWishlist } from "../../hooks/useWishlist";
+
 
 const MyFarmScreen = () => {
   const navigation = useNavigation();
   const {isConnected} = useAppKitAccount();
   const [farms, setFarms] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [favorites, setFavorites] = useState(new Set());
+  const { favorites, fetchWishlist } = useWishlist();
 
   const userId = getUser()?.userId;
 
@@ -63,22 +65,15 @@ const MyFarmScreen = () => {
     }
   }, [isConnected, userId]);
 
-  useEffect(() => {
+
+useFocusEffect(
+  useCallback(() => {
     if (isConnected) {
       getAllFarmsUserID();
+      fetchWishlist();
     }
-  }, [isConnected, getAllFarmsUserID]);
-
-  const toggleFavorite = farmCode => {
-    const newFavorites = new Set(favorites);
-    if (newFavorites.has(farmCode)) {
-      newFavorites.delete(farmCode);
-    } else {
-      newFavorites.add(farmCode);
-    }
-    setFavorites(newFavorites);
-  };
-
+  }, [isConnected, getAllFarmsUserID, fetchWishlist])
+);
   return (
     <View style={styles.mainContent}>
       <View style={styles.resultsHeader}>
@@ -97,7 +92,6 @@ const MyFarmScreen = () => {
               params: {
                 farms: farms,
                 favorites,
-                toggleFavorite,
                 isLoading: isLoading,
               },
             })
@@ -117,15 +111,18 @@ const MyFarmScreen = () => {
           </Text>
         </View>
       ) : (
-        <>
-          <FarmList
-            farms={farms}
-            favorites={favorites}
-            isLoading={isLoading}
-            toggleFavorite={toggleFavorite}
-            isUserFarm={true}
-          />
-        </>
+        <FarmList
+          farms={farms}
+          favorites={favorites}
+          isLoading={isLoading}
+          isUserFarm={true}
+          onPressFarm={farm =>
+            navigation.navigate('FarmDetail', {
+              farm,
+              isFavorite: favorites.has(farm.farmCode),
+            })
+          }
+        />
       )}
     </View>
   );

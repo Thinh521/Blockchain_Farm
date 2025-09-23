@@ -37,6 +37,7 @@ import {scale} from '../../utils/scaling';
 import NewsCardSkeleton from '../../components/CustomSkeleton/NewsCardSkeleton';
 import ImageViewerModal from '../../components/ImageViewerModal/ImageViewerModal';
 
+
 const farmData = {
   farmCode: 'F001',
   fullname: 'Nguyễn Văn An',
@@ -115,17 +116,18 @@ const farmData = {
 };
 
 const FarmDetailScreen = ({navigation}) => {
-  const {farm} = useRoute().params;
+  const {farm, isFavorite: initialFavorite} = useRoute().params;
+  const [favorite, setFavorite] = useState(initialFavorite);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
   const [wishlist, setWishlist] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
-  const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [farmImageViewerVisible, setFarmImageViewerVisible] = useState(false);
   const [farmImageIndex, setFarmImageIndex] = useState(0);
+
 
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -205,16 +207,16 @@ const FarmDetailScreen = ({navigation}) => {
     setLoading(true);
 
     try {
-      if (wishlist.some(f => String(f.farmCode) === String(farmCode))) {
+      if (favorite) {
         await removeWishlistFarm(farmCode);
         setWishlist(prev =>
           prev.filter(f => String(f.farmCode) !== String(farmCode)),
         );
-        if (farmCode === farm.farmCode) setIsFavorite(false);
+        setFavorite(false);
       } else {
         await addWishlistFarm(farmCode);
         setWishlist(prev => [...prev, {farmCode}]);
-        if (farmCode === farm.farmCode) setIsFavorite(true);
+        setFavorite(true);
       }
     } catch (err) {
       console.log('Lỗi toggle favorite:', err);
@@ -493,9 +495,9 @@ const FarmDetailScreen = ({navigation}) => {
           onPress={() => handleToggleFavorite(farm.farmCode)}
           disabled={loading}>
           <Ionicons
-            name={isFavorite ? 'heart' : 'heart-outline'}
+            name={favorite ? 'heart' : 'heart-outline'}
             size={20}
-            color={isFavorite ? '#EF4444' : '#FFFFFF'}
+            color={favorite ? '#EF4444' : '#FFFFFF'}
           />
         </TouchableOpacity>
       </Animated.View>
@@ -512,9 +514,9 @@ const FarmDetailScreen = ({navigation}) => {
           onPress={() => handleToggleFavorite(farm.farmCode)}
           disabled={loading}>
           <Ionicons
-            name={isFavorite ? 'heart' : 'heart-outline'}
+            name={favorite ? 'heart' : 'heart-outline'}
             size={20}
-            color={isFavorite ? '#EF4444' : '#FFFFFF'}
+            color={favorite ? '#EF4444' : '#FFFFFF'}
           />
         </TouchableOpacity>
       </View>
@@ -615,7 +617,7 @@ const FarmDetailScreen = ({navigation}) => {
                       screen: 'AllFarms',
                       params: {
                         farms: farms,
-                        isFavorite,
+                        favorite,
                         handleToggleFavorite,
                       },
                     })
