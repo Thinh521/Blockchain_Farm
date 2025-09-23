@@ -109,7 +109,7 @@ const SettingsScreen = () => {
         <Header
           title="Cài đặt"
           subtitle="Quản lý tài khoản và tùy chỉnh ứng dụng"
-          emoji="🌱"
+          emoji="⚙️"
         />
 
         <View style={styles.content}>

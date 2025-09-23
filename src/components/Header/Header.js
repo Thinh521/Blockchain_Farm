@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     right: -10,
     top: 20,
     flexDirection: 'row',
-    opacity: 0.2,
+    opacity: 0.3,
   },
   decorEmoji: {
     fontSize: 40,

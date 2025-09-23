@@ -213,7 +213,7 @@ const NewScreen = () => {
       <Header
         title="Tin tức nông sản"
         subtitle="Cập nhật thông tin mới nhất từ ruộng đồng Việt Nam"
-        emoji="🚜"
+        emoji="📰"
       />
 
       <FlatList
