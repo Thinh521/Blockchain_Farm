@@ -1,27 +1,33 @@
 import React, {useEffect, useState, useCallback} from 'react';
 import {StyleSheet, View, Text} from 'react-native';
-import {scale} from '../../utils/scaling';
-import FarmList from '../../components/Farms/FarmList';
-import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
-import {ethers} from 'ethers';
+import {useIsFocused} from '@react-navigation/core';
 import {CONTRACT_ADDRESS} from '@env';
+import {ethers} from 'ethers';
+
+import FarmList from '../../components/Farms/FarmList';
+import Header from '../../components/Header/Header';
 import contractArtifact from '../SmartConctract/contractABI.json';
+import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
+
 import {getWishlistFarms} from '../../api/wishlist/wishlistApi';
-import { useIsFocused } from '@react-navigation/core';
+
+import {scale} from '../../utils/scaling';
+import {Colors, FontSizes, FontWeights} from '../../theme/theme';
 
 const WishlistScreen = () => {
+  const isFocused = useIsFocused();
   const [wishlistFarms, setWishlistFarms] = useState([]);
   const [favorites, setFavorites] = useState(new Set());
   const [loading, setLoading] = useState(false);
-    const isFocused = useIsFocused();
-
 
   const fetchWishlist = useCallback(async () => {
     try {
       setLoading(true);
 
       // 1. Lấy farms từ blockchain
-      const rpcProvider = new ethers.JsonRpcProvider('https://rpc.zeroscan.org');
+      const rpcProvider = new ethers.JsonRpcProvider(
+        'https://rpc.zeroscan.org',
+      );
       const contractRead = new ethers.Contract(
         CONTRACT_ADDRESS,
         contractArtifact.abi,
@@ -39,7 +45,9 @@ const WishlistScreen = () => {
         description: farm.description || farm[6],
         location: farm.location || farm[7],
         area: farm.area?.toString?.() || farm[8]?.toString?.() || '',
-        image: Array.isArray(farm.images || farm[9]) ? farm.images || farm[9] : [],
+        image: Array.isArray(farm.images || farm[9])
+          ? farm.images || farm[9]
+          : [],
       }));
 
       // 2. Lấy wishlist từ API
@@ -61,7 +69,6 @@ const WishlistScreen = () => {
     }
   }, []);
 
-
   useEffect(() => {
     if (isFocused) {
       fetchWishlist();
@@ -70,15 +77,25 @@ const WishlistScreen = () => {
 
   return (
     <View style={styles.container}>
-      {loading ? (
-        <FarmCardSkeleton count={4} />
-      ) : wishlistFarms.length > 0 ? (
-        <View style={{ flex: 1, width: '100%'}}>
-          <FarmList farms={wishlistFarms} favorites={favorites} />
-        </View>
-      ) : (
-        <Text style={styles.emptyText}>Chưa có farm nào trong wishlist</Text>
-      )}
+      <Header
+        title="Yêu thích"
+        subtitle="Nơi lưu giữ những nông trại bạn quan tâm"
+        emoji="❤️"
+      />
+
+      <View style={styles.content}>
+        {loading ? (
+          <FarmCardSkeleton count={4} />
+        ) : wishlistFarms.length > 0 ? (
+          <View style={{flex: 1, width: '100%'}}>
+            <FarmList farms={wishlistFarms} favorites={favorites} />
+          </View>
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Không có nông trại yêu thích</Text>
+          </View>
+        )}
+      </View>
     </View>
   );
 };
@@ -86,11 +103,22 @@ const WishlistScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: scale(16),
+    backgroundColor: Colors.background,
+  },
+  content: {
+    flex: 1,
+    padding: scale(20),
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   emptyText: {
-    fontSize: 16,
-    color: '#666',
+    textAlign: 'center',
+    color: Colors.title,
+    fontWeight: FontWeights.bold,
+    fontSize: FontSizes.regular,
   },
 });
 
