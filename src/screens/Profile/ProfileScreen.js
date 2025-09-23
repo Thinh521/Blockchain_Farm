@@ -1,12 +1,10 @@
 import {API_URL} from '@env';
 import React, {useEffect, useState} from 'react';
 import {
-  StyleSheet,
   Text,
   View,
   TouchableOpacity,
   ScrollView,
-  StatusBar,
   ActivityIndicator,
   Alert,
 } from 'react-native';
@@ -14,13 +12,19 @@ import FastImage from 'react-native-fast-image';
 import {useForm, Controller} from 'react-hook-form';
 import {showMessage} from 'react-native-flash-message';
 import {launchImageLibrary} from 'react-native-image-picker';
+import {useNavigation} from '@react-navigation/core';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
 import Button from '../../components/CustomButton/CustomButton';
 import Input from '../../components/CustomInput/CustomInput';
-import {getUserApi, updateUserApi} from '../../api/userApi';
-import {Colors} from '../../theme/theme';
 import LoadingOverlay from '../../components/CustomLoading/LoadingOverlay';
+import Header from '../../components/Header/Header';
+
+import {getUserApi, updateUserApi} from '../../api/userApi';
 import {getUser} from '../../utils/storage/authStorage';
-import {useNavigation} from '@react-navigation/core';
+
+import {scale} from '../../utils/scaling';
+import styles from './Profile.styles';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -72,14 +76,7 @@ const ProfileScreen = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const storedUser = getUser();
-
-        if (!storedUser) {
-          console.log('No user found, redirect to Login if needed');
-          return;
-        }
-
-        const accessToken = storedUser.accessToken;
+        const accessToken = getUser()?.accessToken;
 
         const data = await getUserApi(accessToken);
         if (data?.user) {
@@ -121,7 +118,8 @@ const ProfileScreen = () => {
       !avatar
     ) {
       showMessage({
-        message: 'Không có thay đổi nào để lưu',
+        message: 'Thông báo',
+        description: 'Không có thay đổi nào để lưu',
         type: 'info',
       });
       setSaving(false);
@@ -157,7 +155,8 @@ const ProfileScreen = () => {
       }
 
       showMessage({
-        message: 'Cập nhật thành công!',
+        message: 'Thành công',
+        description: 'Cập nhật thông tin thành công!',
         type: 'success',
       });
 
@@ -190,29 +189,34 @@ const ProfileScreen = () => {
 
   return (
     <View style={{flex: 1}}>
+      <Header
+        title="Cập nhật thông tin"
+        subtitle="Chỉnh sửa và quản lý thông tin của bạn"
+        emoji="📝"
+      />
       <ScrollView
         style={styles.container}
-        contentContainerStyle={{paddingBottom: 40}}
+        contentContainerStyle={{paddingBottom: scale(40)}}
         showsVerticalScrollIndicator={false}>
-        <StatusBar barStyle="light-content" backgroundColor="#28a745" />
-
-        <View style={{flex: 1, paddingTop: 40}}>
-          <TouchableOpacity
-            style={styles.avatarContainer}
-            onPress={handlePickImage}>
-            <FastImage
-              source={
-                avatar
-                  ? {uri: avatar.uri}
-                  : serverAvatar
-                  ? {uri: serverAvatar}
-                  : require('../../assets/images/avatar.png')
-              }
-              style={styles.avatar}
-              resizeMode={FastImage.resizeMode.contain}
-            />
-            <Text style={styles.avatarText}>Nhấn để đổi ảnh</Text>
-          </TouchableOpacity>
+        <View style={{flex: 1, paddingTop: scale(20)}}>
+          <View style={{position: 'relative'}}>
+            <View style={styles.avatarContainer}>
+              <FastImage
+                source={
+                  avatar
+                    ? {uri: avatar.uri}
+                    : serverAvatar
+                    ? {uri: serverAvatar}
+                    : require('../../assets/images/avatar.png')
+                }
+                style={styles.avatar}
+                resizeMode={FastImage.resizeMode.contain}
+              />
+            </View>
+            <TouchableOpacity style={styles.camare} onPress={handlePickImage}>
+              <Ionicons name="camera" size={24} color="#666" />
+            </TouchableOpacity>
+          </View>
 
           <View style={{gap: 20, marginBottom: 20}}>
             <Controller
@@ -324,7 +328,6 @@ const ProfileScreen = () => {
                     onPress={() => setGender(item.value)}>
                     <Text
                       style={[
-                        styles.genderText,
                         gender === item.value && styles.genderTextActive,
                       ]}>
                       {item.label}
@@ -359,13 +362,23 @@ const ProfileScreen = () => {
             />
           </View>
         </View>
-
+      </ScrollView>
+      <View style={styles.buttonActions}>
+        <Button.Main
+          title="Quay lại"
+          onPress={() => {
+            navigation.goBack();
+          }}
+          style={styles.cancelButton}
+          textStyle={styles.cancelButtonText}
+        />
         <Button.Main
           title={saving ? 'Đang lưu...' : 'Lưu thông tin'}
           onPress={handleSubmit(onSubmit)}
           disabled={saving}
+          style={{flex: 1}}
         />
-      </ScrollView>
+      </View>
 
       {saving && <LoadingOverlay />}
     </View>
@@ -373,60 +386,3 @@ const ProfileScreen = () => {
 };
 
 export default ProfileScreen;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingHorizontal: 24,
-  },
-  avatarContainer: {
-    alignItems: 'center',
-    marginVertical: 12,
-  },
-  avatar: {
-    width: 90,
-    height: 90,
-    borderRadius: 99,
-    borderWidth: 1,
-    borderColor: Colors.primary,
-  },
-  avatarText: {
-    marginTop: 8,
-    color: '#666',
-  },
-  label: {
-    fontWeight: '600',
-    marginBottom: 6,
-    color: '#333',
-  },
-  genderContainer: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  genderBtn: {
-    flex: 1,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  genderActive: {
-    borderColor: '#28a745',
-    backgroundColor: '#e8f9f0',
-  },
-  genderText: {
-    color: '#333',
-    fontWeight: '500',
-  },
-  genderTextActive: {
-    color: '#28a745',
-    fontWeight: '700',
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
