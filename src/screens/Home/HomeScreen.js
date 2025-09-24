@@ -48,7 +48,6 @@ const HomeScreen = () => {
     {id: 'livestock', name: 'Chăn nuôi', icon: User_Line_Icon},
   ];
 
-
   useFocusEffect(
     useCallback(() => {
       fetchWishlist();
