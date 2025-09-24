@@ -14,9 +14,9 @@ import {ethers} from 'ethers';
 import contractArtifact from '../SmartConctract/contractABI.json';
 import Images from '../../assets/images/images';
 import {CONTRACT_ADDRESS} from '@env';
-import {API_URL} from '@env';
 import styles from './Categories.styles';
 import api from '../../api/tokenApi';
+
 
 const CategoriesScreen = ({navigation, route}) => {
   const {farmCode} = route.params || {};
@@ -24,94 +24,90 @@ const CategoriesScreen = ({navigation, route}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    let isMounted = true;
+ useEffect(() => {
+  let isMounted = true;
 
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        if (!farmCode) {
-          throw new Error('No farmCode provided');
-        }
-
-        const rpcProvider = new ethers.JsonRpcProvider(
-          'https://rpc.zeroscan.org',
-        );
-        const contractRead = new ethers.Contract(
-          CONTRACT_ADDRESS,
-          contractArtifact.abi,
-          rpcProvider,
-        );
-
-        const productsData = await contractRead.getProductByFarmCode(farmCode);
-
-        const formattedProducts = productsData.map((product, index) => {
-
-        const formattedProducts = productsData.map(product => {
-          const images =
-            typeof product.image === 'string'
-              ? product.image
-                  .split(/[,|]/)
-                  .map(url => url.trim())
-                  .filter(Boolean)
-              : [];
-
-          return {
-            farmCode: product.farmCode,
-            productCode: product.productCode,
-            categoryName: product.categoryName,
-            name: product.name,
-            quantity: product.quantity,
-            price: product.price,
-            area: product.area,
-            image: images,
-            description: product.description,
-          };
-        });
-
-        if (isMounted) {
-          setProducts(formattedProducts);
-        const backendRes = await api.get(`/api/farms/${farmCode}/products`);
-
-        const backendCodes = Array.isArray(backendRes.data.data)
-          ? backendRes.data.data.map(p => p.productCode)
-          : [];
-
-        // 3. Lọc những productCode có ở cả SC và backend
-        const syncedProducts = formattedProducts.filter(p =>
-          backendCodes.includes(p.productCode),
-        );
-
-        if (isMounted) {
-          setProducts(syncedProducts);
-        }
-      } catch (err) {
-        console.log('Error in getProductsByFarm:', err);
-        if (isMounted) {
-          setError(err.message || 'Không thể tải danh sách nông sản.');
-          Alert.alert(
-            'Lỗi',
-            err.message || 'Không thể tải danh sách nông sản.',
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      if (!farmCode) {
+        throw new Error('No farmCode provided');
       }
-    };
 
+      // 1. Lấy dữ liệu từ Smart Contract
+      const rpcProvider = new ethers.JsonRpcProvider(
+        'https://rpc.zeroscan.org',
+      );
+      const contractRead = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        contractArtifact.abi,
+        rpcProvider,
+      );
+
+      const productsData = await contractRead.getProductByFarmCode(farmCode);
+
+      const formattedProducts = productsData.map(product => {
+        const images =
+          typeof product.image === 'string'
+            ? product.image
+                .split(/[,|]/)
+                .map(url => url.trim())
+                .filter(Boolean)
+            : [];
+
+        return {
+          farmCode: product.farmCode,
+          productCode: product.productCode,
+          categoryName: product.categoryName,
+          name: product.name,
+          quantity: product.quantity,
+          price: product.price,
+          area: product.area,
+          image: images,
+          description: product.description,
+        };
+      });
+
+      // 2. Lấy danh sách productCode từ backend
+      const backendRes = await api.get(`/api/farms/${farmCode}/products`);
+      const backendCodes = Array.isArray(backendRes.data.data)
+        ? backendRes.data.data.map(p => p.productCode)
+        : [];
+
+      // 3. Chỉ giữ lại sản phẩm có trong cả SC và backend
+      const syncedProducts = formattedProducts.filter(p =>
+        backendCodes.includes(p.productCode),
+      );
+
+      if (isMounted) {
+        setProducts(syncedProducts);
+      }
+    } catch (err) {
+      console.log('Error in getProductsByFarm:', err);
+      if (isMounted) {
+        setError(err.message || 'Không thể tải danh sách nông sản.');
+        Alert.alert('Lỗi', err.message || 'Không thể tải danh sách nông sản.');
+      }
+    } finally {
+      if (isMounted) {
+        setLoading(false);
+      }
+    }
+  };
+
+  fetchProducts();
+
+  const unsubscribe = navigation.addListener('focus', () => {
     fetchProducts();
+  });
 
-    const unsubscribe = navigation.addListener('focus', () => {
-      fetchProducts();
-    });
+  return () => {
+    isMounted = false;
+    unsubscribe();
+  };
+}, [farmCode, navigation]);
 
-    return () => {
-      isMounted = false;
-      unsubscribe();
-    };
-  }, [farmCode, navigation]);
+
 
   const handleProductPress = productItem => {
     navigation.navigate('Product', {productCode: productItem.productCode});

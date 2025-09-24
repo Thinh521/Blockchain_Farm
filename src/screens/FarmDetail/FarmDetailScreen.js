@@ -24,11 +24,9 @@ import ImageCarousel from './components/ImageCarousel';
 import Tabs from './components/Tabs';
 import BottomActionBar from './components/BottomActionBar';
 import {useFarms} from '../../hooks/useFarms';
-import {useWishlist} from '../../context/WishlistContext';
 import {CONTRACT_ADDRESS} from '@env';
 import contractArtifact from '../SmartConctract/contractABI.json';
 import {
-  getWishlistFarms,
   addWishlistFarm,
   removeWishlistFarm,
 } from '../../api/wishlist/wishlistApi';
@@ -38,7 +36,6 @@ import {useNews} from '../../hooks/useNews';
 import {scale} from '../../utils/scaling';
 import NewsCardSkeleton from '../../components/CustomSkeleton/NewsCardSkeleton';
 import ImageViewerModal from '../../components/ImageViewerModal/ImageViewerModal';
-import api from '../../api/tokenApi';
 
 const farmData = {
   farmCode: 'F001',
@@ -118,29 +115,35 @@ const farmData = {
 };
 
 const FarmDetailScreen = ({navigation}) => {
-  const {farm} = useRoute().params;
-  const [favorites, setFavorites] = useState(new Set());
-  const [isLoading, setIsLoading] = useState(false);
+  const {farm, isFavorite: initialFavorite} = useRoute().params;
+  const [favorite, setFavorite] = useState(initialFavorite);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
   const [wishlist, setWishlist] = useState([]);
   const [activeTab, setActiveTab] = useState('overview');
-  const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
+  const [farmImageViewerVisible, setFarmImageViewerVisible] = useState(false);
+  const [farmImageIndex, setFarmImageIndex] = useState(0);
 
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const {farms, isLoading: farmsLoading, error, refetch} = useFarms();
 
+  const farmCode = farm?.farmCode;
+
   const {
     news,
+    isLoading,
     expandedId,
-    toggleExpand,
-    openImageViewer,
+    selectedImageIndex,
+    selectedImages,
     handleDelete,
-  } = useNews();
+    closeImageViewer,
+    openImageViewer,
+    toggleExpand,
+  } = useNews({farmCode});
 
   useEffect(() => {
     let isMounted = true;
@@ -148,8 +151,6 @@ const FarmDetailScreen = ({navigation}) => {
     const fetchProducts = async () => {
       try {
         setLoadingProducts(true);
-
-        // 1. Lấy danh sách sản phẩm từ Smart Contract
         const rpcProvider = new ethers.JsonRpcProvider(
           'https://rpc.zeroscan.org',
         );
@@ -163,7 +164,7 @@ const FarmDetailScreen = ({navigation}) => {
           farm.farmCode,
         );
 
-        const formattedProducts = productsData.map(product => {
+        const formattedProducts = productsData.map((product, index) => {
           const images =
             typeof product.image === 'string'
               ? product.image
@@ -185,29 +186,7 @@ const FarmDetailScreen = ({navigation}) => {
           };
         });
 
-        // 2. Lấy danh sách sản phẩm từ Backend
-        const backendRes = await api.get(
-          `/api/farms/${farm.farmCode}/products`,
-        );
-        console.log(
-          '📥 Backend products for farmCode',
-          farm.farmCode,
-          ':',
-          backendRes.data,
-        );
-
-        const backendCodes = Array.isArray(backendRes.data.data)
-          ? backendRes.data.data.map(p => p.productCode)
-          : [];
-
-        // 3. Lọc ra sản phẩm có ở cả SC và Backend
-        const syncedProducts = formattedProducts.filter(p =>
-          backendCodes.includes(p.productCode),
-        );
-
-        console.log('✅ Synced products:', syncedProducts);
-
-        if (isMounted) setProducts(syncedProducts);
+        if (isMounted) setProducts(formattedProducts);
       } catch (err) {
         console.error('❌ Error fetchProducts:', err);
       } finally {
@@ -216,7 +195,6 @@ const FarmDetailScreen = ({navigation}) => {
     };
 
     fetchProducts();
-
     return () => {
       isMounted = false;
     };
@@ -227,16 +205,16 @@ const FarmDetailScreen = ({navigation}) => {
     setLoading(true);
 
     try {
-      if (wishlist.some(f => String(f.farmCode) === String(farmCode))) {
+      if (favorite) {
         await removeWishlistFarm(farmCode);
         setWishlist(prev =>
           prev.filter(f => String(f.farmCode) !== String(farmCode)),
         );
-        if (farmCode === farm.farmCode) setIsFavorite(false);
+        setFavorite(false);
       } else {
         await addWishlistFarm(farmCode);
         setWishlist(prev => [...prev, {farmCode}]);
-        if (farmCode === farm.farmCode) setIsFavorite(true);
+        setFavorite(true);
       }
     } catch (err) {
       console.log('Lỗi toggle favorite:', err);
@@ -620,21 +598,6 @@ const FarmDetailScreen = ({navigation}) => {
                 />
               )}
             </View>
-            <TouchableOpacity
-              style={styles.seeAllButton}
-              activeOpacity={0.7}
-              onPress={() =>
-                navigation.navigate('NoBottomTab', {
-                  screen: 'AllFarms',
-                  params: {
-                    farms: farms,
-                    isFavorite,
-                    handleToggleFavorite,
-                  },
-                })
-              }>
-              <Text style={styles.seeAllText}>Xem tất cả</Text>
-            </TouchableOpacity>
 
             <View style={styles.mainContent}>
               <View style={styles.resultsHeader}>
@@ -681,6 +644,7 @@ const FarmDetailScreen = ({navigation}) => {
             </View>
           </>
         )}></Animated.FlatList>
+
       <BottomActionBar handleCall={handleCall} />
 
       <ImageViewerModal
