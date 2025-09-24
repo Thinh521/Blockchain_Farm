@@ -17,12 +17,10 @@ import contractArtifact from '../screens/SmartConctract/contractABI.json';
 const WishlistContext = createContext();
 
 export const WishlistProvider = ({children}) => {
-  
   const [favorites, setFavorites] = useState(new Set());
   const [wishlistFarms, setWishlistFarms] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 👉 Hàm reset state khi logout
   const resetWishlist = useCallback(() => {
     setFavorites(new Set());
     setWishlistFarms([]);
@@ -34,7 +32,9 @@ export const WishlistProvider = ({children}) => {
     try {
       setLoading(true);
 
-      const rpcProvider = new ethers.JsonRpcProvider('https://rpc.zeroscan.org');
+      const rpcProvider = new ethers.JsonRpcProvider(
+        'https://rpc.zeroscan.org',
+      );
 
       const contractRead = new ethers.Contract(
         CONTRACT_ADDRESS,
@@ -90,9 +90,7 @@ export const WishlistProvider = ({children}) => {
           newSet.delete(farmCode);
           return newSet;
         });
-        setWishlistFarms(prev =>
-          prev.filter(f => f.farmCode !== farmCode),
-        );
+        setWishlistFarms(prev => prev.filter(f => f.farmCode !== farmCode));
       } else {
         await addWishlistFarm(farmCode);
         setFavorites(prev => new Set([...prev, farmCode]));
@@ -112,7 +110,7 @@ export const WishlistProvider = ({children}) => {
         loading,
         toggleFavorite,
         fetchWishlist,
-        resetWishlist, // 👈 expose hàm reset ra ngoài
+        resetWishlist,
       }}>
       {children}
     </WishlistContext.Provider>

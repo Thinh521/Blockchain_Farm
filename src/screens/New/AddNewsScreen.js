@@ -8,30 +8,34 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
-import {useAppKitAccount} from '@reown/appkit-ethers-react-native';
 import {ethers} from 'ethers';
 import {CONTRACT_ADDRESS} from '@env';
-import contractArtifact from '../SmartConctract/contractABI.json';
-import styles from './AddNews.styles';
+import {useAppKitAccount} from '@reown/appkit-ethers-react-native';
 import * as ImagePicker from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {createNewsApi} from '../../api/newsApi';
-import {getUser} from '../../utils/storage/authStorage';
 import {showMessage} from 'react-native-flash-message';
-import {Colors} from '../../theme/theme';
+import {useNavigation} from '@react-navigation/core';
+
 import Input from '../../components/CustomInput/CustomInput';
 import Button from '../../components/CustomButton/CustomButton';
-import {useNavigation} from '@react-navigation/core';
+import contractArtifact from '../SmartConctract/contractABI.json';
+
+import {createNewsApi} from '../../api/newsApi';
+import {getUser} from '../../utils/storage/authStorage';
+import {useAppLoading} from '../../context/AppLoadingContext';
+
+import {Colors} from '../../theme/theme';
+import styles from './AddNews.styles';
 
 const AddNewsScreen = () => {
   const navigation = useNavigation();
   const {isConnected} = useAppKitAccount();
+  const {loading, setLoading} = useAppLoading();
   const [farms, setFarms] = useState([]);
   const [selectedFarm, setSelectedFarm] = useState(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [images, setImages] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [showFarmDropdown, setShowFarmDropdown] = useState(false);
 
   const userId = getUser()?.userId;
@@ -42,7 +46,6 @@ const AddNewsScreen = () => {
       console.log('Chưa có userId hoặc chưa connect ví');
       return;
     }
-    setIsLoading(true);
 
     try {
       const rpcProvider = new ethers.JsonRpcProvider(
@@ -65,8 +68,6 @@ const AddNewsScreen = () => {
     } catch (error) {
       console.log('Lỗi getAllFarmsUserID:', error);
       setFarms([]);
-    } finally {
-      setIsLoading(false);
     }
   }, [isConnected, userId]);
 
@@ -118,8 +119,7 @@ const AddNewsScreen = () => {
         type: img.type || 'image/jpeg',
       });
     });
-
-    setIsLoading(true);
+    setLoading(true);
     try {
       const res = await createNewsApi(accessToken, formData);
 
@@ -147,7 +147,7 @@ const AddNewsScreen = () => {
     } catch (error) {
       console.log('Lỗi handleSubmit:', error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
@@ -272,9 +272,9 @@ const AddNewsScreen = () => {
         </View>
 
         <Button.Main
-          title={isLoading ? 'Đang đăng tin...' : 'Đăng tin'}
-          iconLeft={!isLoading && <Icon name="send" size={20} color="#fff" />}
-          disabled={!selectedFarm || !title || !description || isLoading}
+          title={loading ? 'Đang đăng tin...' : 'Đăng tin'}
+          iconLeft={!loading && <Icon name="send" size={20} color="#fff" />}
+          disabled={!selectedFarm || !title || !description || loading}
           onPress={handleSubmit}
         />
       </ScrollView>

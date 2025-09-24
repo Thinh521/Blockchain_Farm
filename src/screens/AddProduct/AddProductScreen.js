@@ -65,7 +65,6 @@ const handleImageSelect = (field, imageData, type) => {
       [field]: imageData,
     }));
   } else if (type === 'multiple') {
-    // imageData có thể là mảng nhiều ảnh
     const newImages = Array.isArray(imageData) ? imageData : [imageData];
     setFormData(prev => ({
       ...prev,
@@ -73,7 +72,6 @@ const handleImageSelect = (field, imageData, type) => {
     }));
   }
 };
-
 
   const handleImageRemove = (field, index = null) => {
     if (index === null) {
@@ -236,7 +234,7 @@ const handleImageSelect = (field, imageData, type) => {
         },
       });
     } catch (error) {
-      console.error('❌ Lỗi:', error);
+      console.error('Lỗi:', error);
       showMessage({
         message: 'Lỗi',
         description: error.reason || error.message || 'Đã xảy ra lỗi khi thêm sản phẩm.',

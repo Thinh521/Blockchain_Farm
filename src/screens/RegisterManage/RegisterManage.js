@@ -1,4 +1,3 @@
-// RegisterManage.js - Sử dụng FormWizard component
 import React, { useState, useEffect } from 'react';
 import { StatusBar } from 'react-native';
 import { showMessage } from 'react-native-flash-message';
@@ -7,18 +6,19 @@ import {
   useAppKitAccount,
   useAppKitProvider,
 } from '@reown/appkit-ethers-react-native';
-import { CONTRACT_ADDRESS } from '@env';
+import {CONTRACT_ADDRESS} from '@env';
+
 import contractArtifact from '../SmartConctract/contractABI.json';
-import { storage } from '../../utils/storage/storage';
-import api from '../../api/baseApi';
-import { getUserApi } from '../../api/userApi';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 import FormWizard from '../../components/FormWizard/FormWizard';
+import Header from '../../components/Header/Header';
 
-const RegisterManage = ({ navigation, route }) => {
-  const { isConnected } = useAppKitAccount();
-  const { walletProvider } = useAppKitProvider();
+import api from '../../api/baseApi';
+import {getUserApi} from '../../api/userApi';
+import {storage} from '../../utils/storage/storage';
 
+const RegisterManage = ({navigation, route}) => {
+  const {isConnected} = useAppKitAccount();
+  const {walletProvider} = useAppKitProvider();
   const [loadingUserData, setLoadingUserData] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -247,7 +247,6 @@ const RegisterManage = ({ navigation, route }) => {
         duration: 2000,
         onHide: () => {
           navigation.navigate('NoBottomTab', {screen: 'MyFarm'});
-
         },
       });
     } catch (error) {
@@ -315,7 +314,7 @@ const RegisterManage = ({ navigation, route }) => {
     {
       title: 'Mô tả',
       description: 'Mô tả trang trại và phương pháp canh tác',
-      isCompleted: (data) => data.description.length > 0,
+      isCompleted: data => data.description.length > 0,
       fields: [
         {
           type: 'input',
@@ -329,7 +328,7 @@ const RegisterManage = ({ navigation, route }) => {
     {
       title: 'Vị trí và diện tích',
       description: 'Vị trí, diện tích trang trại',
-      isCompleted: (data) => data.location && data.area,
+      isCompleted: data => data.location && data.area,
       fields: [
         {
           type: 'input',
@@ -349,7 +348,7 @@ const RegisterManage = ({ navigation, route }) => {
     {
       title: 'Hình ảnh xác thực chủ trang trại',
       description: 'Tải lên hình ảnh định danh chủ sở hữu',
-      isCompleted: (data) => data.kycImage !== null,
+      isCompleted: data => data.kycImage !== null,
       fields: [
         {
           type: 'image',
@@ -362,7 +361,7 @@ const RegisterManage = ({ navigation, route }) => {
     {
       title: 'Chi tiết hình ảnh trang trại',
       description: 'Tải lên hình ảnh chi tiết trang trại',
-      isCompleted: (data) => data.farmImages.length > 0,
+      isCompleted: data => data.farmImages.length > 0,
       fields: [
         {
           type: 'image',
@@ -375,7 +374,13 @@ const RegisterManage = ({ navigation, route }) => {
 
   return (
     <>
-      <StatusBar backgroundColor={Colors.green} barStyle="light-content" />
+      <Header
+        title="Đăng ký nông trại"
+        subtitle="Đăng ký & quản lí nông trại của bạn"
+        emoji="🏡"
+        showBack={true}
+      />
+
       <FormWizard
         menuItems={menuItems}
         formData={formData}

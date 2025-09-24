@@ -37,6 +37,18 @@ export default StyleSheet.create({
     fontWeight: FontWeights.semiBold,
     marginLeft: scale(14),
   },
+  headerHeart: {
+    top: 22,
+    position: 'absolute',
+    right: scale(20),
+    width: scale(40),
+    height: scale(40),
+    borderRadius: scale(20),
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 100,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
   floatingBackButton: {
     position: 'absolute',
     top: scale(20),
@@ -51,7 +63,7 @@ export default StyleSheet.create({
   },
 floatingActions: {
   position: 'absolute',
-  top: 60,  // chỉnh lại tùy UI
+  top: 60
   right: 16,
   flexDirection: 'column',
   alignItems: 'center',

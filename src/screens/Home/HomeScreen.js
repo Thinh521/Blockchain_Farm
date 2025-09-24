@@ -30,12 +30,17 @@ import {getWishlistFarms} from '../../api/wishlist/wishlistApi';
 import {useUser} from '../../hooks/useUser';
 import FastImage from 'react-native-fast-image';
 import Images from '../../assets/images/images';
+import {API_URL} from '@env';
+import { useWishlist } from '../../hooks/useWishlist';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [favorites, setFavorites] = useState(new Set());
+  const { favorites, fetchWishlist } = useWishlist();
+
+  const {farms, isLoading, error, refetch} = useFarms();
+  const {data: user} = useUser();
 
   const {farms, isLoading, error, refetch} = useFarms();
   const {data: user} = useUser();

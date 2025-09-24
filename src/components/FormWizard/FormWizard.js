@@ -56,7 +56,6 @@ const selectImage = (type, field) => {
   });
 };
 
-
   const removeImage = (field, index = null) => {
     onImageRemove(field, index);
   };

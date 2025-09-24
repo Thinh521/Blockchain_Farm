@@ -14,7 +14,7 @@ const ImageCarousel = ({
   farm,
   imageScale,
   setCurrentImageIndex,
-  setShowImageModal,
+  onOpenImageViewer,
   currentImageIndex,
 }) => (
   <View style={styles.imageCarousel}>
@@ -29,7 +29,7 @@ const ImageCarousel = ({
       {farm.image.map((imgUrl, idx) => (
         <TouchableOpacity
           key={idx}
-          onPress={() => setShowImageModal(true)}
+          onPress={() => onOpenImageViewer(idx)}
           activeOpacity={0.9}>
           <Animated.Image
             source={{uri: imgUrl}}

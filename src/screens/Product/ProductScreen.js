@@ -5,6 +5,8 @@ import {
   ActivityIndicator,
   ScrollView,
   Image,
+  StyleSheet,
+  Dimensions,
   TouchableOpacity,
   SafeAreaView,
   FlatList,
@@ -330,13 +332,11 @@ const RelatedProducts = React.memo(
       if (!farmCode || !currentProductCode) return;
       try {
         setLoading(true);
-
         // 1. Backend: lấy danh sách productCode
         const backendRes = await api.get(`/api/farms/${farmCode}/products`);
         const backendCodes = (backendRes.data?.data || []).map(
           p => p.productCode,
         );
-        console.log('Backend product codes:', backendCodes);
 
         // 2. SC: lấy danh sách sản phẩm
         const rpcProvider = new ethers.JsonRpcProvider(RPC_URL);
@@ -371,8 +371,6 @@ const RelatedProducts = React.memo(
                 : [],
             description: p.description,
           }));
-        console.log('Related products:', formattedProducts);
-
         setProducts(formattedProducts);
       } catch (err) {
         console.error('Error fetching related products:', err);
@@ -456,7 +454,7 @@ const RelatedProducts = React.memo(
 );
 
 const ProductScreen = () => {
-   const route = useRoute();
+  const route = useRoute();
   const navigation = useNavigation();
   const { productCode } = route.params || {};
   const [product, setProduct] = useState(null);
@@ -564,7 +562,6 @@ const ProductScreen = () => {
     );
   }, [product?.image, selectedImageIndex]);
 
-
   if (isLoading) {
     return (
       <SafeAreaView style={styles.centerContainer}>
@@ -576,7 +573,7 @@ const ProductScreen = () => {
     );
   }
 
-   if (!product) {
+  if (!product) {
     return (
       <SafeAreaView style={styles.centerContainer}>
         <Text style={styles.errorText}>⚠️ Không tìm thấy sản phẩm</Text>
@@ -663,5 +660,149 @@ const ProductScreen = () => {
     </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  // Related Products (ảnh tròn + tên)
+  relatedRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 20,
+    paddingVertical: 8,
+    borderColor: '#d1d2d6ff',
+    borderWidth: 1,
+    borderRadius: 28,
+    paddingHorizontal: 8,
+    backgroundColor: '#fff',
+  },
+  relatedCircleImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#e1e2e4ff',
+    marginRight: 8,
+  },
+  relatedRowText: {
+    paddingHorizontal: 5,
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#111827',
+    maxWidth: 100,
+  },
+
+  // Container
+  container: {flex: 1, backgroundColor: '#fff'},
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  scrollView: {flex: 1},
+
+  // Gallery
+  galleryContainer: {backgroundColor: '#fff'},
+  mainImage: {width, height: 320, backgroundColor: '#F9FAFB'},
+  imageCounter: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  imageCounterText: {color: '#fff', fontSize: 12, fontWeight: '500'},
+  thumbnailContainer: {paddingHorizontal: 16, paddingVertical: 16},
+  thumbnail: {
+    width: 80,
+    height: 80,
+    borderRadius: 10,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  selectedThumbnail: {borderColor: '#10B981'},
+  thumbnailImage: {width: '100%', height: '100%'},
+
+  // Placeholder
+  placeholderContainer: {
+    width,
+    height: 320,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+  },
+  placeholderText: {fontSize: 16, color: '#6B7280'},
+
+  // Product Info
+  productInfo: {
+    backgroundColor: '#fff',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  productHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  productTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#111827',
+    flex: 1,
+    marginRight: 12,
+  },
+  categoryPill: {
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#10B981',
+  },
+  categoryText: {fontSize: 12, fontWeight: '600', color: '#10B981'},
+  priceContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  price: {fontSize: 26, fontWeight: 'bold', color: '#DC2626'},
+  stockText: {fontSize: 14, fontWeight: '600'},
+
+  // Section
+  section: {backgroundColor: '#fff', marginTop: 8, padding: 16},
+  sectionContainer: {
+    backgroundColor: '#fff',
+    marginTop: 8,
+    paddingVertical: 10,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  sectionTitle: {fontSize: 18, fontWeight: '600', color: '#111827'},
+  sectionSubtitle: {fontSize: 14, color: '#6B7280'},
+  description: {fontSize: 16, lineHeight: 22, color: '#4B5563', marginTop: 8},
+
+  // Loading / Empty
+  loadingText: {textAlign: 'center', color: '#6B7280'},
+  loadingMainText: {marginTop: 16, fontSize: 16, color: '#6B7280'},
+  emptyText: {textAlign: 'center', color: '#9CA3AF', fontSize: 14},
+
+  // Error
+  errorText: {fontSize: 16, color: '#6B7280', marginBottom: 16},
+  primaryButton: {
+    backgroundColor: '#10B981',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  primaryButtonText: {color: '#fff', fontSize: 16, fontWeight: '600'},
+});
 
 export default ProductScreen;

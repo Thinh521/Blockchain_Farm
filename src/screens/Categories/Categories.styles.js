@@ -27,14 +27,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.3)',
   },
-  
+
   backButtonText: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#FFFFFF',
     marginLeft: -2,
   },
-  
+
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -57,49 +57,49 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  
+
   addButtonText: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#0E9F58',
     lineHeight: 20,
   },
-  
+
   content: {
     flex: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
-  
+
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-  
+
   errorText: {
     fontSize: 16,
     color: '#FF3B30',
     textAlign: 'center',
     fontWeight: '500',
   },
-  
+
   emptyText: {
     fontSize: 16,
     color: '#8E8E93',
     textAlign: 'center',
     fontWeight: '500',
   },
-  
+
   list: {
     padding: 15,
     paddingBottom: 30,
   },
-  
+
   row: {
     justifyContent: 'space-between',
   },
-  
+
   productCard: {
     width: '48%',
     backgroundColor: '#FFFFFF',
@@ -129,10 +129,14 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 12,
     overflow: 'hidden',
   },
-  
+
   productImage: {
     width: '100%',
     height: '100%',
+  },
+
+  productInfo: {
+    padding: 12,
   },
 
   productFooter: {

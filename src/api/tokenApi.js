@@ -25,7 +25,6 @@ api.interceptors.response.use(
 
     if (
       error.response?.status === 401 &&
-      error.response?.data?.code === '401-3' &&
       !originalRequest._retry
     ) {
       originalRequest._retry = true;

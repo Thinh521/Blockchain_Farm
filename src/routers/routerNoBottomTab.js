@@ -19,6 +19,7 @@ import AddMewsScreen from '../screens/New/AddNewsScreen';
 import CategoriesScreen from '../screens/Categories/CategoriesScreen';
 import AddProductScreen from '../screens/AddProduct/AddProductScreen';
 import ProductScreen from '../screens/Product/ProductScreen';
+import AllNewsScreen from '../screens/New/AllNewsScreen';
 import ProcessScreen from '../screens/Process/ProcessSreen';
 
 const routerNoBottomTab = [
@@ -107,16 +108,8 @@ const routerNoBottomTab = [
     component: RegisterManage,
     hasLayout: false,
     options: {
-      title: 'Đăng ký quản lý trang trại',
-      headerShown: true,
-      headerStyle: {
-        backgroundColor: Colors.green,
-      },
-      headerTintColor: Colors.white,
-      headerTitleStyle: {
-        fontWeight: 'bold',
-        fontSize: 18,
-      },
+      title: 'Đăng ký quản lý nông trại',
+      headerShown: false,
     },
   },
   {
@@ -172,15 +165,7 @@ const routerNoBottomTab = [
     hasLayout: false,
     options: {
       title: 'Quản lí nông trại',
-      headerShown: true,
-      headerStyle: {
-        backgroundColor: Colors.green,
-      },
-      headerTintColor: Colors.white,
-      headerTitleStyle: {
-        fontWeight: 'bold',
-        fontSize: 18,
-      },
+      headerShown: false,
     },
   },
   {
@@ -189,6 +174,24 @@ const routerNoBottomTab = [
     hasLayout: false,
     options: {
       title: 'Nông trại của tôi',
+      headerShown: false,
+    },
+  },
+  {
+    name: 'WishList',
+    component: WishListScreen,
+    hasLayout: false,
+    options: {
+      title: 'Nông trại yêu thích',
+      headerShown: false,
+    },
+  },
+  {
+    name: 'AddMewsScreen',
+    component: AddMewsScreen,
+    hasLayout: false,
+    options: {
+      title: 'Thêm tin tức',
       headerShown: true,
       headerStyle: {
         backgroundColor: Colors.green,
@@ -201,11 +204,62 @@ const routerNoBottomTab = [
     },
   },
   {
-    name: 'WishList',
-    component: WishListScreen,
+    name: 'Categories',
+    component: CategoriesScreen,
     hasLayout: false,
     options: {
-      title: 'Nông trại yêu thích',
+      title: 'Danh mục nông sản',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'AddProduct',
+    component: AddProductScreen,
+    hasLayout: false,
+    options: {
+      title: 'Thêm sản phẩm',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'Product',
+    component: ProductScreen,
+    hasLayout: false,
+    options: {
+      title: 'Thêm sản phẩm',
+      headerShown: true,
+      headerStyle: {
+        backgroundColor: Colors.green,
+      },
+      headerTintColor: Colors.white,
+      headerTitleStyle: {
+        fontWeight: 'bold',
+        fontSize: 18,
+      },
+    },
+  },
+  {
+    name: 'AllNews',
+    component: AllNewsScreen,
+    hasLayout: false,
+    options: {
+      title: 'Tất cả tin tức',
       headerShown: true,
       headerStyle: {
         backgroundColor: Colors.green,

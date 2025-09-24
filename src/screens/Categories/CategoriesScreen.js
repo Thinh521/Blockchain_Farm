@@ -14,6 +14,7 @@ import {ethers} from 'ethers';
 import contractArtifact from '../SmartConctract/contractABI.json';
 import Images from '../../assets/images/images';
 import {CONTRACT_ADDRESS} from '@env';
+import {API_URL} from '@env';
 import styles from './Categories.styles';
 import api from '../../api/tokenApi';
 
@@ -33,9 +34,6 @@ const CategoriesScreen = ({navigation, route}) => {
           throw new Error('No farmCode provided');
         }
 
-        console.log('📤 Calling getProductsByFarm for:', farmCode);
-
-        // 1. Gọi smart contract
         const rpcProvider = new ethers.JsonRpcProvider(
           'https://rpc.zeroscan.org',
         );
@@ -46,6 +44,8 @@ const CategoriesScreen = ({navigation, route}) => {
         );
 
         const productsData = await contractRead.getProductByFarmCode(farmCode);
+
+        const formattedProducts = productsData.map((product, index) => {
 
         const formattedProducts = productsData.map(product => {
           const images =
@@ -69,16 +69,10 @@ const CategoriesScreen = ({navigation, route}) => {
           };
         });
 
-        // 2. Gọi backend để lấy danh sách productCode
+        if (isMounted) {
+          setProducts(formattedProducts);
         const backendRes = await api.get(`/api/farms/${farmCode}/products`);
-        console.log(
-          '📥 Backend products for farmCode',
-          farmCode,
-          ':',
-          backendRes.data,
-        );
 
-        // Đảm bảo backendRes.data.data là mảng
         const backendCodes = Array.isArray(backendRes.data.data)
           ? backendRes.data.data.map(p => p.productCode)
           : [];
@@ -87,13 +81,12 @@ const CategoriesScreen = ({navigation, route}) => {
         const syncedProducts = formattedProducts.filter(p =>
           backendCodes.includes(p.productCode),
         );
-        console.log('✅ Synced products:', syncedProducts);
 
         if (isMounted) {
           setProducts(syncedProducts);
         }
       } catch (err) {
-        console.error('❌ Error in getProductsByFarm:', err);
+        console.log('Error in getProductsByFarm:', err);
         if (isMounted) {
           setError(err.message || 'Không thể tải danh sách nông sản.');
           Alert.alert(

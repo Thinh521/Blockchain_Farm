@@ -31,7 +31,6 @@ const FarmSlider = ({farms, favorites, toggleFavorite}) => {
       decelerationRate="fast"
       disableIntervalMomentum
       bounces={false}
-      contentContainerStyle={styles.container}
     />
   );
 };

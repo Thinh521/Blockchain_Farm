@@ -12,6 +12,7 @@ import './src/Metamask/appkit';
 import {WishlistProvider} from './src/context/WishlistContext';
 import {useUser} from './src/hooks/useUser';
 import {requestCameraPermission} from './src/permissions/cameraPermission';
+import {AppLoadingProvider} from './src/context/AppLoadingContext';
 
 const queryClient = new QueryClient();
 
@@ -37,9 +38,11 @@ export default function App() {
       <BottomSheetModalProvider>
         <QueryClientProvider client={queryClient}>
           <SafeAreaProvider>
-            <WishlistProvider>
-              <AppContent />
-            </WishlistProvider>
+            <AppLoadingProvider>
+              <WishlistProvider>
+                <AppContent />
+              </WishlistProvider>
+            </AppLoadingProvider>
           </SafeAreaProvider>
         </QueryClientProvider>
       </BottomSheetModalProvider>

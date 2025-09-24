@@ -13,13 +13,15 @@ import {
 } from '@reown/appkit-ethers-react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Feather';
-import styles from './FarmRegistration.styles';
-import {Arrow_Right_S_Icon} from '../../assets/icons';
 import {useNavigation} from '@react-navigation/core';
 import {showMessage} from 'react-native-flash-message';
-import {scale} from '../../utils/scaling';
-import Button from '../../components/CustomButton/CustomButton';
+
 import Header from '../../components/Header/Header';
+import Button from '../../components/CustomButton/CustomButton';
+import {Arrow_Right_S_Icon} from '../../assets/icons';
+
+import {scale} from '../../utils/scaling';
+import styles from './FarmRegistration.styles';
 
 const menuItems = [
   {
@@ -186,7 +188,7 @@ const FarmRegistrationScreen = () => {
         <Header
           title="Đăng ký & quản lí nông trại"
           subtitle="Đăng ký nông trại & quản lý các nông trại đã tạo"
-          emoji="🌾"
+          emoji="🏡"
         />
         {renderMenuScreen()}
       </View>
