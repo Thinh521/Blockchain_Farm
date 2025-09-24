@@ -16,6 +16,8 @@ const NewsCard = ({
   const currentUserId = getUser()?.userId;
   const [showMenu, setShowMenu] = useState(false);
 
+  console.log('item.images.length', item.images.length);
+
   return (
     <View style={styles.card}>
       {item.trending && (
@@ -54,7 +56,8 @@ const NewsCard = ({
                     item.images.map(i => i.url),
                     index,
                   )
-                }>
+                }
+                activeOpacity={0.95}>
                 <FastImage
                   source={{uri: img.url}}
                   style={styles.twoImage}
@@ -271,6 +274,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   twoImagesRow: {
+    flex: 1,
     flexDirection: 'row',
     gap: scale(5),
   },
@@ -278,7 +282,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: scale(160),
     borderRadius: 16,
-    resizeMode: 'cover',
   },
   bigImageContainer: {
     flex: 1,
@@ -448,7 +451,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: scale(8),
-
   },
   engagementButton: {
     flexDirection: 'row',
