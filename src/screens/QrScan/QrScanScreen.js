@@ -9,22 +9,46 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import styles from './QrScan.styles';
 import Button from '../../components/CustomButton/CustomButton';
 import LoadingOverlay from '../../components/CustomLoading/LoadingOverlay';
+import {useNavigation} from '@react-navigation/native';
 
 const QrScanScreen = () => {
   const [scannedCode, setScannedCode] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const device = useCameraDevice('back');
+  const navigation = useNavigation();
 
-  // Scan dicectly with camera
   const scanner = useCodeScanner({
     codeTypes: ['qr'],
-    onCodeScanned: codes => {
-      if (codes.length > 0) {
-        const code = codes[0];
-        const value = code.value || code.rawValue || code.displayValue;
+   onCodeScanned: codes => {
+  if (codes.length > 0) {
+    const code = codes[0];
+    const value = code.value || code.rawValue || code.displayValue;
+
+    if (value) {
+      try {
+        const data = JSON.parse(value); // parse JSON
+        const productCode = data.productCode;
+
+        setScannedCode(productCode);
+        setModalVisible(false);
+
+        navigation.navigate('NoBottomTab', {
+          screen: 'Product',
+          params: { productCode },
+        });
+      } catch (err) {
+        // nếu QR chỉ chứa productCode (string đơn giản) thì fallback
+        console.log('QR không phải JSON, dùng value trực tiếp');
         setScannedCode(value);
-        setModalVisible(true);
+        setModalVisible(false);
+
+        navigation.navigate('NoBottomTab', {
+          screen: 'Product',
+          params: { productCode: value },
+        });
       }
+    }
+  }
     },
   });
 

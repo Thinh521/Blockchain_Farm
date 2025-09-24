@@ -340,5 +340,62 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  // Hash Container Styles
+  hashContainer: {
+    backgroundColor: '#F8FAFC',
+    borderRadius: 8,
+    padding: 12,
+    marginVertical: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderStyle: 'dashed',
+  },
+  
+  hashHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  
+  hashLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#4F46E5',
+  },
+  
+  hashHint: {
+    fontSize: 11,
+    color: '#6B7280',
+    fontStyle: 'italic',
+  },
+  
+  hashText: {
+    fontFamily: 'monospace',
+    fontSize: 12,
+    color: '#1F2937',
+    backgroundColor: '#FFFFFF',
+    padding: 8,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+  },
+  hashCard: {
+  backgroundColor: '#f9f9f9',
+  padding: 10,
+  borderRadius: 8,
+  marginBottom: 8,
+  elevation: 2,
+},
+hashStep: {
+  fontWeight: '600',
+  color: '#333',
+},
+hashText: {
+  fontSize: 12,
+  color: '#666',
+  marginTop: 4,
+},
+
 });
 export default styles;
