@@ -31,7 +31,6 @@ const AddNewsScreen = () => {
   const navigation = useNavigation();
   const {isConnected} = useAppKitAccount();
   const {loading, setLoading} = useAppLoading();
-
   const [farms, setFarms] = useState([]);
   const [selectedFarm, setSelectedFarm] = useState(null);
   const [title, setTitle] = useState('');
@@ -120,7 +119,6 @@ const AddNewsScreen = () => {
         type: img.type || 'image/jpeg',
       });
     });
-
     setLoading(true);
     try {
       const res = await createNewsApi(accessToken, formData);

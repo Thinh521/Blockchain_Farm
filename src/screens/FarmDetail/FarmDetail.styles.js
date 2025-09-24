@@ -61,15 +61,15 @@ export default StyleSheet.create({
     justifyContent: 'center',
     zIndex: 100,
   },
-  floatingActions: {
-    position: 'absolute',
-    top: 14,
-    right: 22,
-    flexDirection: 'column',
-    alignItems: 'center',
-    zIndex: 999,
-    elevation: 5,
-  },
+floatingActions: {
+  position: 'absolute',
+  top: 60
+  right: 16,
+  flexDirection: 'column',
+  alignItems: 'center',
+  zIndex: 999,
+  elevation: 5,
+},
 
   floatingActionButton: {
     width: scale(40),

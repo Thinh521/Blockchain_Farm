@@ -28,6 +28,7 @@ const WishlistScreen = () => {
       const rpcProvider = new ethers.JsonRpcProvider(
         'https://rpc.zeroscan.org',
       );
+
       const contractRead = new ethers.Contract(
         CONTRACT_ADDRESS,
         contractArtifact.abi,

@@ -16,6 +16,7 @@ import Button from '../../components/CustomButton/CustomButton';
 
 import {useNews} from '../../hooks/useNews';
 import useDebouncedSearching from '../../hooks/useDebouncedSearching';
+
 import {scale} from '../../utils/scaling';
 import styles from './New.styles';
 import {Colors} from '../../theme/theme';

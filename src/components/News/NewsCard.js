@@ -448,6 +448,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: scale(8),
+
   },
   engagementButton: {
     flexDirection: 'row',
@@ -456,6 +457,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 16,
     backgroundColor: '#f8f9fa',
+  },
+  engagementIcon: {
+    fontSize: 16,
+    marginRight: 4,
   },
   engagementCount: {
     fontSize: FontSizes.xsmall,

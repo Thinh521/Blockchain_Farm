@@ -32,7 +32,6 @@ const AddProductScreen = ({ navigation, route }) => {
     categoryName: '',
     quantity: '',
     price: '',
-    area: '',
     description: '',
     images: null,
     detailImages: [],
@@ -59,19 +58,20 @@ const AddProductScreen = ({ navigation, route }) => {
     }));
   };
 
-  const handleImageSelect = (field, imageData, type) => {
-    if (type === 'single') {
-      setFormData(prev => ({
-        ...prev,
-        [field]: imageData,
-      }));
-    } else if (type === 'multiple') {
-      setFormData(prev => ({
-        ...prev,
-        [field]: [...prev[field], imageData],
-      }));
-    }
-  };
+const handleImageSelect = (field, imageData, type) => {
+  if (type === 'single') {
+    setFormData(prev => ({
+      ...prev,
+      [field]: imageData,
+    }));
+  } else if (type === 'multiple') {
+    const newImages = Array.isArray(imageData) ? imageData : [imageData];
+    setFormData(prev => ({
+      ...prev,
+      [field]: [...prev[field], ...newImages],
+    }));
+  }
+};
 
   const handleImageRemove = (field, index = null) => {
     if (index === null) {
@@ -99,7 +99,6 @@ const AddProductScreen = ({ navigation, route }) => {
       !formData.categoryName ||
       !formData.quantity ||
       !formData.price ||
-      !formData.area ||
       !formData.description ||
       !formData.images
     ) {
@@ -228,7 +227,6 @@ const AddProductScreen = ({ navigation, route }) => {
               categoryName: formData.categoryName,
               quantity: formData.quantity,
               price: formData.price,
-              area: formData.area,
               image: imageUrlString,
               description: formData.description,
             },
@@ -236,7 +234,7 @@ const AddProductScreen = ({ navigation, route }) => {
         },
       });
     } catch (error) {
-      console.error('❌ Lỗi:', error);
+      console.error('Lỗi:', error);
       showMessage({
         message: 'Lỗi',
         description: error.reason || error.message || 'Đã xảy ra lỗi khi thêm sản phẩm.',
@@ -255,7 +253,6 @@ const AddProductScreen = ({ navigation, route }) => {
       formData.categoryName &&
       formData.quantity &&
       formData.price &&
-      formData.area &&
       formData.description &&
       formData.images &&
       isConnected &&
@@ -267,14 +264,13 @@ const AddProductScreen = ({ navigation, route }) => {
   const menuItems = [
     {
       title: 'Thông tin chung',
-      description: 'tên sản phẩm, danh mục, số lượng, giá, diện tích',
+      description: 'tên sản phẩm, danh mục, số lượng, giá',
       isCompleted: (data) => 
         data.productCode && 
         data.name && 
         data.categoryName && 
         data.quantity && 
-        data.price && 
-        data.area,
+        data.price,
       fields: [
         {
           type: 'input',
@@ -300,13 +296,6 @@ const AddProductScreen = ({ navigation, route }) => {
           field: 'price',
           label: 'Giá (VNĐ)',
           placeholder: 'Nhập giá (VNĐ)',
-          keyboardType: 'numeric',
-        },
-        {
-          type: 'input',
-          field: 'area',
-          label: 'Diện tích',
-          placeholder: 'Nhập diện tích',
           keyboardType: 'numeric',
         },
       ],

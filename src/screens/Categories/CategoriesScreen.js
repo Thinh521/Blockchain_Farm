@@ -16,6 +16,7 @@ import Images from '../../assets/images/images';
 import {CONTRACT_ADDRESS} from '@env';
 import {API_URL} from '@env';
 import styles from './Categories.styles';
+import api from '../../api/tokenApi';
 
 const CategoriesScreen = ({navigation, route}) => {
   const {farmCode} = route.params || {};
@@ -33,7 +34,6 @@ const CategoriesScreen = ({navigation, route}) => {
           throw new Error('No farmCode provided');
         }
 
-        console.log('📤 Calling getProductsByFarm for:', farmCode);
         const rpcProvider = new ethers.JsonRpcProvider(
           'https://rpc.zeroscan.org',
         );
@@ -44,9 +44,10 @@ const CategoriesScreen = ({navigation, route}) => {
         );
 
         const productsData = await contractRead.getProductByFarmCode(farmCode);
-        console.log('📦 Raw productsData:', productsData);
 
         const formattedProducts = productsData.map((product, index) => {
+
+        const formattedProducts = productsData.map(product => {
           const images =
             typeof product.image === 'string'
               ? product.image
@@ -54,12 +55,6 @@ const CategoriesScreen = ({navigation, route}) => {
                   .map(url => url.trim())
                   .filter(Boolean)
               : [];
-
-          console.log(`🧱 Product ${index + 1}:`, {
-            productCode: product.productCode,
-            name: product.name,
-            imageCount: images.length,
-          });
 
           return {
             farmCode: product.farmCode,
@@ -76,9 +71,22 @@ const CategoriesScreen = ({navigation, route}) => {
 
         if (isMounted) {
           setProducts(formattedProducts);
+        const backendRes = await api.get(`/api/farms/${farmCode}/products`);
+
+        const backendCodes = Array.isArray(backendRes.data.data)
+          ? backendRes.data.data.map(p => p.productCode)
+          : [];
+
+        // 3. Lọc những productCode có ở cả SC và backend
+        const syncedProducts = formattedProducts.filter(p =>
+          backendCodes.includes(p.productCode),
+        );
+
+        if (isMounted) {
+          setProducts(syncedProducts);
         }
       } catch (err) {
-        console.error('❌ Error in getProductsByFarm:', err);
+        console.log('Error in getProductsByFarm:', err);
         if (isMounted) {
           setError(err.message || 'Không thể tải danh sách nông sản.');
           Alert.alert(
@@ -109,26 +117,42 @@ const CategoriesScreen = ({navigation, route}) => {
     navigation.navigate('Product', {productCode: productItem.productCode});
   };
 
+  const handleProcessPress = productCode => {
+    navigation.navigate('Process', {productCode, farmCode});
+  };
+
   const renderProductItem = ({item}) => {
     const imageSource =
       item.image?.length > 0 ? {uri: item.image[0]} : Images.bg;
 
     return (
-      <TouchableOpacity
-        style={styles.productCard}
-        onPress={() => handleProductPress(item)}
-        activeOpacity={0.8}>
-        <View style={styles.imageContainer}>
-          <Image
-            source={imageSource}
-            style={styles.productImage}
-            resizeMode="cover"
-          />
+      <View style={styles.productCard}>
+        <TouchableOpacity
+          onPress={() => handleProductPress(item)}
+          activeOpacity={0.8}
+          style={styles.productImageWrapper}>
+          <View style={styles.imageContainer}>
+            <Image
+              source={imageSource}
+              style={styles.productImage}
+              resizeMode="cover"
+            />
+          </View>
+        </TouchableOpacity>
+        <View style={styles.productFooter}>
+          <TouchableOpacity
+            onPress={() => handleProductPress(item)}
+            style={styles.productNameWrapper}>
+            <Text style={styles.productName}>{item.name}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.processButton}
+            onPress={() => handleProcessPress(item.productCode)}
+            activeOpacity={0.7}>
+            <Text style={styles.processButtonText}>Quy trình</Text>
+          </TouchableOpacity>
         </View>
-        <View style={styles.productInfo}>
-          <Text style={styles.productName}>{item.name}</Text>
-        </View>
-      </TouchableOpacity>
+      </View>
     );
   };
 
@@ -173,14 +197,11 @@ const CategoriesScreen = ({navigation, route}) => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor="#059669" barStyle="light-content" />
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Danh mục nông sản</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => navigation.navigate('AddProduct', {farmCode})}>
-          <Text style={styles.addButtonText}>+</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={() => navigation.navigate('AddProduct', {farmCode})}>
+        <Text style={styles.addButtonText}>+</Text>
+      </TouchableOpacity>
       <View style={styles.content}>{renderContent()}</View>
     </SafeAreaView>
   );

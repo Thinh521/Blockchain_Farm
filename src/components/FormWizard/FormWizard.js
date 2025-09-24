@@ -32,23 +32,29 @@ const FormWizard = ({
     setActiveSection(activeSection === sectionIndex ? null : sectionIndex);
   };
 
-  const selectImage = (type, field) => {
-    const options = {
-      mediaType: 'photo',
-      includeBase64: false,
-      maxHeight: 2000,
-      maxWidth: 2000,
-    };
-
-    launchImageLibrary(options, (response) => {
-      if (response.didCancel || response.error) return;
-
-      if (response.assets && response.assets[0]) {
-        const imageData = response.assets[0];
-        onImageSelect(field, imageData, type);
-      }
-    });
+const selectImage = (type, field) => {
+  const options = {
+    mediaType: 'photo',
+    includeBase64: false,
+    maxHeight: 2000,
+    maxWidth: 2000,
+    selectionLimit: 0, // 👈 quan trọng
   };
+
+  launchImageLibrary(options, (response) => {
+    if (response.didCancel || response.errorCode) return;
+
+    if (response.assets && response.assets.length > 0) {
+      if (type === 'single') {
+        // lấy 1 ảnh duy nhất
+        onImageSelect(field, response.assets[0], type);
+      } else if (type === 'multiple') {
+        // gửi nguyên mảng ảnh
+        onImageSelect(field, response.assets, type);
+      }
+    }
+  });
+};
 
   const removeImage = (field, index = null) => {
     onImageRemove(field, index);

@@ -21,7 +21,6 @@ export const WishlistProvider = ({children}) => {
   const [wishlistFarms, setWishlistFarms] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // 👉 Hàm reset state khi logout
   const resetWishlist = useCallback(() => {
     setFavorites(new Set());
     setWishlistFarms([]);
@@ -111,7 +110,7 @@ export const WishlistProvider = ({children}) => {
         loading,
         toggleFavorite,
         fetchWishlist,
-        resetWishlist, // 👈 expose hàm reset ra ngoài
+        resetWishlist,
       }}>
       {children}
     </WishlistContext.Provider>

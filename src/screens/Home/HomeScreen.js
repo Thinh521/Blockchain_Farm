@@ -42,12 +42,31 @@ const HomeScreen = () => {
   const {farms, isLoading, error, refetch} = useFarms();
   const {data: user} = useUser();
 
+  const {farms, isLoading, error, refetch} = useFarms();
+  const {data: user} = useUser();
+
   const categories = [
     {id: 'all', name: 'Tất cả', icon: Leaf_Line_Icon},
     {id: 'vegetable', name: 'Rau củ', icon: Flower_Line_Icon},
     {id: 'fruit', name: 'Trái cây', icon: Sun_Line_Icon},
     {id: 'livestock', name: 'Chăn nuôi', icon: User_Line_Icon},
   ];
+
+  const fetchWishlist = useCallback(async () => {
+    try {
+      const res = await getWishlistFarms();
+      const wishlistFarmsApi = res?.wishlist?.farms || [];
+      setFavorites(new Set(wishlistFarmsApi.map(f => f.farmCode)));
+    } catch (err) {
+      console.log('Lỗi fetch wishlist:', err);
+      setFavorites(new Set());
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchWishlist();
+  }, [fetchWishlist]);
+
   useFocusEffect(
     useCallback(() => {
       fetchWishlist();

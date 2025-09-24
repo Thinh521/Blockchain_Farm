@@ -1,6 +1,7 @@
-import React, {useState, useEffect} from 'react';
-import {showMessage} from 'react-native-flash-message';
-import {ethers} from 'ethers';
+import React, { useState, useEffect } from 'react';
+import { StatusBar } from 'react-native';
+import { showMessage } from 'react-native-flash-message';
+import { ethers } from 'ethers';
 import {
   useAppKitAccount,
   useAppKitProvider,
@@ -18,7 +19,6 @@ import {storage} from '../../utils/storage/storage';
 const RegisterManage = ({navigation, route}) => {
   const {isConnected} = useAppKitAccount();
   const {walletProvider} = useAppKitProvider();
-
   const [loadingUserData, setLoadingUserData] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -164,8 +164,7 @@ const RegisterManage = ({navigation, route}) => {
 
       // Upload images if any
       const hasKycImage = formData.kycImage && formData.kycImage.uri;
-      const hasFarmImages =
-        formData.farmImages && formData.farmImages.length > 0;
+      const hasFarmImages = formData.farmImages && formData.farmImages.length > 0;
 
       if (hasKycImage || hasFarmImages) {
         const formDataToSend = new FormData();
@@ -254,8 +253,7 @@ const RegisterManage = ({navigation, route}) => {
       console.error('❌ Lỗi:', error);
       showMessage({
         message: 'Lỗi',
-        description:
-          error.reason || error.message || 'Đã xảy ra lỗi khi đăng ký farm.',
+        description: error.reason || error.message || 'Đã xảy ra lỗi khi đăng ký farm.',
         type: 'danger',
       });
     } finally {
@@ -280,8 +278,7 @@ const RegisterManage = ({navigation, route}) => {
     {
       title: 'Thông tin chung',
       description: 'Họ và tên, tên trang trại, điện thoại, email',
-      isCompleted: data =>
-        data.fullName && data.nameFarm && data.phone && data.email,
+      isCompleted: (data) => data.fullName && data.nameFarm && data.phone && data.email,
       fields: [
         {
           type: 'input',

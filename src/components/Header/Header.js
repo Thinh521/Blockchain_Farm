@@ -65,6 +65,15 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: FontSizes.large,
+    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingBottom: scale(20),
+    backgroundColor: Colors.green,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  headerTitle: {
+    fontSize: 24,
     fontWeight: FontWeights.semiBold,
     color: Colors.white,
     marginBottom: scale(2),

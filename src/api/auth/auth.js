@@ -2,7 +2,6 @@ import api from '../baseApi.js';
 import {ErrorMap} from '../../utils/errorMapper/errorMapper.js';
 import {deleteUser, saveUser} from '../../utils/storage/authStorage.js';
 
-
 // Đăng ký
 export const registerApi = async data => {
   try {
