@@ -63,7 +63,7 @@ export default StyleSheet.create({
   },
 floatingActions: {
   position: 'absolute',
-  top: 60
+  top: 60,
   right: 16,
   flexDirection: 'column',
   alignItems: 'center',

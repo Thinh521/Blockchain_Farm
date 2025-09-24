@@ -38,8 +38,7 @@ import {useNews} from '../../hooks/useNews';
 import {scale} from '../../utils/scaling';
 import NewsCardSkeleton from '../../components/CustomSkeleton/NewsCardSkeleton';
 import ImageViewerModal from '../../components/ImageViewerModal/ImageViewerModal';
-import api from '../../tokenApi';
-
+import api from '../../api/tokenApi';
 
 const farmData = {
   farmCode: 'F001',
@@ -135,74 +134,93 @@ const FarmDetailScreen = ({navigation}) => {
 
   const {farms, isLoading: farmsLoading, error, refetch} = useFarms();
 
-useEffect(() => {
-  let isMounted = true;
+  const {
+    news,
+    expandedId,
+    toggleExpand,
+    openImageViewer,
+    handleDelete,
+  } = useNews();
 
-  const fetchProducts = async () => {
-    try {
-      setLoadingProducts(true);
+  useEffect(() => {
+    let isMounted = true;
 
-      // 1. Lấy danh sách sản phẩm từ Smart Contract
-      const rpcProvider = new ethers.JsonRpcProvider('https://rpc.zeroscan.org');
-      const contractRead = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        contractArtifact.abi,
-        rpcProvider,
-      );
+    const fetchProducts = async () => {
+      try {
+        setLoadingProducts(true);
 
-      const productsData = await contractRead.getProductByFarmCode(farm.farmCode);
+        // 1. Lấy danh sách sản phẩm từ Smart Contract
+        const rpcProvider = new ethers.JsonRpcProvider(
+          'https://rpc.zeroscan.org',
+        );
+        const contractRead = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          contractArtifact.abi,
+          rpcProvider,
+        );
 
-      const formattedProducts = productsData.map(product => {
-        const images =
-          typeof product.image === 'string'
-            ? product.image
-                .split(/[,|]/)
-                .map(url => url.trim())
-                .filter(Boolean)
-            : [];
+        const productsData = await contractRead.getProductByFarmCode(
+          farm.farmCode,
+        );
 
-        return {
-          farmCode: product.farmCode,
-          productCode: product.productCode,
-          categoryName: product.categoryName,
-          name: product.name,
-          quantity: product.quantity,
-          price: product.price,
-          area: product.area,
-          image: images,
-          description: product.description,
-        };
-      });
+        const formattedProducts = productsData.map(product => {
+          const images =
+            typeof product.image === 'string'
+              ? product.image
+                  .split(/[,|]/)
+                  .map(url => url.trim())
+                  .filter(Boolean)
+              : [];
 
-      // 2. Lấy danh sách sản phẩm từ Backend
-      const backendRes = await api.get(`/api/farms/${farm.farmCode}/products`);
-      console.log('📥 Backend products for farmCode', farm.farmCode, ':', backendRes.data);
+          return {
+            farmCode: product.farmCode,
+            productCode: product.productCode,
+            categoryName: product.categoryName,
+            name: product.name,
+            quantity: product.quantity,
+            price: product.price,
+            area: product.area,
+            image: images,
+            description: product.description,
+          };
+        });
 
-      const backendCodes = Array.isArray(backendRes.data.data)
-        ? backendRes.data.data.map(p => p.productCode)
-        : [];
+        // 2. Lấy danh sách sản phẩm từ Backend
+        const backendRes = await api.get(
+          `/api/farms/${farm.farmCode}/products`,
+        );
+        console.log(
+          '📥 Backend products for farmCode',
+          farm.farmCode,
+          ':',
+          backendRes.data,
+        );
 
-      // 3. Lọc ra sản phẩm có ở cả SC và Backend
-      const syncedProducts = formattedProducts.filter(p =>
-        backendCodes.includes(p.productCode),
-      );
+        const backendCodes = Array.isArray(backendRes.data.data)
+          ? backendRes.data.data.map(p => p.productCode)
+          : [];
 
-      console.log('✅ Synced products:', syncedProducts);
+        // 3. Lọc ra sản phẩm có ở cả SC và Backend
+        const syncedProducts = formattedProducts.filter(p =>
+          backendCodes.includes(p.productCode),
+        );
 
-      if (isMounted) setProducts(syncedProducts);
-    } catch (err) {
-      console.error('❌ Error fetchProducts:', err);
-    } finally {
-      if (isMounted) setLoadingProducts(false);
-    }
-  };
+        console.log('✅ Synced products:', syncedProducts);
 
-  fetchProducts();
+        if (isMounted) setProducts(syncedProducts);
+      } catch (err) {
+        console.error('❌ Error fetchProducts:', err);
+      } finally {
+        if (isMounted) setLoadingProducts(false);
+      }
+    };
 
-  return () => {
-    isMounted = false;
-  };
-}, [farm.farmCode]);
+    fetchProducts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [farm.farmCode]);
 
   const handleToggleFavorite = async farmCode => {
     if (loading) return;
@@ -617,7 +635,6 @@ useEffect(() => {
               }>
               <Text style={styles.seeAllText}>Xem tất cả</Text>
             </TouchableOpacity>
-          </View>
 
             <View style={styles.mainContent}>
               <View style={styles.resultsHeader}>

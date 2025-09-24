@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet } from "react-native";
+import {Dimensions, StyleSheet} from 'react-native';
 const {width} = Dimensions.get('window');
 const CARD_WIDTH = 160;
 const CARD_HEIGHT = 240;
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   },
   primaryButtonText: {color: '#fff', fontSize: 16, fontWeight: '600'},
 
-   // Traceability Section Styles
+  // Traceability Section Styles
   traceabilityItem: {
     flexDirection: 'row',
     marginBottom: 16,
@@ -200,7 +200,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: '#d0d3d9ff',
-  
   },
   traceabilityHeader: {
     flexDirection: 'row',
@@ -288,8 +287,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginTop: 8,
   },
-// QrCode
- productHeader: {
+  // QrCode
+  productHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -306,7 +305,7 @@ const styles = StyleSheet.create({
     padding: 2,
     elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.2,
     shadowRadius: 1,
   },
