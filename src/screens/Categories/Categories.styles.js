@@ -1,8 +1,6 @@
-import { StyleSheet, Dimensions } from 'react-native';
-import { scale } from '../../utils/scaling';
+import {StyleSheet} from 'react-native';
 
 const styles = StyleSheet.create({
-  // Container chính
   container: {
     flex: 1,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
@@ -121,7 +119,7 @@ const styles = StyleSheet.create({
   productImageWrapper: {
     width: '100%',
   },
-  
+
   imageContainer: {
     width: '100%',
     height: 120,
@@ -152,7 +150,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 8,
   },
-  
+
   productName: {
     fontSize: 14,
     fontWeight: '600',
