@@ -1,35 +1,27 @@
-import React, {useEffect, useState, useCallback} from 'react';
-import {StyleSheet, View} from 'react-native';
+import React, { useCallback } from 'react';
+import { StyleSheet, View } from 'react-native';
 import FarmList from '../../../components/Farms/FarmList';
 import FarmCardSkeleton from '../../../components/CustomSkeleton/FarmCardSkeleton';
-import {scale} from '../../../utils/scaling';
-import {getWishlistFarms} from '../../../api/wishlist/wishlistApi';
+import { scale } from '../../../utils/scaling';
+import { useWishlist } from '../../../hooks/useWishlist';
+import { useFocusEffect } from '@react-navigation/core';
 
-const AllFarmsScreen = ({route}) => {
-  const {farms, isLoading} = route.params; 
-  const [favorites, setFavorites] = useState(new Set());
+const AllFarmsScreen = ({ route }) => {
+  const { farms, isLoading } = route.params; 
+  const { favorites, fetchWishlist } = useWishlist();
 
-  const fetchWishlist = useCallback(async () => {
-    try {
-      const res = await getWishlistFarms();
-      const wishlistFarmsApi = res?.wishlist?.farms || [];
-      setFavorites(new Set(wishlistFarmsApi.map(f => f.farmCode)));
-    } catch (err) {
-      console.log("Lỗi fetch wishlist:", err);
-      setFavorites(new Set());
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchWishlist();
-  }, [fetchWishlist]);
+useFocusEffect(
+  useCallback(() => {
+    fetchWishlist(); // gọi lại API để đồng bộ
+  }, [fetchWishlist])
+);
 
   return (
     <View style={styles.container}>
       {isLoading ? (
         <FarmCardSkeleton count={4} />
       ) : (
-        <View style={{padding: scale(16)}}>
+        <View style={{ padding: scale(16) }}>
           <FarmList farms={farms} favorites={favorites} />
         </View>
       )}

@@ -9,24 +9,32 @@ import Clipboard from '@react-native-clipboard/clipboard';
 import styles from './QrScan.styles';
 import Button from '../../components/CustomButton/CustomButton';
 import LoadingOverlay from '../../components/CustomLoading/LoadingOverlay';
+import {useNavigation} from '@react-navigation/native';
+
 
 const QrScanScreen = () => {
   const [scannedCode, setScannedCode] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const device = useCameraDevice('back');
+    const navigation = useNavigation(); 
+
 
   // Scan dicectly with camera
-  const scanner = useCodeScanner({
-    codeTypes: ['qr'],
-    onCodeScanned: codes => {
-      if (codes.length > 0) {
-        const code = codes[0];
-        const value = code.value || code.rawValue || code.displayValue;
+const scanner = useCodeScanner({
+  codeTypes: ['qr'],
+  onCodeScanned: codes => {
+    if (codes.length > 0) {
+      const code = codes[0];
+      const value = code.value || code.rawValue || code.displayValue;
+      if (value) {
         setScannedCode(value);
-        setModalVisible(true);
+        setModalVisible(false);
+        navigation.navigate('Product', {productCode: value}); // 👈 điều hướng
       }
-    },
-  });
+    }
+  },
+});
+
 
   // Select images and decode QR code
   const pickImageAndScan = async () => {

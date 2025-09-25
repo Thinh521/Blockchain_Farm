@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   FlatList,
-  Modal
+  Modal,
 } from 'react-native';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import {ethers} from 'ethers';
@@ -38,23 +38,25 @@ const TraceabilitySection = React.memo(({productCode}) => {
         contractArtifact.abi,
         rpcProvider,
       );
-      
-      const traceabilityResult = await contractRead.getCompleteProductTraceability(productCode);
+
+      const traceabilityResult =
+        await contractRead.getCompleteProductTraceability(productCode);
       console.log('Traceability data:', traceabilityResult);
-      
+
       // Lấy từ index 1-5 (5 quy trình), bỏ qua index 0 (thông tin sản phẩm)
       const processData = traceabilityResult.slice(1, 6);
-      
+
       const formattedData = processData.map((process, index) => {
         console.log(`\nProcess ${index + 1}:`, process);
-        
+
         switch (index) {
           case 0: // 🌱 FARMING PROCESS
             return {
               id: index,
               step: 'Bước 1',
               title: '🌱 Quy trình canh tác',
-              date: process.sowingDate || process.plantingDate || 'Không xác định',
+              date:
+                process.sowingDate || process.plantingDate || 'Không xác định',
               location: process.source || 'Không xác định',
               responsible: 'Nông dân',
               status: 'Hoàn thành',
@@ -64,13 +66,13 @@ const TraceabilitySection = React.memo(({productCode}) => {
                 source: process.source,
                 plantingDate: process.plantingDate,
                 sowingDate: process.sowingDate,
-              }
+              },
             };
-            
+
           case 1: // 💊 MEDICINE USAGE
             return {
               id: index,
-              step: 'Bước 2', 
+              step: 'Bước 2',
               title: '💊 Sử dụng thuốc bảo vệ thực vật',
               description: `Thuốc: ${process.nameMedicine}\nSố lượng: ${process.quantityMedicine}\nLoại: ${process.medicineType}`,
               date: process.medicineDate || 'Không xác định',
@@ -83,9 +85,9 @@ const TraceabilitySection = React.memo(({productCode}) => {
                 quantityMedicine: process.quantityMedicine,
                 medicineDate: process.medicineDate,
                 medicineType: process.medicineType,
-              }
+              },
             };
-            
+
           case 2: // 🌿 FERTILIZER USAGE
             return {
               id: index,
@@ -102,9 +104,9 @@ const TraceabilitySection = React.memo(({productCode}) => {
                 quantityFertilizer: process.quantityFertilizer,
                 fertilizerDate: process.fertilizerDate,
                 fertilizerType: process.fertilizerType,
-              }
+              },
             };
-            
+
           case 3: // 🌾 HARVEST INFORMATION
             return {
               id: index,
@@ -121,9 +123,9 @@ const TraceabilitySection = React.memo(({productCode}) => {
                 estimatedQuantity: process.estimatedQuantity,
                 actualQuantity: process.actualQuantity,
                 quality: process.quality,
-              }
+              },
             };
-            
+
           case 4: // 🚚 DISTRIBUTION
             return {
               id: index,
@@ -140,9 +142,9 @@ const TraceabilitySection = React.memo(({productCode}) => {
                 distributorPartner: process.distributorPartner,
                 distributionDate: process.distributionDate,
                 transportMethod: process.transportMethod,
-              }
+              },
             };
-            
+
           default:
             return {
               id: index,
@@ -157,7 +159,7 @@ const TraceabilitySection = React.memo(({productCode}) => {
             };
         }
       });
-      
+
       console.log('Formatted traceability data:', formattedData);
       setTraceabilityData(formattedData);
     } catch (err) {
@@ -171,39 +173,39 @@ const TraceabilitySection = React.memo(({productCode}) => {
     fetchTraceability();
   }, [fetchTraceability]);
 
-  const getDetailLabel = (key) => {
+  const getDetailLabel = key => {
     const labelMap = {
       // Farming Process
       nameProcess: 'Tên giống',
       source: 'Nguồn gốc',
       plantingDate: 'Ngày trồng',
       sowingDate: 'Ngày gieo',
-      
+
       // Medicine Usage
       nameMedicine: 'Tên thuốc',
       quantityMedicine: 'Số lượng thuốc',
       medicineDate: 'Ngày sử dụng thuốc',
       medicineType: 'Loại thuốc',
-      
+
       // Fertilizer Usage
       nameFertilizer: 'Tên phân bón',
       quantityFertilizer: 'Số lượng phân bón',
       fertilizerDate: 'Ngày bón phân',
       fertilizerType: 'Loại phân bón',
-      
+
       // Harvest Information
       harvestDate: 'Ngày thu hoạch',
       estimatedQuantity: 'Sản lượng dự kiến',
       actualQuantity: 'Sản lượng thực tế',
       quality: 'Chất lượng',
-      
+
       // Distribution
       distributorName: 'Nhà phân phối',
       distributorPartner: 'Đối tác',
       distributionDate: 'Ngày phân phối',
       transportMethod: 'Phương thức vận chuyển',
     };
-    
+
     return labelMap[key] || key;
   };
 
@@ -212,7 +214,7 @@ const TraceabilitySection = React.memo(({productCode}) => {
     return icons[index % icons.length];
   };
 
-  const getStatusColor = (status) => {
+  const getStatusColor = status => {
     switch (status?.toLowerCase()) {
       case 'hoàn thành':
       case 'completed':
@@ -230,44 +232,57 @@ const TraceabilitySection = React.memo(({productCode}) => {
 
   const renderTraceabilityItem = ({item, index}) => {
     const isLast = index === traceabilityData.length - 1;
-    
+
     return (
       <View style={styles.traceabilityItem}>
         <View style={styles.traceabilityTimeline}>
-          <View style={[styles.timelineIcon, {backgroundColor: getStatusColor(item.status)}]}>
-            <Text style={styles.timelineIconText}>{getStepIcon(index, traceabilityData.length)}</Text>
+          <View
+            style={[
+              styles.timelineIcon,
+              {backgroundColor: getStatusColor(item.status)},
+            ]}>
+            <Text style={styles.timelineIconText}>
+              {getStepIcon(index, traceabilityData.length)}
+            </Text>
           </View>
           {!isLast && <View style={styles.timelineLine} />}
         </View>
-        
+
         <View style={styles.traceabilityContent}>
           <View style={styles.traceabilityCard}>
             <View style={styles.traceabilityHeader}>
               <Text style={styles.traceabilityStep}>{item.step}</Text>
-              <View style={[styles.statusBadge, {backgroundColor: getStatusColor(item.status)}]}>
+              <View
+                style={[
+                  styles.statusBadge,
+                  {backgroundColor: getStatusColor(item.status)},
+                ]}>
                 <Text style={styles.statusText}>{item.status}</Text>
               </View>
             </View>
-            
+
             <Text style={styles.traceabilityTitle}>{item.title}</Text>
             <View style={styles.traceabilityDetails}>
-              
               {/* Hiển thị thông tin chi tiết dựa trên từng quy trình */}
               {item.details && Object.keys(item.details).length > 0 && (
                 <View style={styles.additionalDetails}>
                   <Text style={styles.additionalDetailsTitle}>Chi tiết:</Text>
-                  {Object.entries(item.details).map(([key, value]) => (
-                    value && value !== 'Không xác định' && (
-                      <View key={key} style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>• {getDetailLabel(key)}:</Text>
-                        <Text style={styles.detailValue}>{value}</Text>
-                      </View>
-                    )
-                  ))}
+                  {Object.entries(item.details).map(
+                    ([key, value]) =>
+                      value &&
+                      value !== 'Không xác định' && (
+                        <View key={key} style={styles.detailRow}>
+                          <Text style={styles.detailLabel}>
+                            • {getDetailLabel(key)}:
+                          </Text>
+                          <Text style={styles.detailValue}>{value}</Text>
+                        </View>
+                      ),
+                  )}
                 </View>
               )}
             </View>
-            
+
             {item.images && item.images.length > 0 && (
               <View style={styles.traceabilityImages}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -300,15 +315,19 @@ const TraceabilitySection = React.memo(({productCode}) => {
           </Text>
         )}
       </View>
-      
+
       {loading ? (
         <View style={styles.traceabilityLoading}>
           <ActivityIndicator size="large" color="#10B981" />
-          <Text style={styles.loadingText}>Đang tải quy trình truy xuất...</Text>
+          <Text style={styles.loadingText}>
+            Đang tải quy trình truy xuất...
+          </Text>
         </View>
       ) : traceabilityData.length === 0 ? (
         <View style={styles.emptyTraceability}>
-          <Text style={styles.emptyText}>📋 Chưa có thông tin truy xuất nguồn gốc</Text>
+          <Text style={styles.emptyText}>
+            📋 Chưa có thông tin truy xuất nguồn gốc
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -456,7 +475,7 @@ const RelatedProducts = React.memo(
 const ProductScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const { productCode } = route.params || {};
+  const {productCode} = route.params || {};
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -596,13 +615,10 @@ const ProductScreen = () => {
         <View style={styles.productInfo}>
           <View style={styles.productHeader}>
             <Text style={styles.productTitle}>{product.name}</Text>
-            <TouchableOpacity
-              style={styles.qrBadge} 
-              onPress={handleQRPress}
-            >
+            <TouchableOpacity style={styles.qrBadge} onPress={handleQRPress}>
               <QRCode
-                value={`https://your-app-domain.com/product?productCode=${product.productCode}#traceability`}
-                size={30} 
+                value={product.productCode}
+                size={30}
                 backgroundColor="#ffffff"
                 color="#000000"
               />
@@ -614,7 +630,7 @@ const ProductScreen = () => {
             <Text
               style={[
                 styles.stockText,
-                { color: product.quantity > 0 ? '#10B981' : '#EF4444' },
+                {color: product.quantity > 0 ? '#10B981' : '#EF4444'},
               ]}>
               {product.quantity > 0 ? `Còn ${product.quantity} kg` : 'Hết hàng'}
             </Text>
@@ -639,18 +655,19 @@ const ProductScreen = () => {
           visible={showQRModal}
           transparent
           animationType="fade"
-          onRequestClose={closeQRModal}
-        >
+          onRequestClose={closeQRModal}>
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Quét mã QR để xem truy xuất</Text>
               <QRCode
-                value={`https://your-app-domain.com/product?productCode=${product.productCode}#traceability`}
-                size={200} // Kích thước lớn hơn để dễ quét
+                value={product.productCode}
+                size={200}
                 backgroundColor="#ffffff"
                 color="#000000"
               />
-              <TouchableOpacity style={styles.closeButton} onPress={closeQRModal}>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={closeQRModal}>
                 <Text style={styles.closeButtonText}>Đóng</Text>
               </TouchableOpacity>
             </View>
