@@ -5,8 +5,6 @@ import {
   ActivityIndicator,
   ScrollView,
   Image,
-  StyleSheet,
-  Dimensions,
   TouchableOpacity,
   SafeAreaView,
   FlatList,
@@ -17,21 +15,23 @@ import {ethers} from 'ethers';
 import {CONTRACT_ADDRESS} from '@env';
 import contractArtifact from '../SmartConctract/contractABI.json';
 import Images from '../../assets/images/images';
-import api from '../../api/tokenApi';
+import api from '../../api/baseApi';
 import QRCode from 'react-native-qrcode-svg';
 import styles from './ProductScreen.style';
+import {QrTabIcon} from '../../assets/icons';
 
 const RPC_URL = 'https://rpc.zeroscan.org';
 
-// Component hiển thị quy trình truy xuất nguồn gốc
 const TraceabilitySection = React.memo(({productCode}) => {
   const [traceabilityData, setTraceabilityData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [hashes, setHashes] = useState([]);
 
   const fetchTraceability = useCallback(async () => {
     if (!productCode) return;
     try {
       setLoading(true);
+
       const rpcProvider = new ethers.JsonRpcProvider(RPC_URL);
       const contractRead = new ethers.Contract(
         CONTRACT_ADDRESS,
@@ -41,16 +41,21 @@ const TraceabilitySection = React.memo(({productCode}) => {
 
       const traceabilityResult =
         await contractRead.getCompleteProductTraceability(productCode);
-      console.log('Traceability data:', traceabilityResult);
 
-      // Lấy từ index 1-5 (5 quy trình), bỏ qua index 0 (thông tin sản phẩm)
+      const hashResponse = await api.get(`/api/process/${productCode}`);
+      const hashData = hashResponse.data?.process?.steps || [];
+
+      const hashesOnly = hashData.map(step => step.txHash);
+
+      setHashes(hashesOnly);
+
       const processData = traceabilityResult.slice(1, 6);
 
       const formattedData = processData.map((process, index) => {
         console.log(`\nProcess ${index + 1}:`, process);
 
         switch (index) {
-          case 0: // 🌱 FARMING PROCESS
+          case 0:
             return {
               id: index,
               step: 'Bước 1',
@@ -61,6 +66,7 @@ const TraceabilitySection = React.memo(({productCode}) => {
               responsible: 'Nông dân',
               status: 'Hoàn thành',
               images: [],
+              hash: hashesOnly[index] || 'Không có mã hash',
               details: {
                 nameProcess: process.nameProcess,
                 source: process.source,
@@ -69,7 +75,7 @@ const TraceabilitySection = React.memo(({productCode}) => {
               },
             };
 
-          case 1: // 💊 MEDICINE USAGE
+          case 1:
             return {
               id: index,
               step: 'Bước 2',
@@ -80,6 +86,7 @@ const TraceabilitySection = React.memo(({productCode}) => {
               responsible: 'Kỹ thuật viên',
               status: 'Hoàn thành',
               images: [],
+              hash: hashesOnly[index] || 'Không có mã hash',
               details: {
                 nameMedicine: process.nameMedicine,
                 quantityMedicine: process.quantityMedicine,
@@ -88,7 +95,7 @@ const TraceabilitySection = React.memo(({productCode}) => {
               },
             };
 
-          case 2: // 🌿 FERTILIZER USAGE
+          case 2:
             return {
               id: index,
               step: 'Bước 3',
@@ -99,6 +106,7 @@ const TraceabilitySection = React.memo(({productCode}) => {
               responsible: 'Kỹ thuật viên',
               status: 'Hoàn thành',
               images: [],
+              hash: hashesOnly[index] || 'Không có mã hash',
               details: {
                 nameFertilizer: process.nameFertilizer,
                 quantityFertilizer: process.quantityFertilizer,
@@ -107,7 +115,7 @@ const TraceabilitySection = React.memo(({productCode}) => {
               },
             };
 
-          case 3: // 🌾 HARVEST INFORMATION
+          case 3:
             return {
               id: index,
               step: 'Bước 4',
@@ -118,6 +126,7 @@ const TraceabilitySection = React.memo(({productCode}) => {
               responsible: 'Đội thu hoạch',
               status: 'Hoàn thành',
               images: [],
+              hash: hashesOnly[index] || 'Không có mã hash',
               details: {
                 harvestDate: process.harvestDate,
                 estimatedQuantity: process.estimatedQuantity,
@@ -126,17 +135,18 @@ const TraceabilitySection = React.memo(({productCode}) => {
               },
             };
 
-          case 4: // 🚚 DISTRIBUTION
+          case 4:
             return {
               id: index,
               step: 'Bước 5',
               title: '🚚 Phân phối',
-              description: `Nhà phân phối: ${process.distributorName}\nĐối tác: ${process.distributorPartner}\nPhương thức vận chuyển:${process.transportMethod}`,
+              description: `Nhà phân phối: ${process.distributorName}\nĐối tác: ${process.distributorPartner}\nPhương thức vận chuyển: ${process.transportMethod}`,
               date: process.distributionDate || 'Không xác định',
               location: process.distributorPartner || 'Không xác định',
               responsible: process.distributorName || 'Nhà phân phối',
               status: 'Hoàn thành',
               images: [],
+              hash: hashesOnly[index] || 'Không có mã hash',
               details: {
                 distributorName: process.distributorName,
                 distributorPartner: process.distributorPartner,
@@ -156,14 +166,13 @@ const TraceabilitySection = React.memo(({productCode}) => {
               responsible: 'Không xác định',
               status: 'Hoàn thành',
               images: [],
+              hash: 'Không có mã hash',
             };
         }
       });
-
-      console.log('Formatted traceability data:', formattedData);
       setTraceabilityData(formattedData);
     } catch (err) {
-      console.error('Error fetching traceability:', err);
+      console.log('Error fetching traceability:', err);
     } finally {
       setLoading(false);
     }
@@ -210,7 +219,7 @@ const TraceabilitySection = React.memo(({productCode}) => {
   };
 
   const getStepIcon = (index, total) => {
-    const icons = ['🌱', '🚜', '💧', '🌾', '📦', '🚚', '🏪'];
+    const icons = ['🌱', '🏪', '💧', '🌾', '📦', '🚚'];
     return icons[index % icons.length];
   };
 
@@ -227,6 +236,14 @@ const TraceabilitySection = React.memo(({productCode}) => {
         return '#6B7280';
       default:
         return '#10B981';
+    }
+  };
+
+  // Hàm xử lý nhấn vào mã hash
+  const handleHashPress = hash => {
+    if (hash && hash !== 'Không có mã hash') {
+      const url = `https://zeroscan.org/tx/${hash}`;
+      Linking.openURL(url).catch(err => console.log('Không thể mở URL:', err));
     }
   };
 
@@ -263,6 +280,18 @@ const TraceabilitySection = React.memo(({productCode}) => {
 
             <Text style={styles.traceabilityTitle}>{item.title}</Text>
             <View style={styles.traceabilityDetails}>
+              {/* Hiển thị mã hash */}
+              {item.hash && (
+                <TouchableOpacity onPress={() => handleHashPress(item.hash)}>
+                  <Text
+                    style={styles.hashText}
+                    numberOfLines={1}
+                    ellipsizeMode="middle">
+                    Mã hash: <Text style={styles.hashLink}>{item.hash}</Text>
+                  </Text>
+                </TouchableOpacity>
+              )}
+                                       
               {/* Hiển thị thông tin chi tiết dựa trên từng quy trình */}
               {item.details && Object.keys(item.details).length > 0 && (
                 <View style={styles.additionalDetails}>
@@ -306,7 +335,7 @@ const TraceabilitySection = React.memo(({productCode}) => {
   return (
     <View style={styles.sectionContainer}>
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}> Truy xuất nguồn gốc</Text>
+        <Text style={styles.sectionTitle}>Truy xuất nguồn gốc</Text>
         {loading ? (
           <ActivityIndicator size="small" color="#10B981" />
         ) : (
@@ -392,7 +421,7 @@ const RelatedProducts = React.memo(
           }));
         setProducts(formattedProducts);
       } catch (err) {
-        console.error('Error fetching related products:', err);
+        console.log('Error fetching related products:', err);
       } finally {
         setLoading(false);
       }
@@ -480,6 +509,39 @@ const ProductScreen = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showQRModal, setShowQRModal] = useState(false);
+  const [hashes, setHashes] = useState([]);
+
+  useEffect(() => {
+    const fetchHashes = async () => {
+      try {
+        const hashResponse = await api.get(`/api/process/${productCode}`);
+        const hashData = hashResponse.data?.process?.steps || [];
+
+        const hashesOnly = hashData.slice(0, 5).map(step => ({
+          name: step.stepName,
+          hash: step.txHash,
+        }));
+        setHashes(hashesOnly);
+
+        console.log('Hashes only:', hashesOnly);
+      } catch (err) {
+        console.error('Lỗi fetch hashes:', err);
+      }
+    };
+
+    if (productCode) {
+      fetchHashes();
+    }
+  }, [productCode]);
+
+  // 🔹 tạo giá trị QR
+  const qrValue = useMemo(() => {
+    if (!product) return '';
+    return JSON.stringify({
+      productCode: product.productCode,
+      hashes: hashes || [],
+    });
+  }, [product, hashes]);
 
   const fetchProduct = useCallback(async () => {
     if (!productCode) return;
@@ -512,7 +574,7 @@ const ProductScreen = () => {
         image: images,
       });
     } catch (err) {
-      console.error('Error fetch product:', err);
+      console.log('Error fetch product:', err);
     } finally {
       setIsLoading(false);
     }
@@ -616,12 +678,7 @@ const ProductScreen = () => {
           <View style={styles.productHeader}>
             <Text style={styles.productTitle}>{product.name}</Text>
             <TouchableOpacity style={styles.qrBadge} onPress={handleQRPress}>
-              <QRCode
-                value={product.productCode}
-                size={30}
-                backgroundColor="#ffffff"
-                color="#000000"
-              />
+              <QrTabIcon />
             </TouchableOpacity>
           </View>
 
@@ -643,6 +700,7 @@ const ProductScreen = () => {
         </View>
 
         <TraceabilitySection productCode={product.productCode} />
+        
 
         <RelatedProducts
           farmCode={product.farmCode}
@@ -660,7 +718,7 @@ const ProductScreen = () => {
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Quét mã QR để xem truy xuất</Text>
               <QRCode
-                value={product.productCode}
+                value={qrValue}
                 size={200}
                 backgroundColor="#ffffff"
                 color="#000000"
