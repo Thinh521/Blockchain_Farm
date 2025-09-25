@@ -13,6 +13,8 @@ const Images = {
   bg: require('./bg.png'),
   slider_1: require('./slider_1.png'),
   slider_2: require('./slider_2.png'),
+  images: require('./images.png'),
+  nomessage: require('./nomessage.png'),
 };
 
 export default Images;

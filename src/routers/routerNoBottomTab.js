@@ -192,15 +192,7 @@ const routerNoBottomTab = [
     hasLayout: false,
     options: {
       title: 'Thêm tin tức',
-      headerShown: true,
-      headerStyle: {
-        backgroundColor: Colors.green,
-      },
-      headerTintColor: Colors.white,
-      headerTitleStyle: {
-        fontWeight: 'bold',
-        fontSize: 18,
-      },
+      headerShown: false,
     },
   },
   {

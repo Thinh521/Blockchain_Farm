@@ -2,13 +2,9 @@ import api from './tokenApi';
 import {ErrorMap} from '../utils/errorMapper/errorMapper';
 
 // Get all the news
-export const getAllNewsApi = async accessToken => {
+export const getAllNewsApi = async () => {
   try {
-    const res = await api.get('/api/news/all', {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    const res = await api.get('/api/news/all');
 
     if (res.data?.code === 200) {
       return res.data.data;
@@ -25,13 +21,9 @@ export const getAllNewsApi = async accessToken => {
 };
 
 // Get all news by farmCode
-export const getAllNewsByFarmApi = async (farmCode, accessToken) => {
+export const getAllNewsByFarmApi = async farmCode => {
   try {
-    const res = await api.get(`/api/news/${farmCode}`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+    const res = await api.get(`/api/news/${farmCode}`);
 
     if (res.data?.code === 200) {
       return res.data.data;

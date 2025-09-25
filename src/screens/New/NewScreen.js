@@ -6,6 +6,7 @@ import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
 } from '@gorhom/bottom-sheet';
+import FastImage from 'react-native-fast-image';
 
 import Header from '../../components/Header/Header';
 import NewsList from '../../components/News/NewsList';
@@ -13,13 +14,14 @@ import NewsCardSkeleton from '../../components/CustomSkeleton/NewsCardSkeleton';
 import ImageViewerModal from '../../components/ImageViewerModal/ImageViewerModal';
 import {Search_Line_Icon} from '../../assets/icons';
 import Button from '../../components/CustomButton/CustomButton';
+import Images from '../../assets/images/images';
 
 import {useNews} from '../../hooks/useNews';
 import useDebouncedSearching from '../../hooks/useDebouncedSearching';
 
 import {scale} from '../../utils/scaling';
-import styles from './New.styles';
 import {Colors} from '../../theme/theme';
+import styles from './New.styles';
 
 const NewScreen = () => {
   const navigation = useNavigation();
@@ -274,7 +276,13 @@ const NewScreen = () => {
                     });
                   }}
                   style={styles.addPostButton}>
-                  <Text style={styles.addPostText}>+ Thêm bài viết</Text>
+                  <Ionicons
+                    name="add-circle-outline"
+                    size={20}
+                    color="#fff"
+                    style={{marginRight: 6}}
+                  />
+                  <Text style={styles.addPostText}>Thêm bài viết</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -285,7 +293,12 @@ const NewScreen = () => {
               <NewsCardSkeleton count={1} />
             ) : filteredNews.length === 0 ? (
               <View style={styles.emptyWrapper}>
-                <Text style={styles.emptyText}>Không có tin tức nào</Text>
+                <FastImage
+                  source={Images.nomessage}
+                  style={{width: scale(100), height: scale(100)}}
+                  resizeMode="contain"
+                />
+                <Text style={styles.emptyText}>Không có tin tức</Text>
               </View>
             ) : (
               <FlatList
@@ -299,6 +312,15 @@ const NewScreen = () => {
                     onToggleExpand={toggleExpand}
                     onOpenImageViewer={openImageViewer}
                     onDelete={handleDelete}
+                    onEdit={item => {
+                      navigation.navigate('NoBottomTab', {
+                        screen: 'AddMewsScreen',
+                        params: {
+                          mode: 'edit',
+                          news: item,
+                        },
+                      });
+                    }}
                   />
                 )}
                 onEndReached={() => {
