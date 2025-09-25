@@ -12,11 +12,10 @@ const NewsCard = ({
   onToggleExpand,
   onOpenImageViewer,
   onDelete,
+  onEdit,
 }) => {
   const currentUserId = getUser()?.userId;
   const [showMenu, setShowMenu] = useState(false);
-
-  console.log('item.images.length', item.images.length);
 
   return (
     <View style={styles.card}>
@@ -167,8 +166,9 @@ const NewsCard = ({
                     style={styles.menuItem}
                     onPress={() => {
                       setShowMenu(false);
-                      onEdit?.(item._id);
+                      onEdit?.(item);
                     }}>
+                    
                     <View style={styles.menubox}>
                       <Ionicons name="create-outline" size={20} color="#000" />
                       <Text style={styles.menuText}>Chỉnh sửa</Text>

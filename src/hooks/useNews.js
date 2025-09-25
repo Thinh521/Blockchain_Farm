@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {Alert} from 'react-native'; 
+import {Alert} from 'react-native';
 import {useIsFocused} from '@react-navigation/core';
 import {useQuery} from '@tanstack/react-query';
 import {showMessage} from 'react-native-flash-message';
@@ -9,11 +9,9 @@ import {
   getAllNewsApi,
   getAllNewsByFarmApi,
 } from '../api/newsApi';
-import {getUser} from '../utils/storage/authStorage';
 
 export const useNews = ({farmCode} = {}) => {
   const isFocused = useIsFocused();
-  const accessToken = getUser()?.accessToken;
 
   const [expandedId, setExpandedId] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
@@ -30,12 +28,8 @@ export const useNews = ({farmCode} = {}) => {
     refetch,
   } = useQuery({
     queryKey: ['news', farmCode ?? 'all'],
-    queryFn: () =>
-      farmCode
-        ? getAllNewsByFarmApi(farmCode, accessToken)
-        : getAllNewsApi(accessToken),
+    queryFn: () => (farmCode ? getAllNewsByFarmApi(farmCode) : getAllNewsApi()),
     staleTime: 10 * 60 * 1000,
-    enabled: !!accessToken,
     retry: 1,
   });
 

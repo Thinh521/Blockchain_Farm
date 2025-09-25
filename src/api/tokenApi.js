@@ -5,7 +5,7 @@ import {storage} from '../utils/storage/storage';
 const api = axios.create({
   baseURL: API_URL,
   timeout: 10000,
-  headers: {'Content-Type': 'application/json', Accept: 'application/json'},
+  headers: {Accept: 'application/json'},
 });
 
 // Request: gắn accessToken
@@ -23,10 +23,7 @@ api.interceptors.response.use(
   async error => {
     const originalRequest = error.config;
 
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry
-    ) {
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       const refreshToken = storage.getString('refreshToken');
       if (!refreshToken) return Promise.reject(error);
@@ -36,10 +33,12 @@ api.interceptors.response.use(
           refreshToken,
         });
         const newAccessToken = res.data?.accessToken;
+
         if (newAccessToken) {
           storage.set('accessToken', newAccessToken);
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          return api(originalRequest);
+
+          return axios(originalRequest);
         }
       } catch (err) {
         return Promise.reject(err);
@@ -47,7 +46,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

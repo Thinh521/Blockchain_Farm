@@ -9,6 +9,7 @@ const NewsList = ({
   onToggleExpand,
   onOpenImageViewer,
   onDelete,
+  onEdit,
 }) => {
   return (
     <FlatList
@@ -20,6 +21,7 @@ const NewsList = ({
           onToggleExpand={onToggleExpand}
           onOpenImageViewer={onOpenImageViewer}
           onDelete={onDelete}
+          onEdit={onEdit}
         />
       )}
       keyExtractor={item => item._id}

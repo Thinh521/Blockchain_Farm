@@ -21,8 +21,8 @@ export default StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F3F4F6',
     borderRadius: 10,
-    paddingHorizontal: 12,
-    height: scale(40),
+    paddingHorizontal: scale(12),
+    height: scale(44),
     borderWidth: 1,
     borderColor: Colors.border,
   },
@@ -35,7 +35,7 @@ export default StyleSheet.create({
   filterButton: {
     marginLeft: 10,
     backgroundColor: '#10B981',
-    padding: 10,
+    padding: scale(12),
     borderRadius: 10,
   },
   infoRow: {
@@ -49,10 +49,11 @@ export default StyleSheet.create({
     fontWeight: FontWeights.semiBold,
   },
   addPostButton: {
+    flexDirection: 'row',
     backgroundColor: '#10B981',
     paddingVertical: scale(10),
-    paddingHorizontal: 12,
-    borderRadius: 8,
+    paddingHorizontal: scale(14),
+    borderRadius: scale(10),
   },
   addPostText: {
     color: Colors.white,
@@ -82,13 +83,14 @@ export default StyleSheet.create({
     padding: 10,
   },
   emptyWrapper: {
-    flex: 1,
-    justifyContent: 'center',
+    marginTop: scale(150),
     alignItems: 'center',
+    justifyContent: 'center',
   },
   emptyText: {
-    fontSize: 16,
-    color: Colors.title,
+    color: '#307EF4',
+    fontSize: FontSizes.regular,
+    fontWeight: FontWeights.semiBold,
   },
   bottomSheetContainer: {
     backgroundColor: Colors.white,
@@ -145,7 +147,8 @@ export default StyleSheet.create({
   },
   filterContent: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: scale(20),
+    paddingBottom: scale(20),
   },
   bottomSheetActions: {
     flexDirection: 'row',

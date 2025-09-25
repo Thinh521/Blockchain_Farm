@@ -8,11 +8,12 @@ export const Colors = {
   white: '#FFFFFF',
   black: '#000000',
   red: '#FF0000',
+  red_2: '#ef4444',
   border: '#D6D6D6',
   border_2: '#E5E7EB',
   title: '#212121',
   green: '#059669',
-  inputText: 'A8A8A9',
+  inputText: '#A8A8A9',
   bottomSheetHandle: '#D1D5DB',
 };
 
