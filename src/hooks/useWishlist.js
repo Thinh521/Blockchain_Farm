@@ -4,18 +4,16 @@ import { getWishlistFarms, addWishlistFarm, removeWishlistFarm } from "../api/wi
 export const useWishlist = () => {
   const [favorites, setFavorites] = useState(new Set());
 
-  // 🔹 Load wishlist từ BE
   const fetchWishlist = useCallback(async () => {
     try {
       const data = await getWishlistFarms();
       const farmList = data?.wishlist?.farms || [];
       setFavorites(new Set(farmList.map(f => String(f.farmCode))));
     } catch (err) {
-      console.log("❌ fetchWishlist:", err.message);
+      console.log(" fetchWishlist:", err.message);
     }
   }, []);
 
-  // 🔹 Toggle tim
   const toggleFavorite = useCallback(async (farmCode) => {
     const code = String(farmCode);
     setFavorites(prev => {
@@ -35,7 +33,7 @@ export const useWishlist = () => {
         await addWishlistFarm(code);
       }
     } catch (err) {
-      console.log("❌ toggleFavorite error:", err);
+      console.log(" toggleFavorite error:", err);
     }
   }, [favorites]);
 

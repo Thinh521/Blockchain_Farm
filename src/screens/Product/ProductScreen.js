@@ -48,7 +48,6 @@ const TraceabilitySection = React.memo(({productCode}) => {
       const hashesOnly = hashData.map(step => step.txHash);
 
       setHashes(hashesOnly);
-      console.log('Hashes only:', hashesOnly);
 
       const processData = traceabilityResult.slice(1, 6);
 
@@ -171,7 +170,6 @@ const TraceabilitySection = React.memo(({productCode}) => {
             };
         }
       });
-
       setTraceabilityData(formattedData);
     } catch (err) {
       console.log('Error fetching traceability:', err);
@@ -293,7 +291,7 @@ const TraceabilitySection = React.memo(({productCode}) => {
                   </Text>
                 </TouchableOpacity>
               )}
-
+                                       
               {/* Hiển thị thông tin chi tiết dựa trên từng quy trình */}
               {item.details && Object.keys(item.details).length > 0 && (
                 <View style={styles.additionalDetails}>

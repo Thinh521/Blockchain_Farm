@@ -26,16 +26,14 @@ import BottomActionBar from './components/BottomActionBar';
 import {useFarms} from '../../hooks/useFarms';
 import {CONTRACT_ADDRESS} from '@env';
 import contractArtifact from '../SmartConctract/contractABI.json';
-import {
-  addWishlistFarm,
-  removeWishlistFarm,
-} from '../../api/wishlist/wishlistApi';
 import {ethers} from 'ethers';
 import NewsSlider from '../../components/News/NewsSlider';
 import {useNews} from '../../hooks/useNews';
 import {scale} from '../../utils/scaling';
 import NewsCardSkeleton from '../../components/CustomSkeleton/NewsCardSkeleton';
 import ImageViewerModal from '../../components/ImageViewerModal/ImageViewerModal';
+import { getProductsByFarm } from '../../api/productApi';
+import { useWishlist } from '../../hooks/useWishlist';
 
 const farmData = {
   farmCode: 'F001',
@@ -119,7 +117,7 @@ const FarmDetailScreen = ({navigation}) => {
   const [favorite, setFavorite] = useState(initialFavorite);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
-  const [wishlist, setWishlist] = useState([]);
+const {favorites, fetchWishlist, toggleFavorite} = useWishlist();
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
@@ -145,84 +143,77 @@ const FarmDetailScreen = ({navigation}) => {
     toggleExpand,
   } = useNews({farmCode});
 
-  useEffect(() => {
-    let isMounted = true;
+useEffect(() => {
+  let isMounted = true;
+  fetchWishlist();
 
-    const fetchProducts = async () => {
-      try {
-        setLoadingProducts(true);
-        const rpcProvider = new ethers.JsonRpcProvider(
-          'https://rpc.zeroscan.org',
-        );
-        const contractRead = new ethers.Contract(
-          CONTRACT_ADDRESS,
-          contractArtifact.abi,
-          rpcProvider,
-        );
-
-        const productsData = await contractRead.getProductByFarmCode(
-          farm.farmCode,
-        );
-
-        const formattedProducts = productsData.map((product, index) => {
-          const images =
-            typeof product.image === 'string'
-              ? product.image
-                  .split(/[,|]/)
-                  .map(url => url.trim())
-                  .filter(Boolean)
-              : [];
-
-          return {
-            farmCode: product.farmCode,
-            productCode: product.productCode,
-            categoryName: product.categoryName,
-            name: product.name,
-            quantity: product.quantity,
-            price: product.price,
-            area: product.area,
-            image: images,
-            description: product.description,
-          };
-        });
-
-        if (isMounted) setProducts(formattedProducts);
-      } catch (err) {
-        console.error('❌ Error fetchProducts:', err);
-      } finally {
-        if (isMounted) setLoadingProducts(false);
-      }
-    };
-
-    fetchProducts();
-    return () => {
-      isMounted = false;
-    };
-  }, [farm.farmCode]);
-
-  const handleToggleFavorite = async farmCode => {
-    if (loading) return;
-    setLoading(true);
-
+  const fetchProducts = async () => {
     try {
-      if (favorite) {
-        await removeWishlistFarm(farmCode);
-        setWishlist(prev =>
-          prev.filter(f => String(f.farmCode) !== String(farmCode)),
-        );
-        setFavorite(false);
-      } else {
-        await addWishlistFarm(farmCode);
-        setWishlist(prev => [...prev, {farmCode}]);
-        setFavorite(true);
-      }
+      setLoadingProducts(true);
+
+      // 🔹 1. Lấy từ API backend
+      const apiProducts = await getProductsByFarm(farm.farmCode);
+
+      // 🔹 2. Lấy từ smart contract
+      const rpcProvider = new ethers.JsonRpcProvider('https://rpc.zeroscan.org');
+      const contractRead = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        contractArtifact.abi,
+        rpcProvider,
+      );
+
+      const scProducts = await contractRead.getProductByFarmCode(farm.farmCode);
+
+      const formattedSC = scProducts.map(product => {
+        const images =
+          typeof product.image === 'string'
+            ? product.image.split(/[,|]/).map(url => url.trim()).filter(Boolean)
+            : [];
+
+        return {
+          farmCode: product.farmCode,
+          productCode: product.productCode,
+          categoryName: product.categoryName,
+          name: product.name,
+          quantity: product.quantity,
+          price: product.price,
+          area: product.area,
+          image: images,
+          description: product.description,
+        };
+      });
+
+      // 🔹 3. So khớp: chỉ giữ những product tồn tại ở cả API & SC
+      const matchedProducts = formattedSC.filter(scProd =>
+        apiProducts.some(apiProd => apiProd.productCode === scProd.productCode),
+      );
+
+      if (isMounted) setProducts(matchedProducts);
     } catch (err) {
-      console.log('Lỗi toggle favorite:', err);
+      console.error(' Error fetchProducts:', err);
     } finally {
-      setLoading(false);
+      if (isMounted) setLoadingProducts(false);
     }
   };
 
+  fetchProducts();
+  return () => {
+    isMounted = false;
+  };
+}, [farm.farmCode, fetchWishlist]);
+const handleToggleFavorite = async farmCode => {
+  if (loading) return;
+  setLoading(true);
+
+  try {
+    await toggleFavorite(farmCode);
+    setFavorite(prev => !prev); // vẫn giữ UI local cho farm chính
+  } catch (err) {
+    console.log('Lỗi toggle favorite:', err);
+  } finally {
+    setLoading(false);
+  }
+};
   const handleCall = () => {
     Linking.openURL(`tel:${farmData.phone}`);
   };
@@ -634,11 +625,11 @@ const FarmDetailScreen = ({navigation}) => {
                 </View>
               ) : (
                 <>
-                  <FarmSlider
-                    farms={farms}
-                    favorites={new Set(wishlist.map(f => String(f.farmCode)))}
-                    toggleFavorite={handleToggleFavorite}
-                  />
+<FarmSlider
+  farms={farms}
+  favorites={favorites}
+  toggleFavorite={toggleFavorite}
+/>
                 </>
               )}
             </View>
