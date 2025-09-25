@@ -1,7 +1,7 @@
 export const ErrorMap = {
   '400-1': 'Thiếu email',
   '400-2': 'Thiếu sđt',
-  '400-3': 'Thiếu mk',
+  '400-3': 'Thiếu mật khẩu',
   '400-4': 'Thiếu OTP',
 
   '400-5': 'Email không hợp lệ',
@@ -11,6 +11,7 @@ export const ErrorMap = {
 
   '401-1': 'Sai tài khoản hoặc mk',
   '401-2': 'Chưa đăng nhập hoặc token không hợp lệ',
+  '401-3': 'token hết hạn',
 
   '403-1': 'Tài khoản chưa xác thực',
 
@@ -22,6 +23,6 @@ export const ErrorMap = {
 
   '500-1': 'Lỗi server',
 
-  // Lỗi news
-  '401-3': 'Chưa có news tin tức ',
+  '404-NEWS-1': 'Chưa có news tin tức ',
+  '404-FARM-1': 'Không tìm thấy nông trại',
 };

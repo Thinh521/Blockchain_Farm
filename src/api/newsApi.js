@@ -31,6 +31,8 @@ export const getAllNewsByFarmApi = async farmCode => {
     return [];
   } catch (error) {
     const code = error.response?.data?.code;
+        console.log(code);
+
     return {
       success: false,
       message: ErrorMap[code] || 'Có lỗi từ server',
@@ -52,6 +54,7 @@ export const createNewsApi = async (accessToken, formData) => {
     return res.data;
   } catch (error) {
     const code = error.response?.data?.code;
+    console.log(code);
     return {
       success: false,
       message: ErrorMap[code] || 'Có lỗi từ server',

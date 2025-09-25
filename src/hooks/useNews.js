@@ -9,9 +9,11 @@ import {
   getAllNewsApi,
   getAllNewsByFarmApi,
 } from '../api/newsApi';
+import {getUser} from '../utils/storage/authStorage';
 
 export const useNews = ({farmCode} = {}) => {
   const isFocused = useIsFocused();
+  const accessToken = getUser()?.accessToken;
 
   const [expandedId, setExpandedId] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(null);
