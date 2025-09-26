@@ -32,8 +32,8 @@ import {useNews} from '../../hooks/useNews';
 import {scale} from '../../utils/scaling';
 import NewsCardSkeleton from '../../components/CustomSkeleton/NewsCardSkeleton';
 import ImageViewerModal from '../../components/ImageViewerModal/ImageViewerModal';
-import { getProductsByFarm } from '../../api/productApi';
-import { useWishlist } from '../../hooks/useWishlist';
+import {getProductsByFarm} from '../../api/productApi';
+import {useWishlist} from '../../hooks/useWishlist';
 
 const farmData = {
   farmCode: 'F001',
@@ -117,7 +117,7 @@ const FarmDetailScreen = ({navigation}) => {
   const [favorite, setFavorite] = useState(initialFavorite);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
-const {favorites, fetchWishlist, toggleFavorite} = useWishlist();
+  const {favorites, fetchWishlist, toggleFavorite} = useWishlist();
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
@@ -143,77 +143,87 @@ const {favorites, fetchWishlist, toggleFavorite} = useWishlist();
     toggleExpand,
   } = useNews({farmCode});
 
-useEffect(() => {
-  let isMounted = true;
-  fetchWishlist();
+  useEffect(() => {
+    let isMounted = true;
+    fetchWishlist();
 
-  const fetchProducts = async () => {
+    const fetchProducts = async () => {
+      try {
+        setLoadingProducts(true);
+
+        // 🔹 1. Lấy từ API backend
+        const apiProducts = await getProductsByFarm(farm.farmCode);
+
+        // 🔹 2. Lấy từ smart contract
+        const rpcProvider = new ethers.JsonRpcProvider(
+          'https://rpc.zeroscan.org',
+        );
+        const contractRead = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          contractArtifact.abi,
+          rpcProvider,
+        );
+
+        const scProducts = await contractRead.getProductByFarmCode(
+          farm.farmCode,
+        );
+
+        const formattedSC = scProducts.map(product => {
+          const images =
+            typeof product.image === 'string'
+              ? product.image
+                  .split(/[,|]/)
+                  .map(url => url.trim())
+                  .filter(Boolean)
+              : [];
+
+          return {
+            farmCode: product.farmCode,
+            productCode: product.productCode,
+            categoryName: product.categoryName,
+            name: product.name,
+            quantity: product.quantity,
+            price: product.price,
+            area: product.area,
+            image: images,
+            description: product.description,
+          };
+        });
+
+        // 🔹 3. So khớp: chỉ giữ những product tồn tại ở cả API & SC
+        const matchedProducts = formattedSC.filter(scProd =>
+          apiProducts.some(
+            apiProd => apiProd.productCode === scProd.productCode,
+          ),
+        );
+
+        if (isMounted) setProducts(matchedProducts);
+      } catch (err) {
+        console.error(' Error fetchProducts:', err);
+      } finally {
+        if (isMounted) setLoadingProducts(false);
+      }
+    };
+
+    fetchProducts();
+    return () => {
+      isMounted = false;
+    };
+  }, [farm.farmCode, fetchWishlist]);
+
+  const handleToggleFavorite = async farmCode => {
+    if (loading) return;
+    setLoading(true);
+
     try {
-      setLoadingProducts(true);
-
-      // 🔹 1. Lấy từ API backend
-      const apiProducts = await getProductsByFarm(farm.farmCode);
-
-      // 🔹 2. Lấy từ smart contract
-      const rpcProvider = new ethers.JsonRpcProvider('https://rpc.zeroscan.org');
-      const contractRead = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        contractArtifact.abi,
-        rpcProvider,
-      );
-
-      const scProducts = await contractRead.getProductByFarmCode(farm.farmCode);
-
-      const formattedSC = scProducts.map(product => {
-        const images =
-          typeof product.image === 'string'
-            ? product.image.split(/[,|]/).map(url => url.trim()).filter(Boolean)
-            : [];
-
-        return {
-          farmCode: product.farmCode,
-          productCode: product.productCode,
-          categoryName: product.categoryName,
-          name: product.name,
-          quantity: product.quantity,
-          price: product.price,
-          area: product.area,
-          image: images,
-          description: product.description,
-        };
-      });
-
-      // 🔹 3. So khớp: chỉ giữ những product tồn tại ở cả API & SC
-      const matchedProducts = formattedSC.filter(scProd =>
-        apiProducts.some(apiProd => apiProd.productCode === scProd.productCode),
-      );
-
-      if (isMounted) setProducts(matchedProducts);
+      await toggleFavorite(farmCode);
+      setFavorite(prev => !prev); // vẫn giữ UI local cho farm chính
     } catch (err) {
-      console.error(' Error fetchProducts:', err);
+      console.log('Lỗi toggle favorite:', err);
     } finally {
-      if (isMounted) setLoadingProducts(false);
+      setLoading(false);
     }
   };
-
-  fetchProducts();
-  return () => {
-    isMounted = false;
-  };
-}, [farm.farmCode, fetchWishlist]);
-const handleToggleFavorite = async farmCode => {
-  if (loading) return;
-  setLoading(true);
-
-  try {
-    await toggleFavorite(farmCode);
-    setFavorite(prev => !prev); // vẫn giữ UI local cho farm chính
-  } catch (err) {
-    console.log('Lỗi toggle favorite:', err);
-  } finally {
-    setLoading(false);
-  }
-};
   const handleCall = () => {
     Linking.openURL(`tel:${farmData.phone}`);
   };
@@ -625,11 +635,11 @@ const handleToggleFavorite = async farmCode => {
                 </View>
               ) : (
                 <>
-<FarmSlider
-  farms={farms}
-  favorites={favorites}
-  toggleFavorite={toggleFavorite}
-/>
+                  <FarmSlider
+                    farms={farms}
+                    favorites={favorites}
+                    toggleFavorite={toggleFavorite}
+                  />
                 </>
               )}
             </View>
