@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useCallback, useMemo} from 'react';
+import React, {useEffect, useState, useCallback, useMemo, useRef} from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
   SafeAreaView,
   FlatList,
   Modal,
+  Animated,
+  StatusBar,
 } from 'react-native';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import {ethers} from 'ethers';
@@ -18,7 +20,7 @@ import Images from '../../assets/images/images';
 import api from '../../api/baseApi';
 import QRCode from 'react-native-qrcode-svg';
 import styles from './ProductScreen.style';
-import {QrTabIcon} from '../../assets/icons';
+import {Arrow_Left_Line_Icon, QrTabIcon} from '../../assets/icons';
 
 const RPC_URL = 'https://rpc.zeroscan.org';
 
@@ -291,7 +293,7 @@ const TraceabilitySection = React.memo(({productCode}) => {
                   </Text>
                 </TouchableOpacity>
               )}
-                                       
+
               {/* Hiển thị thông tin chi tiết dựa trên từng quy trình */}
               {item.details && Object.keys(item.details).length > 0 && (
                 <View style={styles.additionalDetails}>
@@ -510,6 +512,7 @@ const ProductScreen = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showQRModal, setShowQRModal] = useState(false);
   const [hashes, setHashes] = useState([]);
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const fetchHashes = async () => {
@@ -643,6 +646,12 @@ const ProductScreen = () => {
     );
   }, [product?.image, selectedImageIndex]);
 
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 200],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+
   if (isLoading) {
     return (
       <SafeAreaView style={styles.centerContainer}>
@@ -669,9 +678,26 @@ const ProductScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
+      <StatusBar barStyle="light-content" backgroundColor="#059669" />
+
+      <Animated.View style={[styles.header, {opacity: headerOpacity}]}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}>
+          <Arrow_Left_Line_Icon style={{color: '#fff'}} />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle} numberOfLines={1}>
+          o
+        </Text>
+      </Animated.View>
+
+      <Animated.ScrollView
         style={styles.scrollView}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {y: scrollY}}}],
+          {useNativeDriver: false},
+        )}>
         {renderImageGallery}
 
         <View style={styles.productInfo}>
@@ -700,7 +726,6 @@ const ProductScreen = () => {
         </View>
 
         <TraceabilitySection productCode={product.productCode} />
-        
 
         <RelatedProducts
           farmCode={product.farmCode}
@@ -731,7 +756,7 @@ const ProductScreen = () => {
             </View>
           </View>
         </Modal>
-      </ScrollView>
+      </Animated.ScrollView>
     </SafeAreaView>
   );
 };

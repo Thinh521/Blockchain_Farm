@@ -1,4 +1,6 @@
 import {Dimensions, StyleSheet} from 'react-native';
+import { Colors, FontSizes, FontWeights } from '../../theme/theme';
+import { scale } from '../../utils/scaling';
 const {width} = Dimensions.get('window');
 const CARD_WIDTH = 160;
 const CARD_HEIGHT = 240;
@@ -10,6 +12,34 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
+  },
+  header: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: scale(20),
+    paddingTop: scale(20),
+    paddingBottom: scale(15),
+    backgroundColor: Colors.green,
+    zIndex: 1000,
+  },
+  backButton: {
+    width: scale(40),
+    height: scale(40),
+    borderRadius: scale(20),
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    flex: 1,
+    color: Colors.white,
+    fontSize: FontSizes.regular,
+    fontWeight: FontWeights.semiBold,
+    marginLeft: scale(14),
   },
   scrollView: {flex: 1},
 
@@ -350,26 +380,26 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
     borderStyle: 'dashed',
   },
-  
+
   hashHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 6,
   },
-  
+
   hashLabel: {
     fontSize: 13,
     fontWeight: '600',
     color: '#4F46E5',
   },
-  
+
   hashHint: {
     fontSize: 11,
     color: '#6B7280',
     fontStyle: 'italic',
   },
-  
+
   hashText: {
     fontFamily: 'monospace',
     fontSize: 12,
@@ -381,21 +411,20 @@ const styles = StyleSheet.create({
     borderColor: '#D1D5DB',
   },
   hashCard: {
-  backgroundColor: '#f9f9f9',
-  padding: 10,
-  borderRadius: 8,
-  marginBottom: 8,
-  elevation: 2,
-},
-hashStep: {
-  fontWeight: '600',
-  color: '#333',
-},
-hashText: {
-  fontSize: 12,
-  color: '#666',
-  marginTop: 4,
-},
-
+    backgroundColor: '#f9f9f9',
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 8,
+    elevation: 2,
+  },
+  hashStep: {
+    fontWeight: '600',
+    color: '#333',
+  },
+  hashText: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+  },
 });
 export default styles;
