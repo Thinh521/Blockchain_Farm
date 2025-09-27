@@ -1,12 +1,15 @@
 import React from 'react';
 import {View, FlatList, StyleSheet, Text} from 'react-native';
 import {useRoute} from '@react-navigation/native';
-import {useNews} from '../../hooks/useNews';
+
 import NewsCard from '../../components/News/NewsCard';
 import NewsCardSkeleton from '../../components/CustomSkeleton/NewsCardSkeleton';
+import ImageViewerModal from '../../components/ImageViewerModal/ImageViewerModal';
+
+import {useNews} from '../../hooks/useNews';
+
 import {Colors} from '../../theme/theme';
 import {scale} from '../../utils/scaling';
-import ImageViewerModal from '../../components/ImageViewerModal/ImageViewerModal';
 
 const AllNewsScreen = () => {
   const {farmCode} = useRoute().params || {};

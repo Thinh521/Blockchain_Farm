@@ -1,6 +1,7 @@
 import React from 'react';
 import {FlatList, StyleSheet} from 'react-native';
 import FarmCard from './FarmCard';
+import {scale} from '../../utils/scaling';
 
 const FarmList = ({farms, favorites, toggleFavorite, isUserFarm = false}) => {
   const renderFarm = ({item}) => (
@@ -27,7 +28,7 @@ const FarmList = ({farms, favorites, toggleFavorite, isUserFarm = false}) => {
 
 const styles = StyleSheet.create({
   farmList: {
-    paddingBottom: 20,
+    padding: scale(20),
   },
   farmRow: {
     justifyContent: 'space-between',
