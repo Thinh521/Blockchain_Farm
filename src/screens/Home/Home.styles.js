@@ -1,25 +1,25 @@
-import { StyleSheet} from 'react-native';
+import {StyleSheet} from 'react-native';
 import {Colors, FontSizes, FontWeights} from '../../theme/theme';
 import {scale} from '../../utils/scaling';
 
 export default StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: Colors.background,
   },
   header: {
-    height: 160,
+    height: scale(138),
     position: 'relative',
-    backgroundColor: '#059669',
+    backgroundColor: Colors.primary,
   },
   headerContent: {
     flex: 1,
-    paddingTop: 16,
-    paddingHorizontal: 20,
+    paddingTop: scale(14),
+    paddingHorizontal: scale(20),
     justifyContent: 'space-between',
   },
   welcomeSection: {
-    marginBottom: 10,
+    marginBottom: scale(6),
   },
   welcomeTop: {
     flexDirection: 'row',
@@ -31,24 +31,24 @@ export default StyleSheet.create({
     alignItems: 'center',
   },
   welcomeText: {
-    fontSize: 14,
     color: '#D1FAE5',
-    marginBottom: 4,
+    marginBottom: scale(2),
+    fontSize: FontSizes.small,
   },
   appTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
+    color: Colors.white,
+    fontSize: FontSizes.large,
+    fontWeight: FontWeights.semiBold,
   },
   headerActions: {
+    gap: scale(10),
     flexDirection: 'row',
-    gap: 12,
   },
   notificationButton: {
-    width: 40,
-    height: 40,
+    width: scale(38),
+    height: scale(38),
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderRadius: 20,
+    borderRadius: 9999,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
@@ -63,8 +63,8 @@ export default StyleSheet.create({
     borderRadius: 4,
   },
   profileButton: {
-    width: 40,
-    height: 40,
+    width: scale(38),
+    height: scale(38),
     backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderRadius: 20,
     alignItems: 'center',
@@ -109,31 +109,9 @@ export default StyleSheet.create({
   },
   mainContent: {
     flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    backgroundColor: '#F9FAFB',
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 40,
-  },
-  loadingSpinner: {
-    width: 60,
-    height: 60,
-    backgroundColor: '#ECFDF5',
-    borderRadius: 30,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-  },
-  loadingEmoji: {
-    fontSize: 28,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#6B7280',
+    paddingHorizontal: scale(20),
+    paddingTop: scale(20),
+    backgroundColor: Colors.background,
   },
   emptyContainer: {
     flex: 1,
@@ -141,10 +119,6 @@ export default StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 40,
     paddingVertical: 40,
-  },
-  emptyEmoji: {
-    fontSize: 48,
-    marginBottom: 16,
   },
   emptyTitle: {
     fontSize: 18,

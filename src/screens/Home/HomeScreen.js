@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,10 @@ import {
   StatusBar,
   SafeAreaView,
 } from 'react-native';
+import {API_URL} from '@env';
+import FastImage from 'react-native-fast-image';
+import {useFocusEffect, useNavigation} from '@react-navigation/core';
+
 import {
   Flower_Line_Icon,
   Leaf_Line_Icon,
@@ -17,26 +21,30 @@ import {
   User_Line_Icon,
   UserIcon,
 } from '../../assets/icons';
+import Images from '../../assets/images/images';
 import Carousel from './components/Carousel';
-import styles from './Home.styles';
 import Features from './components/Features';
 import Footer from './components/Footer';
 import Categories from './components/Categories';
 import FarmList from '../../components/Farms/FarmList';
-import {useFocusEffect, useNavigation} from '@react-navigation/core';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
+import ErrorState from '../../components/ErrorState/ErrorState';
+
 import {useFarms} from '../../hooks/useFarms';
 import {useUser} from '../../hooks/useUser';
-import FastImage from 'react-native-fast-image';
-import Images from '../../assets/images/images';
-import {API_URL} from '@env';
-import { useWishlist } from '../../hooks/useWishlist';
+import {useWishlist} from '../../hooks/useWishlist';
+import useDebouncedSearching from '../../hooks/useDebouncedSearching';
+
+import styles from './Home.styles';
+import {scale} from '../../utils/scaling';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const { favorites, fetchWishlist } = useWishlist();
+  const {favorites, fetchWishlist} = useWishlist();
+
+  const isSearching = useDebouncedSearching(searchQuery, 500);
 
   const {farms, isLoading, error, refetch} = useFarms();
   const {data: user} = useUser();
@@ -72,7 +80,7 @@ const HomeScreen = () => {
               <View style={styles.titleContainer}>
                 <View>
                   <Text style={styles.welcomeText}>Chào mừng đến với</Text>
-                  <Text style={styles.appTitle}>Nông Nghiệp Xanh</Text>
+                  <Text style={styles.appTitle}>GreenFarm</Text>
                 </View>
               </View>
 
@@ -126,25 +134,29 @@ const HomeScreen = () => {
         data={[1]}
         keyExtractor={(_, index) => index.toString()}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{paddingBottom: 80}}
+        contentContainerStyle={{paddingBottom: 100}}
         renderItem={() => (
           <>
-            {/* Carousel Section */}
-            <View style={styles.carouselSection}>
-              <Text style={[styles.sectionTitle, {paddingHorizontal: 20}]}>
-                Trang trại nổi bật
-              </Text>
-              <View style={{alignItems: 'center'}}>
-                <Carousel />
-              </View>
-            </View>
+            {searchQuery.trim().length === 0 && (
+              <>
+                {/* Carousel Section */}
+                <View style={styles.carouselSection}>
+                  <Text style={[styles.sectionTitle, {paddingHorizontal: 20}]}>
+                    Trang trại nổi bật
+                  </Text>
+                  <View style={{alignItems: 'center'}}>
+                    <Carousel />
+                  </View>
+                </View>
 
-            {/* Categories */}
-            <Categories
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={setSelectedCategory}
-            />
+                {/* Categories */}
+                <Categories
+                  categories={categories}
+                  selectedCategory={selectedCategory}
+                  onSelectCategory={setSelectedCategory}
+                />
+              </>
+            )}
 
             {/* Farms */}
             <View style={styles.mainContent}>
@@ -175,14 +187,13 @@ const HomeScreen = () => {
               {isLoading ? (
                 <FarmCardSkeleton count={4} />
               ) : error ? (
-                <View style={styles.errorContainer}>
-                  <Text style={{color: 'red'}}>Không thể tải trang trại</Text>
-                  <TouchableOpacity
-                    onPress={refetch}
-                    style={styles.retryButton}>
-                    <Text style={styles.retryText}>Thử lại</Text>
-                  </TouchableOpacity>
-                </View>
+                <ErrorState
+                  message="Không thể tải trang trại"
+                  onRetry={refetch}
+                  style={{minHeight: scale(250)}}
+                />
+              ) : isSearching ? (
+                <FarmCardSkeleton count={2} />
               ) : filteredFarms.length === 0 ? (
                 <View style={styles.emptyContainer}>
                   <Text style={styles.emptyTitle}>
@@ -202,9 +213,12 @@ const HomeScreen = () => {
               )}
             </View>
 
-            {/* Features + Footer */}
-            <Features />
-            <Footer />
+            {searchQuery.trim().length === 0 && (
+              <>
+                <Features />
+                <Footer />
+              </>
+            )}
           </>
         )}
       />
