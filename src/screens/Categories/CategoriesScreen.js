@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {ethers} from 'ethers';
-import {CONTRACT_ADDRESS} from '@env';
+import {CONTRACT_ADDRESS, RPC_URL} from '@env';
 import {useQuery} from '@tanstack/react-query';
 import FastImage from 'react-native-fast-image';
 
@@ -22,12 +22,13 @@ import {formatCurrency} from '../../utils/formatCurrency';
 
 import {scale} from '../../utils/scaling';
 import styles from './Categories.styles';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
 const fetchProducts = async farmCode => {
   if (!farmCode) throw new Error('No farmCode provided');
 
   // 1. Lấy dữ liệu từ Smart Contract
-  const rpcProvider = new ethers.JsonRpcProvider('https://rpc.zeroscan.org');
+  const rpcProvider = new ethers.JsonRpcProvider(RPC_URL);
   const contractRead = new ethers.Contract(
     CONTRACT_ADDRESS,
     contractArtifact.abi,
@@ -85,16 +86,12 @@ const CategoriesScreen = ({navigation, route}) => {
 
   const handleProductPress = useCallback(
     productItem => {
-      navigation.navigate('Product', {productCode: productItem.productCode});
+      navigation.navigate('Product', {
+        productCode: productItem.productCode,
+        farmCode: farmCode,
+      });
     },
     [navigation],
-  );
-
-  const handleProcessPress = useCallback(
-    productCode => {
-      navigation.navigate('Process', {productCode, farmCode});
-    },
-    [navigation, farmCode],
   );
 
   const renderProductItem = ({item}) => (
@@ -122,11 +119,6 @@ const CategoriesScreen = ({navigation, route}) => {
         <View style={styles.titleContainer}>
           <Text>{formatCurrency(item.price)}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.processButton}
-          onPress={() => handleProcessPress(item.productCode)}>
-          <Text style={styles.processButtonText}>Thêm quy trình</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -140,23 +132,35 @@ const CategoriesScreen = ({navigation, route}) => {
         showBack={true}
       />
 
-      <View style={{padding: scale(20)}}>
-        <View style={{alignItems: 'flex-end'}}>
-          <Button.Main
-            title="Thêm nông sản"
-            style={styles.addButton}
-            onPress={() => navigation.navigate('AddProduct', {farmCode})}
-          />
-        </View>
+      <View style={{flex: 1, padding: scale(20)}}>
+        {isLoading ? (
+          <View style={{alignItems: 'flex-end', marginBottom: scale(20)}}>
+            <SkeletonPlaceholder borderRadius={16} speed={1000}>
+              <SkeletonPlaceholder.Item width={160} height={40} />
+            </SkeletonPlaceholder>
+          </View>
+        ) : products.length > 0 ? (
+          <View style={{alignItems: 'flex-end', marginBottom: scale(20)}}>
+            <Button.Main
+              title="Thêm nông sản"
+              style={styles.addButton}
+              onPress={() => navigation.navigate('AddProduct', {farmCode})}
+            />
+          </View>
+        ) : null}
 
         {isLoading ? (
           <ProductCardSkeleton count={4} />
         ) : isError ? (
           <View style={styles.center}>
             <Text style={styles.errorText}>
-              {error?.message || 'Không thể tải danh sách nông sản.'}
+              Không thể tải danh sách nông sản
             </Text>
-            <Button.Main title="Thử lại" onPress={refetch} />
+            <Button.Main
+              title="Thử lại"
+              onPress={refetch}
+              style={styles.refetchButton}
+            />
           </View>
         ) : products.length === 0 ? (
           <View style={styles.center}>

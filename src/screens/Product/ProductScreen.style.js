@@ -1,17 +1,21 @@
 import {Dimensions, StyleSheet} from 'react-native';
-import { Colors, FontSizes, FontWeights } from '../../theme/theme';
-import { scale } from '../../utils/scaling';
+import {Colors, FontSizes, FontWeights} from '../../theme/theme';
+import {scale} from '../../utils/scaling';
+
 const {width} = Dimensions.get('window');
 const CARD_WIDTH = 160;
 const CARD_HEIGHT = 240;
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: '#fff', paddingBottom: 20},
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
   centerContainer: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    justifyContent: 'center',
+    backgroundColor: Colors.white,
   },
   header: {
     position: 'absolute',
@@ -41,86 +45,96 @@ const styles = StyleSheet.create({
     fontWeight: FontWeights.semiBold,
     marginLeft: scale(14),
   },
-  scrollView: {flex: 1},
-
-  // Gallery
-  galleryContainer: {backgroundColor: '#fff'},
-  mainImage: {width, height: 320, backgroundColor: '#F9FAFB'},
+  scrollView: {
+    flex: 1,
+  },
+  galleryContainer: {
+    backgroundColor: Colors.white,
+  },
+  mainImage: {
+    width,
+    height: scale(250),
+  },
   imageCounter: {
     position: 'absolute',
-    top: 16,
-    left: 16,
+    top: scale(20),
+    left: scale(20),
     backgroundColor: 'rgba(0,0,0,0.7)',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(4),
+    borderRadius: 999,
   },
-  imageCounterText: {color: '#fff', fontSize: 12, fontWeight: '500'},
-  thumbnailContainer: {paddingHorizontal: 16, paddingVertical: 16},
+  imageCounterText: {
+    color: Colors.white,
+    fontSize: FontSizes.small,
+    fontWeight: FontWeights.semiBold,
+  },
+  thumbnailContainer: {
+    padding: scale(20),
+    paddingBottom: 0,
+  },
   thumbnail: {
-    width: 80,
-    height: 80,
-    borderRadius: 10,
+    width: scale(70),
+    height: scale(70),
+    borderRadius: scale(12),
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: 'transparent',
   },
-  selectedThumbnail: {borderColor: '#10B981'},
-  thumbnailImage: {width: '100%', height: '100%'},
-
-  // Placeholder
-  placeholderContainer: {
-    width,
-    height: 320,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F9FAFB',
+  selectedThumbnail: {
+    borderRadius: scale(12),
+    borderColor: Colors.green,
   },
-  placeholderText: {fontSize: 16, color: '#6B7280'},
-
-  // Product Info
+  thumbnailImage: {
+    width: '100%',
+    height: '100%',
+  },
   productInfo: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    backgroundColor: Colors.white,
+    padding: scale(20),
   },
   productHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
   },
   productTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#111827',
-    flex: 1,
-    marginRight: 12,
+    color: Colors.title,
+    fontSize: FontSizes.regular,
+    fontWeight: FontWeights.semiBold,
   },
-  categoryPill: {
-    backgroundColor: '#ECFDF5',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
+  qrBadge: {
+    backgroundColor: Colors.white,
+    paddingVertical: scale(2),
+    paddingHorizontal: scale(6),
+    alignItems: 'flex-end',
     borderWidth: 1,
-    borderColor: '#10B981',
+    borderRadius: scale(8),
+    borderColor: '#D1D5DB',
   },
-  categoryText: {fontSize: 12, fontWeight: '600', color: '#10B981'},
   priceContainer: {
+    marginTop: scale(8),
     flexDirection: 'row',
+    alignItems: 'flex-end',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 12,
   },
-  price: {fontSize: 26, fontWeight: 'bold', color: '#DC2626'},
-  stockText: {fontSize: 14, fontWeight: '600'},
-
-  // Section
-  section: {backgroundColor: '#fff', marginTop: 8, padding: 16},
+  price: {
+    fontSize: FontSizes.regular,
+    fontWeight: FontWeights.semiBold,
+    color: '#DC2626',
+  },
+  stockText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  section: {
+    padding: scale(20),
+    marginTop: scale(20),
+    backgroundColor: Colors.white,
+  },
   sectionContainer: {
-    backgroundColor: '#fff',
-    marginTop: 8,
-    paddingVertical: 10,
+    backgroundColor: Colors.white,
+    marginTop: scale(20),
+    paddingVertical: scale(20),
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -138,7 +152,7 @@ const styles = StyleSheet.create({
   relatedCard: {
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     borderRadius: 12,
@@ -161,7 +175,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 4,
   },
-  relatedBadgeText: {fontSize: 10, fontWeight: '600', color: '#fff'},
+  relatedBadgeText: {fontSize: 10, fontWeight: '600', color: Colors.white},
   relatedContent: {padding: 12, flex: 1, justifyContent: 'space-between'},
   relatedName: {
     fontSize: 14,
@@ -171,7 +185,7 @@ const styles = StyleSheet.create({
   },
   relatedPrice: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: FontWeights.semiBold,
     color: '#DC2626',
     marginBottom: 4,
   },
@@ -190,125 +204,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
   },
-  primaryButtonText: {color: '#fff', fontSize: 16, fontWeight: '600'},
-
-  // Traceability Section Styles
-  traceabilityItem: {
-    flexDirection: 'row',
-    marginBottom: 16,
-    paddingHorizontal: 10,
-  },
-  traceabilityTimeline: {
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  timelineIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-  },
-  timelineIconText: {
-    fontSize: 18,
-  },
-  timelineLine: {
-    position: 'absolute',
-    top: 40,
-    width: 2,
-    height: '100%',
-    backgroundColor: '#E5E7EB',
-    marginTop: 8,
-  },
-  traceabilityContent: {
-    flex: 1,
-  },
-  traceabilityCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#d0d3d9ff',
-  },
-  traceabilityHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  traceabilityStep: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#6B7280',
-  },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  traceabilityTitle: {
+  primaryButtonText: {
+    color: Colors.white,
     fontSize: 16,
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: 8,
-  },
-  traceabilityDescription: {
-    fontSize: 14,
-    color: '#6B7280',
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  traceabilityDetails: {
-    marginBottom: 12,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 4,
-  },
-  detailLabel: {
-    fontSize: 13,
-    color: '#6B7280',
-    minWidth: 120,
-    fontWeight: '500',
-  },
-  detailValue: {
-    fontSize: 13,
-    color: '#111827',
-    flex: 1,
     fontWeight: '600',
-  },
-  additionalDetails: {
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
-  },
-  additionalDetailsTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#374151',
-    marginBottom: 4,
-  },
-  traceabilityImages: {
-    marginTop: 8,
-  },
-  traceabilityImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    marginRight: 8,
-    backgroundColor: '#F3F4F6',
-  },
-  traceabilityLoading: {
-    alignItems: 'center',
-    paddingVertical: 32,
   },
   emptyTraceability: {
     alignItems: 'center',
@@ -326,18 +225,8 @@ const styles = StyleSheet.create({
   },
   productTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: FontWeights.semiBold,
     color: '#1F2937',
-  },
-  qrBadge: {
-    backgroundColor: '#ffffff',
-    borderRadius: 4,
-    padding: 2,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.2,
-    shadowRadius: 1,
   },
   modalContainer: {
     flex: 1,
@@ -354,7 +243,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: FontWeights.semiBold,
     marginBottom: 16,
     color: '#1F2937',
   },
