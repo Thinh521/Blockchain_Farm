@@ -17,7 +17,9 @@ import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 import Button from '../../../components/CustomButton/CustomButton';
 import contractArtifact from '../../SmartConctract/contractABI.json';
 import TraceabilitySkeleton from '../../../components/CustomSkeleton/TraceabilitySkeleton';
+
 import api from '../../../api/baseApi';
+
 import styles from './TraceabilitySection.styles';
 
 const TraceabilitySection = ({productCode, farmCode}) => {
