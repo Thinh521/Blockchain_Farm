@@ -86,7 +86,9 @@ const WishlistScreen = () => {
 
       <View style={styles.content}>
         {loading ? (
-          <FarmCardSkeleton count={4} />
+          <View style={{padding: scale(20)}}>
+            <FarmCardSkeleton count={4} />
+          </View>
         ) : wishlistFarms.length > 0 ? (
           <View style={{flex: 1, width: '100%'}}>
             <FarmList farms={wishlistFarms} favorites={favorites} />
@@ -108,7 +110,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: scale(20),
   },
   emptyContainer: {
     flex: 1,
