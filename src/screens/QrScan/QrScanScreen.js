@@ -1,15 +1,18 @@
 import React, {useState} from 'react';
 import {View, Text, Modal, TouchableOpacity, Alert} from 'react-native';
 import {Camera, useCameraDevice} from 'react-native-vision-camera';
+import {useNavigation} from '@react-navigation/native';
 import {useCodeScanner} from 'react-native-vision-camera';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {launchImageLibrary} from 'react-native-image-picker';
 import RNQRGenerator from 'rn-qr-generator';
 import Clipboard from '@react-native-clipboard/clipboard';
-import styles from './QrScan.styles';
+
 import Button from '../../components/CustomButton/CustomButton';
 import LoadingOverlay from '../../components/CustomLoading/LoadingOverlay';
-import {useNavigation} from '@react-navigation/native';
+
+import styles from './QrScan.styles';
+import {showMessage} from 'react-native-flash-message';
 
 const QrScanScreen = () => {
   const [scannedCode, setScannedCode] = useState(null);
@@ -19,36 +22,35 @@ const QrScanScreen = () => {
 
   const scanner = useCodeScanner({
     codeTypes: ['qr'],
-   onCodeScanned: codes => {
-  if (codes.length > 0) {
-    const code = codes[0];
-    const value = code.value || code.rawValue || code.displayValue;
+    onCodeScanned: codes => {
+      if (codes.length > 0) {
+        const code = codes[0];
+        const value = code.value || code.rawValue || code.displayValue;
 
-    if (value) {
-      try {
-        const data = JSON.parse(value); // parse JSON
-        const productCode = data.productCode;
+        if (value) {
+          try {
+            const data = JSON.parse(value);
+            const productCode = data.productCode;
 
-        setScannedCode(productCode);
-        setModalVisible(false);
+            setScannedCode(productCode);
+            setModalVisible(false);
 
-        navigation.navigate('NoBottomTab', {
-          screen: 'Product',
-          params: { productCode },
-        });
-      } catch (err) {
-        // nếu QR chỉ chứa productCode (string đơn giản) thì fallback
-        console.log('QR không phải JSON, dùng value trực tiếp');
-        setScannedCode(value);
-        setModalVisible(false);
+            navigation.navigate('NoBottomTab', {
+              screen: 'Product',
+              params: {productCode},
+            });
+          } catch (err) {
+            console.log('QR không phải JSON, dùng value trực tiếp');
+            setScannedCode(value);
+            setModalVisible(false);
 
-        navigation.navigate('NoBottomTab', {
-          screen: 'Product',
-          params: { productCode: value },
-        });
+            navigation.navigate('NoBottomTab', {
+              screen: 'Product',
+              params: {productCode: value},
+            });
+          }
+        }
       }
-    }
-  }
     },
   });
 
@@ -62,14 +64,39 @@ const QrScanScreen = () => {
 
         const response = await RNQRGenerator.detect({uri});
         if (response.values && response.values.length > 0) {
-          setScannedCode(response.values[0]);
-          setModalVisible(true);
+          const value = response.values[0];
+
+          try {
+            const data = JSON.parse(value);
+            const productCode = data.productCode;
+
+            setScannedCode(productCode);
+            setModalVisible(false);
+
+            navigation.navigate('NoBottomTab', {
+              screen: 'Product',
+              params: {productCode},
+            });
+          } catch (error) {
+            console.log('QR không phải JSON, dùng value trực tiếp');
+            setScannedCode(value);
+            setModalVisible(false);
+
+            navigation.navigate('NoBottomTab', {
+              screen: 'Product',
+              params: {productCode: value},
+            });
+          }
         } else {
-          Alert.alert('Thông báo', 'Không tìm thấy QR Code trong ảnh này');
+          showMessage({
+            message: 'Thông báo',
+            description: 'Không tìm thấy QR Code trong ảnh này',
+            type: 'warning',
+          });
         }
       }
     } catch (error) {
-      console.error('Lỗi decode QR:', error);
+      console.log('Lỗi decode QR:', error);
     }
   };
 
