@@ -1,18 +1,22 @@
-// FormWizard.js - Component tái sử dụng cho form đa bước
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
-  Image,
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { launchImageLibrary } from 'react-native-image-picker';
+import {launchImageLibrary} from 'react-native-image-picker';
+
 import Button from '../../components/CustomButton/CustomButton';
 import Input from '../../components/CustomInput/CustomInput';
+
 import styles from './FormWizard.style';
+import Images from '../../assets/images/images';
+import {scale} from '../../utils/scaling';
+import {Colors} from '../../theme/theme';
 
 const FormWizard = ({
   menuItems,
@@ -23,65 +27,71 @@ const FormWizard = ({
   onImageRemove,
   isSubmitting,
   isFormValid,
-  submitButtonText = "Xác nhận",
-  children, // Cho phép custom render section
+  submitButtonText = 'Xác nhận',
+  children,
 }) => {
   const [activeSection, setActiveSection] = useState(null);
 
-  const handleMenuItemPress = (sectionIndex) => {
+  const handleMenuItemPress = sectionIndex => {
     setActiveSection(activeSection === sectionIndex ? null : sectionIndex);
   };
 
-const selectImage = (type, field) => {
-  const options = {
-    mediaType: 'photo',
-    includeBase64: false,
-    maxHeight: 2000,
-    maxWidth: 2000,
-    selectionLimit: 0, // 👈 quan trọng
-  };
+  const selectImage = (type, field) => {
+    const options = {
+      mediaType: 'photo',
+      includeBase64: false,
+      maxHeight: 2000,
+      maxWidth: 2000,
+      selectionLimit: 0,
+    };
 
-  launchImageLibrary(options, (response) => {
-    if (response.didCancel || response.errorCode) return;
+    launchImageLibrary(options, response => {
+      if (response.didCancel || response.errorCode) return;
 
-    if (response.assets && response.assets.length > 0) {
-      if (type === 'single') {
-        // lấy 1 ảnh duy nhất
-        onImageSelect(field, response.assets[0], type);
-      } else if (type === 'multiple') {
-        // gửi nguyên mảng ảnh
-        onImageSelect(field, response.assets, type);
+      if (response.assets && response.assets.length > 0) {
+        if (type === 'single') {
+          onImageSelect(field, response.assets[0], type);
+        } else if (type === 'multiple') {
+          onImageSelect(field, response.assets, type);
+        }
       }
-    }
-  });
-};
+    });
+  };
 
   const removeImage = (field, index = null) => {
     onImageRemove(field, index);
   };
 
   // Render image upload component
-  const renderImageUpload = (field, type = 'single', placeholder = 'Chọn ảnh') => {
+  const renderImageUpload = (
+    field,
+    type = 'single',
+    placeholder = 'Chọn ảnh',
+  ) => {
     const fieldValue = formData[field];
 
     if (type === 'single') {
       return fieldValue ? (
         <View style={styles.imagePreviewContainer}>
-          <Image
-            source={{ uri: fieldValue.uri }}
+          <FastImage
+            source={{uri: fieldValue.uri}}
             style={styles.imagePreview}
           />
           <TouchableOpacity
             style={styles.removeImageButton}
             onPress={() => removeImage(field)}>
-            <Icon name="close" size={20} color="#fff" />
+            <Icon name="close" size={20} color={Colors.white} />
           </TouchableOpacity>
         </View>
       ) : (
         <TouchableOpacity
           style={styles.uploadButton}
           onPress={() => selectImage('single', field)}>
-          <Icon name="photo-camera" size={40} color="#999" />
+          <FastImage
+            source={Images.images}
+            resizeMode="contain"
+            style={{width: scale(30), height: scale(30)}}
+          />
           <Text style={styles.uploadText}>{placeholder}</Text>
         </TouchableOpacity>
       );
@@ -93,14 +103,14 @@ const selectImage = (type, field) => {
         <View style={styles.farmImagesContainer}>
           {(fieldValue || []).map((image, index) => (
             <View key={index} style={styles.farmImageContainer}>
-              <Image
-                source={{ uri: image.uri }}
+              <FastImage
+                source={{uri: image.uri}}
                 style={styles.farmImagePreview}
               />
               <TouchableOpacity
-                style={styles.removeFarmImageButton}
+                style={styles.removeImageButton}
                 onPress={() => removeImage(field, index)}>
-                <Icon name="close" size={16} color="#fff" />
+                <Icon name="close" size={16} color={Colors.white} />
               </TouchableOpacity>
             </View>
           ))}
@@ -116,7 +126,7 @@ const selectImage = (type, field) => {
   };
 
   // Render input field
-  const renderInput = (config) => {
+  const renderInput = config => {
     const {
       field,
       label,
@@ -124,7 +134,7 @@ const selectImage = (type, field) => {
       keyboardType = 'default',
       multiline = false,
       numberOfLines = 1,
-      editable = true
+      editable = true,
     } = config;
 
     return (
@@ -133,7 +143,7 @@ const selectImage = (type, field) => {
         <Input
           placeholder={placeholder}
           value={formData[field]}
-          onChangeText={(text) => onInputChange(field, text)}
+          onChangeText={text => onInputChange(field, text)}
           keyboardType={keyboardType}
           multiline={multiline}
           numberOfLines={numberOfLines}
@@ -143,7 +153,7 @@ const selectImage = (type, field) => {
     );
   };
 
-  const isCompleted = (sectionIndex) => {
+  const isCompleted = sectionIndex => {
     if (menuItems[sectionIndex]?.isCompleted) {
       return menuItems[sectionIndex].isCompleted(formData);
     }
@@ -153,7 +163,7 @@ const selectImage = (type, field) => {
   return (
     <View style={styles.whiteBackground}>
       <SafeAreaView style={styles.container}>
-        <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+        <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
           <View style={styles.content}>
             {menuItems.map((item, index) => (
               <View key={index} style={styles.menuItemContainer}>
@@ -177,7 +187,7 @@ const selectImage = (type, field) => {
                         name="check-circle"
                         size={20}
                         color="#4CAF50"
-                        style={{ marginRight: 8 }}
+                        style={{marginRight: 8}}
                       />
                     )}
                     <Icon name={item.icon} size={24} color="#FF6B35" />
@@ -196,28 +206,29 @@ const selectImage = (type, field) => {
                 {activeSection === index && (
                   <View style={styles.formSection}>
                     {/* Render custom content hoặc default fields */}
-                    {item.renderContent ? 
+                    {item.renderContent ? (
                       item.renderContent({
                         formData,
                         onInputChange,
                         renderInput,
                         renderImageUpload,
-                      }) : 
-                      (
-                        <View>
-                          {item.fields?.map((fieldConfig, fieldIndex) => (
-                            <View key={fieldIndex}>
-                              {fieldConfig.type === 'input' && renderInput(fieldConfig)}
-                              {fieldConfig.type === 'image' && renderImageUpload(
-                                fieldConfig.field, 
-                                fieldConfig.imageType, 
-                                fieldConfig.placeholder
+                      })
+                    ) : (
+                      <View>
+                        {item.fields?.map((fieldConfig, fieldIndex) => (
+                          <View key={fieldIndex}>
+                            {fieldConfig.type === 'input' &&
+                              renderInput(fieldConfig)}
+                            {fieldConfig.type === 'image' &&
+                              renderImageUpload(
+                                fieldConfig.field,
+                                fieldConfig.imageType,
+                                fieldConfig.placeholder,
                               )}
-                            </View>
-                          ))}
-                        </View>
-                      )
-                    }
+                          </View>
+                        ))}
+                      </View>
+                    )}
                   </View>
                 )}
               </View>
@@ -227,7 +238,7 @@ const selectImage = (type, field) => {
 
         <View style={styles.submitContainer}>
           <Button.Main
-            title={isSubmitting ? "Đang xử lý..." : submitButtonText}
+            title={isSubmitting ? 'Đang xử lý...' : submitButtonText}
             onPress={onSubmit}
             disabled={!isFormValid() || isSubmitting}
           />

@@ -1,45 +1,38 @@
-// FormWizard.style.js - Style file chung cho FormWizard component
-import { StyleSheet } from 'react-native';
-import { scale } from '../../utils/scaling';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
+import {StyleSheet} from 'react-native';
+import {scale} from '../../utils/scaling';
+import {Colors, FontSizes, FontWeights} from '../../theme/theme';
 
 const styles = StyleSheet.create({
-  // Container chính
   whiteBackground: {
     flex: 1,
-    backgroundColor: '#f0f0f0ff',
+    backgroundColor: Colors.background,
   },
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
   },
-
-  // Content
   content: {
     flexGrow: 1,
-    paddingHorizontal: scale(16),
+    paddingHorizontal: scale(20),
     paddingTop: scale(20),
     paddingBottom: scale(80),
   },
-
-  // Menu Item (Accordion)
   menuItemContainer: {
     marginBottom: scale(16),
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
     borderRadius: scale(12),
     borderWidth: 1,
-    borderColor: 'rgba(219, 31, 31, 0.05)',
+    borderColor: Colors.border_2,
   },
   menuItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F8F9FA',
+    backgroundColor: Colors.white,
     paddingVertical: scale(12),
     paddingHorizontal: scale(16),
     borderRadius: scale(8),
     borderLeftWidth: scale(4),
-    borderLeftColor: '#4CAF50',
+    borderLeftColor: Colors.primary,
   },
   menuItemCompleted: {
     borderLeftColor: '#4CAF50',
@@ -67,10 +60,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-
-  // Form Section
   formSection: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: Colors.white,
     paddingHorizontal: scale(16),
     paddingVertical: scale(20),
     borderBottomLeftRadius: scale(12),
@@ -82,16 +73,14 @@ const styles = StyleSheet.create({
     marginBottom: scale(16),
   },
   inputLabel: {
-    fontSize: scale(14),
+    fontSize: FontSizes.small,
     fontWeight: '500',
     color: '#333333',
     marginBottom: scale(8),
   },
-
-  // Image Upload
   uploadButton: {
     borderWidth: scale(2),
-    borderColor: Colors.green,
+    borderColor: Colors.gray,
     borderStyle: 'dashed',
     borderRadius: scale(8),
     paddingVertical: scale(40),
@@ -99,12 +88,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginVertical: scale(8),
-    backgroundColor: '#F8FFF8',
   },
   uploadText: {
-    fontSize: scale(14),
-    color: Colors.green,
-    fontWeight: '500',
+    color: Colors.gray,
+    fontSize: FontSizes.small,
+    fontWeight: FontWeights.semiBold,
     marginTop: scale(8),
     textAlign: 'center',
   },
@@ -115,9 +103,8 @@ const styles = StyleSheet.create({
   },
   imagePreview: {
     width: scale(200),
-    height: scale(150),
+    height: scale(140),
     borderRadius: scale(8),
-    backgroundColor: '#F5F5F5',
   },
   farmImagesContainer: {
     flexDirection: 'row',
@@ -132,7 +119,6 @@ const styles = StyleSheet.create({
     width: scale(100),
     height: scale(80),
     borderRadius: scale(6),
-    backgroundColor: '#F5F5F5',
   },
   removeImageButton: {
     position: 'absolute',
@@ -146,52 +132,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 1,
   },
-  removeFarmImageButton: {
-    position: 'absolute',
-    top: scale(-6),
-    right: scale(-6),
-    backgroundColor: '#FF4444',
-    borderRadius: scale(12),
-    width: scale(24),
-    height: scale(24),
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-  },
   addFarmImageButton: {
     width: scale(100),
     height: scale(80),
     borderRadius: scale(6),
-    borderWidth: scale(2),
-    borderColor: '#E0E0E0',
+    borderWidth: 2,
     borderStyle: 'dashed',
+    borderColor: Colors.border,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#F8FFF8',
   },
-
-  // Submit Button Container
   submitContainer: {
-    paddingHorizontal: scale(16),
-    paddingVertical: scale(16),
-    backgroundColor: '#FFFFFF',
+    padding: scale(20),
+    backgroundColor: Colors.white,
     borderTopWidth: scale(1),
     borderTopColor: '#E0E0E0',
-  },
-
-  // Validation
-  errorInput: {
-    borderColor: '#FF4444',
-  },
-  errorText: {
-    fontSize: scale(12),
-    color: '#FF4444',
-    marginTop: scale(4),
-  },
-  successText: {
-    fontSize: scale(12),
-    color: Colors.green,
-    marginTop: scale(4),
   },
 });
 

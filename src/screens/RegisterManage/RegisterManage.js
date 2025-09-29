@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { StatusBar } from 'react-native';
-import { showMessage } from 'react-native-flash-message';
-import { ethers } from 'ethers';
+import React, {useState, useEffect} from 'react';
+import {showMessage} from 'react-native-flash-message';
+import {ethers} from 'ethers';
 import {
   useAppKitAccount,
   useAppKitProvider,
@@ -13,14 +12,14 @@ import FormWizard from '../../components/FormWizard/FormWizard';
 import Header from '../../components/Header/Header';
 
 import api from '../../api/baseApi';
-import {getUserApi} from '../../api/userApi';
+import {useUser} from '../../hooks/useUser';
 import {storage} from '../../utils/storage/storage';
 
 const RegisterManage = ({navigation, route}) => {
   const {isConnected} = useAppKitAccount();
   const {walletProvider} = useAppKitProvider();
-  const [loadingUserData, setLoadingUserData] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const {data: user, isLoading, error} = useUser();
 
   const generateFarmCode = () => {
     const randomDigits = Math.floor(100000 + Math.random() * 900000);
@@ -40,39 +39,16 @@ const RegisterManage = ({navigation, route}) => {
     farmCode: generateFarmCode(),
   });
 
-  // Fetch user data
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const accessToken = await storage.getString('accessToken');
-        if (!accessToken) {
-          throw new Error('Không tìm thấy accessToken');
-        }
-
-        const response = await getUserApi(accessToken);
-        if (response?.user) {
-          const userData = response.user;
-          setFormData(prev => ({
-            ...prev,
-            fullName: userData.fullName || prev.fullName,
-            phone: userData.phone || prev.phone,
-            email: userData.email || prev.email,
-          }));
-        }
-      } catch (error) {
-        console.error('Lỗi khi lấy dữ liệu người dùng:', error);
-        showMessage({
-          message: 'Lỗi',
-          description: 'Không thể lấy thông tin người dùng. Vui lòng thử lại.',
-          type: 'danger',
-        });
-      } finally {
-        setLoadingUserData(false);
-      }
-    };
-
-    fetchUserData();
-  }, []);
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: user.fullName || prev.fullName,
+        phone: user.phone || prev.phone,
+        email: user.email || prev.email,
+      }));
+    }
+  }, [user]);
 
   // Update form data from route params
   useEffect(() => {
@@ -111,13 +87,11 @@ const RegisterManage = ({navigation, route}) => {
 
   const handleImageRemove = (field, index = null) => {
     if (index === null) {
-      // Remove single image
       setFormData(prev => ({
         ...prev,
         [field]: null,
       }));
     } else {
-      // Remove from array
       setFormData(prev => ({
         ...prev,
         [field]: prev[field].filter((_, i) => i !== index),
@@ -126,8 +100,6 @@ const RegisterManage = ({navigation, route}) => {
   };
 
   const handleSubmit = async () => {
-    console.log('🔽 Bắt đầu submit form');
-
     if (
       !formData.fullName ||
       !formData.nameFarm ||
@@ -164,7 +136,8 @@ const RegisterManage = ({navigation, route}) => {
 
       // Upload images if any
       const hasKycImage = formData.kycImage && formData.kycImage.uri;
-      const hasFarmImages = formData.farmImages && formData.farmImages.length > 0;
+      const hasFarmImages =
+        formData.farmImages && formData.farmImages.length > 0;
 
       if (hasKycImage || hasFarmImages) {
         const formDataToSend = new FormData();
@@ -242,18 +215,18 @@ const RegisterManage = ({navigation, route}) => {
 
       showMessage({
         message: 'Thành công',
-        description: `Đăng ký farm thành công`,
+        description: `Đăng ký nông trại thành công`,
         type: 'success',
-        duration: 2000,
+        duration: 3000,
         onHide: () => {
           navigation.navigate('NoBottomTab', {screen: 'MyFarm'});
         },
       });
     } catch (error) {
-      console.error('❌ Lỗi:', error);
+      console.log('Lỗi:', error || error.reason || error.message);
       showMessage({
         message: 'Lỗi',
-        description: error.reason || error.message || 'Đã xảy ra lỗi khi đăng ký farm.',
+        description: 'Đã xảy ra lỗi khi đăng ký farm.',
         type: 'danger',
       });
     } finally {
@@ -278,14 +251,14 @@ const RegisterManage = ({navigation, route}) => {
     {
       title: 'Thông tin chung',
       description: 'Họ và tên, tên trang trại, điện thoại, email',
-      isCompleted: (data) => data.fullName && data.nameFarm && data.phone && data.email,
+      isCompleted: data =>
+        data.fullName && data.nameFarm && data.phone && data.email,
       fields: [
         {
           type: 'input',
           field: 'fullName',
           label: 'Họ và tên',
           placeholder: 'Nhập họ và tên',
-          editable: !loadingUserData,
         },
         {
           type: 'input',
@@ -299,7 +272,6 @@ const RegisterManage = ({navigation, route}) => {
           label: 'Điện thoại',
           placeholder: 'Nhập số điện thoại',
           keyboardType: 'phone-pad',
-          editable: !loadingUserData,
         },
         {
           type: 'input',
@@ -307,7 +279,6 @@ const RegisterManage = ({navigation, route}) => {
           label: 'Email',
           placeholder: 'Nhập email',
           keyboardType: 'email-address',
-          editable: !loadingUserData,
         },
       ],
     },
