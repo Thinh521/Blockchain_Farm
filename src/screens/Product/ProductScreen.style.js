@@ -3,8 +3,6 @@ import {Colors, FontSizes, FontWeights} from '../../theme/theme';
 import {scale} from '../../utils/scaling';
 
 const {width} = Dimensions.get('window');
-const CARD_WIDTH = 160;
-const CARD_HEIGHT = 240;
 
 const styles = StyleSheet.create({
   container: {
@@ -143,61 +141,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 12,
   },
-  sectionTitle: {fontSize: 18, fontWeight: '600', color: '#111827'},
-  sectionSubtitle: {fontSize: 14, color: '#6B7280'},
-  description: {fontSize: 16, lineHeight: 22, color: '#4B5563', marginTop: 8},
-
-  // Related Products
-  relatedList: {paddingHorizontal: 16},
-  relatedCard: {
-    width: CARD_WIDTH,
-    height: CARD_HEIGHT,
-    backgroundColor: Colors.white,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-    marginRight: 20,
-  },
-  relatedImageContainer: {height: 120, position: 'relative'},
-  relatedImage: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#e1e2e4ff',
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-  },
-  relatedBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'rgba(16,185,129,0.9)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  relatedBadgeText: {fontSize: 10, fontWeight: '600', color: Colors.white},
-  relatedContent: {padding: 12, flex: 1, justifyContent: 'space-between'},
-  relatedName: {
-    fontSize: 14,
+  sectionTitle: {
+    fontSize: 18,
     fontWeight: '600',
     color: '#111827',
-    marginBottom: 8,
   },
-  relatedPrice: {
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  description: {
+    fontSize: FontSizes.small,
+    lineHeight: scale(18),
+    color: Colors.gray,
+    marginTop: scale(10),
+    textAlign: 'justify',
+  },
+  loadingText: {
+    textAlign: 'center',
+    color: '#6B7280',
+  },
+  loadingMainText: {
+    marginTop: 16,
     fontSize: 16,
-    fontWeight: FontWeights.semiBold,
-    color: '#DC2626',
-    marginBottom: 4,
+    color: '#6B7280',
   },
-  relatedStock: {fontSize: 12, color: '#6B7280'},
-
-  // Loading / Empty
-  loadingText: {textAlign: 'center', color: '#6B7280'},
-  loadingMainText: {marginTop: 16, fontSize: 16, color: '#6B7280'},
-  emptyText: {textAlign: 'center', color: '#9CA3AF', fontSize: 14},
-
-  // Error
-  errorText: {fontSize: 16, color: '#6B7280', marginBottom: 16},
+  emptyText: {
+    textAlign: 'center',
+    color: '#9CA3AF',
+    fontSize: 14,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#6B7280',
+    marginBottom: 16,
+  },
   primaryButton: {
     backgroundColor: '#10B981',
     paddingHorizontal: 24,
@@ -216,7 +194,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginTop: 8,
   },
-  // QrCode
   productHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -230,90 +207,78 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 20,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    width: '85%',
     alignItems: 'center',
-    width: '80%',
   },
-  modalTitle: {
+  modalHeader2: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: scale(16),
+    marginBottom: scale(20),
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    width: '100%',
+  },
+  productIcon: {
+    fontSize: 28,
+    marginRight: 8,
+  },
+  productName: {
     fontSize: 18,
-    fontWeight: FontWeights.semiBold,
-    marginBottom: 16,
-    color: '#1F2937',
-  },
-  closeButton: {
-    marginTop: 16,
-    backgroundColor: '#10B981',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  closeButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
     fontWeight: '600',
+    color: Colors.title,
   },
-  // Hash Container Styles
-  hashContainer: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 8,
-    padding: 12,
-    marginVertical: 8,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    borderStyle: 'dashed',
+  modalImages: {
+    width: scale(40),
+    height: scale(40),
+    borderRadius: 20,
+    marginRight: 12,
   },
-
-  hashHeader: {
+  qrText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: '#374151',
+    textAlign: 'center',
+  },
+  actionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
+    padding: scale(16),
+    marginTop: scale(20),
+    width: '100%',
   },
-
-  hashLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#4F46E5',
-  },
-
-  hashHint: {
-    fontSize: 11,
-    color: '#6B7280',
-    fontStyle: 'italic',
-  },
-
-  hashText: {
-    fontFamily: 'monospace',
-    fontSize: 12,
-    color: '#1F2937',
-    backgroundColor: '#FFFFFF',
-    padding: 8,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-  },
-  hashCard: {
-    backgroundColor: '#f9f9f9',
-    padding: 10,
+  actionButton: {
+    flex: 1,
+    marginHorizontal: 5,
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 10,
     borderRadius: 8,
-    marginBottom: 8,
-    elevation: 2,
+    alignItems: 'center',
   },
-  hashStep: {
-    fontWeight: '600',
-    color: '#333',
+  actionText: {
+    color: '#111827',
+    fontSize: 14,
+    fontWeight: '500',
   },
-  hashText: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
+  closeWrapper: {
+    backgroundColor: '#E5E7EB',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeText: {
+    fontSize: 18,
+    color: '#111827',
   },
 });
 export default styles;

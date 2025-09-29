@@ -15,6 +15,7 @@ export const Colors = {
   green: '#059669',
   inputText: '#A8A8A9',
   bottomSheetHandle: '#D1D5DB',
+  orange: '#FF6B35',
 };
 
 export const FontSizes = {

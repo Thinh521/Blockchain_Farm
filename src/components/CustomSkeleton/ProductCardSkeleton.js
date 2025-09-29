@@ -15,7 +15,6 @@ const ProductCardSkeleton = ({count = 4}) => {
           flexDirection: 'row',
           flexWrap: 'wrap',
           justifyContent: 'space-between',
-          marginTop: scale(20),
         }}>
         {skeletons.map(i => (
           <View
@@ -25,16 +24,19 @@ const ProductCardSkeleton = ({count = 4}) => {
               marginBottom: scale(15),
               borderRadius: scale(16),
               overflow: 'hidden',
+              borderWidth: 1,
+              borderColor: '#E5E7EB',
+              borderRadius: scale(16),
             }}>
             <SkeletonPlaceholder.Item
               width="100%"
               height={scale(120)}
-              borderRadius={12}
+              borderRadius={0}
             />
 
-            <View style={{padding: scale(12)}}>
+            <View style={{padding: scale(10)}}>
               <SkeletonPlaceholder.Item
-                width="80%"
+                width="90%"
                 height={16}
                 marginBottom={8}
               />
@@ -43,7 +45,11 @@ const ProductCardSkeleton = ({count = 4}) => {
                 height={14}
                 marginBottom={10}
               />
-              <SkeletonPlaceholder.Item width="100%" height={36} />
+              <SkeletonPlaceholder.Item
+                width="70%"
+                height={14}
+                marginBottom={10}
+              />
             </View>
           </View>
         ))}

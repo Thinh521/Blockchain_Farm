@@ -21,6 +21,7 @@ import TraceabilitySkeleton from '../../../components/CustomSkeleton/Traceabilit
 import api from '../../../api/baseApi';
 
 import styles from './TraceabilitySection.styles';
+import {scale} from '../../../utils/scaling';
 
 const TraceabilitySection = ({productCode, farmCode}) => {
   const navigation = useNavigation();
@@ -342,12 +343,12 @@ const TraceabilitySection = ({productCode, farmCode}) => {
 
       {isLoading ? (
         <TraceabilitySkeleton count={4} />
-      ) : isError ? (
+      ) : !isError ? (
         <View style={styles.emptyTraceability}>
-          <Text style={styles.emptyText}>⚠️ Lỗi tải dữ liệu</Text>
+          <Text style={styles.emptyText}>Lỗi tải dữ liệu</Text>
           <Button.Main
             title="Thêm quy trình"
-            style={{marginTop: 12}}
+            style={{marginTop: scale(12)}}
             onPress={handleProcessPress}
           />
         </View>

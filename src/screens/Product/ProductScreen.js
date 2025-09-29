@@ -15,6 +15,7 @@ import {CONTRACT_ADDRESS, RPC_URL} from '@env';
 import {useRoute, useNavigation} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import QRCode from 'react-native-qrcode-svg';
+import Clipboard from '@react-native-clipboard/clipboard';
 
 import contractArtifact from '../SmartConctract/contractABI.json';
 import TraceabilitySection from './components/TraceabilitySection';
@@ -78,7 +79,7 @@ const ProductScreen = () => {
     queryKey: ['product', productCode],
     queryFn: fetchProduct,
     enabled: !!productCode,
-  });
+  })
 
   // 🔹 fetch hashes riêng (API)
   React.useEffect(() => {
@@ -259,18 +260,45 @@ const ProductScreen = () => {
           onRequestClose={() => setShowQRModal(false)}>
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Quét mã QR để xem truy xuất</Text>
+              {/* Icon + tên sản phẩm */}
+              <View style={styles.modalHeader2}>
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <FastImage
+                    source={{uri: product.image[0]}}
+                    style={styles.modalImages}
+                    resizeMode={FastImage.resizeMode.cover}
+                  />
+                  <Text style={styles.productName}>Mận</Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.closeWrapper}
+                  onPress={() => setShowQRModal(false)}>
+                  <Text style={styles.closeText}>✕</Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* QR Code */}
               <QRCode
                 value={qrValue}
-                size={200}
+                size={180}
                 backgroundColor="#ffffff"
                 color="#000000"
               />
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setShowQRModal(false)}>
-                <Text style={styles.closeButtonText}>Đóng</Text>
-              </TouchableOpacity>
+
+              {/* Nút hành động */}
+              <View style={styles.actionRow}>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={() => Clipboard.setString(qrValue)}>
+                  <Text style={styles.actionText}>Sao chép</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  // onPress={handleDownloadQR}
+                >
+                  <Text style={styles.actionText}>Tải xuống</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </Modal>

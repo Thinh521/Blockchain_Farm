@@ -1,28 +1,21 @@
 import React, {useCallback} from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  SafeAreaView,
-  TouchableOpacity,
-} from 'react-native';
+import {View, Text, SafeAreaView} from 'react-native';
 import {ethers} from 'ethers';
 import {CONTRACT_ADDRESS, RPC_URL} from '@env';
 import {useQuery} from '@tanstack/react-query';
-import FastImage from 'react-native-fast-image';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
 import Header from '../../components/Header/Header';
 import Button from '../../components/CustomButton/CustomButton';
 import ProductCardSkeleton from '../../components/CustomSkeleton/ProductCardSkeleton';
 import contractArtifact from '../SmartConctract/contractABI.json';
-import Images from '../../assets/images/images';
+import ProductList from '../../components/Product/ProductList';
+import EmptyState from '../../components/EmptyState/EmptyState';
 
 import api from '../../api/tokenApi';
-import {formatCurrency} from '../../utils/formatCurrency';
 
 import {scale} from '../../utils/scaling';
 import styles from './Categories.styles';
-import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
 const fetchProducts = async farmCode => {
   if (!farmCode) throw new Error('No farmCode provided');
@@ -76,7 +69,6 @@ const CategoriesScreen = ({navigation, route}) => {
     data: products = [],
     isLoading,
     isError,
-    error,
     refetch,
   } = useQuery({
     queryKey: ['products', farmCode],
@@ -91,36 +83,7 @@ const CategoriesScreen = ({navigation, route}) => {
         farmCode: farmCode,
       });
     },
-    [navigation],
-  );
-
-  const renderProductItem = ({item}) => (
-    <View style={styles.productCard}>
-      <View style={{position: 'relative'}}>
-        <TouchableOpacity
-          onPress={() => handleProductPress(item)}
-          activeOpacity={0.8}
-          style={styles.productImageWrapper}>
-          <View style={styles.imageContainer}>
-            <FastImage
-              source={item.image?.length > 0 ? {uri: item.image[0]} : Images.bg}
-              style={styles.productImage}
-              resizeMode="cover"
-            />
-          </View>
-        </TouchableOpacity>
-        <View style={styles.trendingBadge}>
-          <Text style={styles.trendingText}>{item.categoryName}</Text>
-        </View>
-      </View>
-
-      <View style={styles.productContent}>
-        <Text style={styles.productName}>{item.name}</Text>
-        <View style={styles.titleContainer}>
-          <Text>{formatCurrency(item.price)}</Text>
-        </View>
-      </View>
-    </View>
+    [navigation, farmCode],
   );
 
   return (
@@ -163,19 +126,9 @@ const CategoriesScreen = ({navigation, route}) => {
             />
           </View>
         ) : products.length === 0 ? (
-          <View style={styles.center}>
-            <Text style={styles.emptyText}>Chưa có nông sản nào.</Text>
-          </View>
+          <EmptyState message="Chưa có sản phẩm nào" />
         ) : (
-          <FlatList
-            data={products}
-            keyExtractor={item => item.productCode}
-            numColumns={2}
-            contentContainerStyle={styles.list}
-            columnWrapperStyle={styles.row}
-            showsVerticalScrollIndicator={false}
-            renderItem={renderProductItem}
-          />
+          <ProductList products={products} onPress={handleProductPress} />
         )}
       </View>
     </SafeAreaView>

@@ -145,10 +145,6 @@ const traceabilityStyles = StyleSheet.create({
     borderRadius: 12,
     marginTop: 8,
   },
-  loadingText: {
-    textAlign: 'center',
-    color: '#6B7280',
-  },
   emptyText: {
     textAlign: 'center',
     color: '#9CA3AF',
