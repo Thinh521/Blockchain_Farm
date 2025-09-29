@@ -343,7 +343,7 @@ const TraceabilitySection = ({productCode, farmCode}) => {
 
       {isLoading ? (
         <TraceabilitySkeleton count={4} />
-      ) : !isError ? (
+      ) : isError ? (
         <View style={styles.emptyTraceability}>
           <Text style={styles.emptyText}>Lỗi tải dữ liệu</Text>
           <Button.Main
