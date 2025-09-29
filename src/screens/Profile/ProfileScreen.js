@@ -20,8 +20,8 @@ import Input from '../../components/CustomInput/CustomInput';
 import LoadingOverlay from '../../components/CustomLoading/LoadingOverlay';
 import Header from '../../components/Header/Header';
 
-import {getUserApi, updateUserApi} from '../../api/userApi';
 import {getUser} from '../../utils/storage/authStorage';
+import {useUser} from '../../hooks/useUser';
 
 import {scale} from '../../utils/scaling';
 import styles from './Profile.styles';
@@ -32,15 +32,10 @@ const ProfileScreen = () => {
   const [avatar, setAvatar] = useState(null);
   const [serverAvatar, setServerAvatar] = useState(null);
   const [gender, setGender] = useState('male');
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [originalUser, setOriginalUser] = useState(null);
 
-  const genders = [
-    {value: 'male', label: 'Nam'},
-    {value: 'female', label: 'Nữ'},
-    {value: 'other', label: 'Khác'},
-  ];
+  const {data: user, isLoading, error, refetch} = useUser();
 
   const {
     control,
@@ -58,6 +53,12 @@ const ProfileScreen = () => {
     },
   });
 
+  const genders = [
+    {value: 'male', label: 'Nam'},
+    {value: 'female', label: 'Nữ'},
+    {value: 'other', label: 'Khác'},
+  ];
+
   const handlePickImage = async () => {
     try {
       const result = await launchImageLibrary({
@@ -74,39 +75,26 @@ const ProfileScreen = () => {
   };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const accessToken = getUser()?.accessToken;
+    if (user) {
+      const u = {
+        fullName: user.fullName || '',
+        userName: user.userName || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        address: user.address || '',
+        dateOfBirth: user.dateOfBirth?.toString() || '',
+        gender: user.gender || 'male',
+      };
 
-        const data = await getUserApi(accessToken);
-        if (data?.user) {
-          const user = {
-            fullName: data.user.fullName || '',
-            userName: data.user.userName || '',
-            email: data.user.email || '',
-            phone: data.user.phone || '',
-            address: data.user.address || '',
-            dateOfBirth: data.user.dateOfBirth?.toString() || '',
-            gender: data.user.gender || 'male',
-          };
+      Object.keys(u).forEach(key => setValue(key, u[key]));
+      setGender(u.gender);
+      setOriginalUser(u);
 
-          Object.keys(user).forEach(key => setValue(key, user[key]));
-          setGender(user.gender);
-          setOriginalUser(user);
-
-          if (data.user.avatar) {
-            setServerAvatar(`${API_URL}/api/images/${data.user.avatar}`);
-          }
-        }
-      } catch (error) {
-        console.log('Lỗi load user:', error.message);
-      } finally {
-        setLoading(false);
+      if (user.avatar) {
+        setServerAvatar(`${API_URL}/api/images/${user.avatar}`);
       }
-    };
-
-    fetchUser();
-  }, [setValue]);
+    }
+  }, [user, setValue]);
 
   const onSubmit = async values => {
     setSaving(true);
@@ -163,10 +151,7 @@ const ProfileScreen = () => {
       setOriginalUser(currentData);
       setAvatar(null);
 
-      const data = await getUserApi(accessToken);
-      if (data?.user?.avatar) {
-        setServerAvatar(`${API_URL}/api/images/${data.user.avatar}`);
-      }
+      refetch();
     } catch (error) {
       console.log('Lỗi update:', error.message);
       showMessage({
@@ -179,10 +164,18 @@ const ProfileScreen = () => {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#28a745" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Text>Lỗi tải dữ liệu người dùng</Text>
       </View>
     );
   }
@@ -227,12 +220,12 @@ const ProfileScreen = () => {
               render={({field: {onChange, value, onBlur}}) => (
                 <Input
                   label="Tên đầy đủ"
-                  placeholder="Nhập tên đầy đủ"
+                  placeholder="Vui lòng nhập tên đầy đủ"
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={!!errors.fullName}
-                  errorMessage={errors.fullName?.message}
+                  error={errors.fullName?.message}
+                  isError={!!errors.fullName}
                 />
               )}
             />
@@ -248,8 +241,8 @@ const ProfileScreen = () => {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={!!errors.userName}
-                  errorMessage={errors.userName?.message}
+                  error={errors.userName?.message}
+                  isError={!!errors.userName}
                 />
               )}
             />
@@ -272,8 +265,8 @@ const ProfileScreen = () => {
                   onChangeText={onChange}
                   onBlur={onBlur}
                   keyboardType="email-address"
-                  error={!!errors.email}
-                  errorMessage={errors.email?.message}
+                  error={errors.email?.message}
+                  isError={!!errors.email}
                 />
               )}
             />
@@ -296,8 +289,8 @@ const ProfileScreen = () => {
                   onChangeText={onChange}
                   onBlur={onBlur}
                   keyboardType="phone-pad"
-                  error={!!errors.phone}
-                  errorMessage={errors.phone?.message}
+                  error={errors.phone?.message}
+                  isError={!!errors.phone}
                 />
               )}
             />
@@ -305,6 +298,7 @@ const ProfileScreen = () => {
             <Controller
               control={control}
               name="address"
+              rules={{required: 'Vui lòng nhập địa chỉ'}}
               render={({field: {onChange, value, onBlur}}) => (
                 <Input
                   label="Địa chỉ"
@@ -312,6 +306,8 @@ const ProfileScreen = () => {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
+                  error={errors.address?.message}
+                  isError={!!errors.address}
                 />
               )}
             />
@@ -342,6 +338,7 @@ const ProfileScreen = () => {
               control={control}
               name="dateOfBirth"
               rules={{
+                required: 'Vui lòng nhập năm sinh',
                 pattern: {
                   value: /^[0-9]{4}$/,
                   message: 'Vui lòng nhập năm sinh hợp lệ (YYYY)',
@@ -356,8 +353,8 @@ const ProfileScreen = () => {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  error={!!errors.dateOfBirth}
-                  errorMessage={errors.dateOfBirth?.message}
+                  error={errors.dateOfBirth?.message}
+                  isError={!!errors.dateOfBirth}
                 />
               )}
             />

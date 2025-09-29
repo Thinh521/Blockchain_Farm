@@ -80,7 +80,7 @@ const Input = forwardRef(
       ];
       if (isFocused) base.push(styles.focusedContainer);
       if (disabled || readonly) base.push(styles.disabledContainer);
-      if (isError) base.push(styles.errorContainer); // ✅ thêm viền đỏ khi lỗi
+      if (isError) base.push(styles.errorContainer);
       return base;
     };
 
