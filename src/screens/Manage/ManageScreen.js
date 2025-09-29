@@ -92,12 +92,12 @@ const ManageScreen = () => {
     <View style={styles.connectContainer}>
       <FloatingIcon name="sun" style={styles.floatingIcon1} />
       <FloatingIcon
-        name="droplet"
+        name="feather"
         style={styles.floatingIcon2}
         animationDelay={1000}
       />
       <FloatingIcon
-        name="leaf"
+        name="edit-3"
         style={styles.floatingIcon3}
         animationDelay={2000}
       />
