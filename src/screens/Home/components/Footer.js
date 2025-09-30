@@ -1,16 +1,25 @@
 import React from 'react';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {Leaf_Line_Icon} from '../../../assets/icons/index';
-import {scale} from '../../../utils/scaling';
+import FastImage from 'react-native-fast-image';
+
+import Images from '../../../assets/images/images';
+
 import {Colors, FontSizes, FontWeights} from '../../../theme/theme';
+import {scale} from '../../../utils/scaling';
 
 const Footer = () => {
   return (
     <View style={styles.footerSection}>
       <View style={styles.footerContent}>
+        <View style={styles.appContainer}>
+          <FastImage
+            source={Images.logo}
+            style={styles.appIcon}
+            resizeMode="contain"
+          />
+        </View>
         <View style={styles.footerLogo}>
-          <Leaf_Line_Icon style={{color: Colors.green, width: scale(24)}} />
-          <Text style={styles.footerTitle}>Blockchain Farm</Text>
+          <Text style={styles.footerTitle}>GreenFarm</Text>
         </View>
         <Text style={styles.footerDescription}>
           Ứng dụng truy xuất nguồn gốc minh bạch trên blockchain, giúp người
@@ -30,7 +39,7 @@ const Footer = () => {
         </View>
 
         <Text style={styles.copyright}>
-          © 2024 Blockchain Farm. Minh bạch – Tin cậy – Bền vững.
+          © 2025 GreenFarm. Minh bạch – Tin cậy – Bền vững.
         </Text>
       </View>
     </View>
@@ -51,6 +60,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(20),
     alignItems: 'center',
   },
+  appContainer: {
+    marginBottom: scale(10),
+    padding: scale(10),
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  appIcon: {
+    width: scale(40),
+    height: scale(40),
+  },
   footerLogo: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -59,15 +81,14 @@ const styles = StyleSheet.create({
   footerTitle: {
     fontSize: FontSizes.regular,
     fontWeight: FontWeights.semiBold,
-    color: Colors.green,
-    marginLeft: scale(8),
+    color: Colors.primary,
   },
   footerDescription: {
-    fontSize: 14,
-    color: '#6B7280',
+    fontSize: FontSizes.small,
+    color: Colors.gray,
     textAlign: 'center',
     lineHeight: scale(18),
-    marginBottom: 24,
+    marginBottom: scale(24),
     paddingHorizontal: scale(20),
   },
   footerLinks: {
@@ -82,7 +103,7 @@ const styles = StyleSheet.create({
   },
   footerLinkText: {
     fontSize: FontSizes.small,
-    color: Colors.green,
+    color: Colors.primary,
     fontWeight: FontWeights.medium,
   },
   copyright: {

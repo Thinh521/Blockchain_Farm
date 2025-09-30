@@ -1,20 +1,21 @@
 import React from 'react';
 import {View, Text, TouchableOpacity} from 'react-native';
-import styles from '../Setting.styles';
 import FastImage from 'react-native-fast-image';
+
 import Images from '../../../assets/images/images';
-import {scale} from '../../../utils/scaling';
+
+import styles from '../Setting.styles';
 
 const AppInfoCard = () => (
   <View style={styles.appInfoCard}>
-    <View style={{marginBottom: scale(10)}}>
+    <View style={styles.appContainer}>
       <FastImage
         source={Images.logo}
         style={styles.appIcon}
         resizeMode="contain"
       />
     </View>
-    <Text style={styles.appName}>Blockchain Farm</Text>
+    <Text style={styles.appName}>GreenFarm</Text>
     <Text style={styles.appVersion}>Phiên bản 2.1.0</Text>
     <View style={styles.appLinks}>
       <TouchableOpacity>

@@ -1,7 +1,6 @@
 const Images = {
-  logo: require('./logo.png'),
-  logo_text: require('./logo_text.png'),
-  logo_remove: require('./logo_remove.png'),
+  logo: require('./logo_1.png'),
+  logo_text: require('./logo_text_remove.png'),
   onboarding_1: require('./onboarding_1.png'),
   onboarding_2: require('./onboarding_2.png'),
   onboarding_3: require('./onboarding_3.png'),

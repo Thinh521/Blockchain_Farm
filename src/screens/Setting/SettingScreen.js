@@ -1,32 +1,36 @@
 import React, {useState} from 'react';
 import {View, Text, ScrollView, Alert} from 'react-native';
-import {ContrastIcon, UserIcon} from '../../assets/icons';
-import {Colors} from '../../theme/theme';
-import Button from '../../components/CustomButton/CustomButton';
 import {useNavigation} from '@react-navigation/core';
-import {logoutApi} from '../../api/auth/auth';
-import {deleteUserApi} from '../../api/userApi';
-import {deleteUser, getUser} from '../../utils/storage/authStorage';
 import {showMessage} from 'react-native-flash-message';
-import styles from './Setting.styles';
 import {useAppKitAccount} from '@reown/appkit-ethers-react-native';
-import Header from '../../components/Header/Header';
-import {useWishlist} from '../../context/WishlistContext';
+
+import Button from '../../components/CustomButton/CustomButton';
+import {ContrastIcon, UserIcon} from '../../assets/icons';
 import ProfileCard from './components/ProfileCard';
+import Header from '../../components/Header/Header';
 import AppInfoCard from './components/AppInfoCard';
 import SettingItem from './components/SettingItem';
 import SwitchComponent from './components/SwitchComponent';
 import LanguageSection from './components/LanguageSection';
+
 import {useUser} from '../../hooks/useUser';
+import {logoutApi} from '../../api/auth/auth';
+import {deleteUserApi} from '../../api/userApi';
+import {useWishlist} from '../../context/WishlistContext';
+import {deleteUser, getUser} from '../../utils/storage/authStorage';
+
+import {Colors} from '../../theme/theme';
+import styles from './Setting.styles';
 
 const SettingsScreen = () => {
   const navigation = useNavigation();
-  const {isConnected} = useAppKitAccount();
   const accessToken = getUser()?.accessToken;
+  const {isConnected} = useAppKitAccount();
+
   const [language, setLanguage] = useState('en');
   const [darkMode, setDarkMode] = useState(false);
-  const {resetWishlist} = useWishlist();
 
+  const {resetWishlist} = useWishlist();
   const {data: user, isLoading, error} = useUser();
 
   const handleLogout = async () => {
