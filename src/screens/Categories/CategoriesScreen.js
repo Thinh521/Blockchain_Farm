@@ -82,7 +82,7 @@ const CategoriesScreen = ({navigation, route}) => {
       navigation.navigate('Product', {
         productCode: productItem.productCode,
         farmCode: farmCode,
-        userId: userId
+        userId: userId,
       });
     },
     [navigation, farmCode, userId],
@@ -127,15 +127,11 @@ const CategoriesScreen = ({navigation, route}) => {
               style={styles.refetchButton}
             />
           </View>
-        ) : products.length === 0 ? (
-          <View style={styles.center}>
-            <Button.Main
-              title="Thêm nông sản"
-              style={styles.addButton}
-              onPress={() => navigation.navigate('AddProduct', {farmCode})}
-            />
-            <EmptyState message="Chưa có sản phẩm nào" />
-          </View>
+        ) : products.length === 1 ? (
+          <EmptyState
+            message="Chưa có sản phẩm nào"
+            style={{marginTop: scale(200)}}
+          />
         ) : (
           <ProductList products={products} onPress={handleProductPress} />
         )}

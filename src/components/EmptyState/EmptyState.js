@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
   message: {
     color: Colors.gray,
     textAlign: 'center',
-    fontSize: FontSizes.medium,
+    fontSize: FontSizes.regular,
     fontWeight: FontWeights.bold,
   },
 });
