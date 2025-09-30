@@ -28,7 +28,7 @@ export const useForm = (initialValues, rules = {}) => {
 
   const handleChange = (name, value) => {
     setValues(prev => ({ ...prev, [name]: value }));
-    validateField(name, value); // ✅ validate ngay khi nhập
+    validateField(name, value);
   };
 
   const validateForm = () => {

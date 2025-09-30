@@ -206,7 +206,7 @@ const HomeScreen = () => {
                 </View>
               ) : (
                 <FarmList
-                  farms={filteredFarms.slice(4, 10)}
+                  farms={filteredFarms.slice(0, 6)}
                   favorites={favorites}
                   isLoading={isLoading}
                 />

@@ -7,6 +7,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Keyboard,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import {useForm, Controller} from 'react-hook-form';
@@ -14,17 +15,15 @@ import {showMessage} from 'react-native-flash-message';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {useNavigation} from '@react-navigation/core';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
 import Button from '../../components/CustomButton/CustomButton';
 import Input from '../../components/CustomInput/CustomInput';
 import LoadingOverlay from '../../components/CustomLoading/LoadingOverlay';
 import Header from '../../components/Header/Header';
-
 import {getUser} from '../../utils/storage/authStorage';
 import {useUser} from '../../hooks/useUser';
-
 import {scale} from '../../utils/scaling';
 import styles from './Profile.styles';
+import {updateUserApi} from '../../api/userApi';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
@@ -34,6 +33,7 @@ const ProfileScreen = () => {
   const [gender, setGender] = useState('male');
   const [saving, setSaving] = useState(false);
   const [originalUser, setOriginalUser] = useState(null);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
 
   const {data: user, isLoading, error, refetch} = useUser();
 
@@ -51,6 +51,7 @@ const ProfileScreen = () => {
       address: '',
       dateOfBirth: '',
     },
+    mode: 'onChange',
   });
 
   const genders = [
@@ -94,6 +95,18 @@ const ProfileScreen = () => {
         setServerAvatar(`${API_URL}/api/images/${user.avatar}`);
       }
     }
+
+    const showSub = Keyboard.addListener('keyboardDidShow', () =>
+      setKeyboardVisible(true),
+    );
+    const hideSub = Keyboard.addListener('keyboardDidHide', () =>
+      setKeyboardVisible(false),
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
   }, [user, setValue]);
 
   const onSubmit = async values => {
@@ -361,22 +374,24 @@ const ProfileScreen = () => {
           </View>
         </View>
       </ScrollView>
-      <View style={styles.buttonActions}>
-        <Button.Main
-          title="Quay lại"
-          onPress={() => {
-            navigation.goBack();
-          }}
-          style={styles.cancelButton}
-          textStyle={styles.cancelButtonText}
-        />
-        <Button.Main
-          title={saving ? 'Đang lưu...' : 'Lưu thông tin'}
-          onPress={handleSubmit(onSubmit)}
-          disabled={saving}
-          style={{flex: 1}}
-        />
-      </View>
+      {!keyboardVisible && (
+        <View style={styles.buttonActions}>
+          <Button.Main
+            title="Quay lại"
+            onPress={() => {
+              navigation.goBack();
+            }}
+            style={styles.cancelButton}
+            textStyle={styles.cancelButtonText}
+          />
+          <Button.Main
+            title={saving ? 'Đang lưu...' : 'Lưu thông tin'}
+            onPress={handleSubmit(onSubmit)}
+            disabled={saving}
+            style={{flex: 1}}
+          />
+        </View>
+      )}
 
       {saving && <LoadingOverlay />}
     </View>

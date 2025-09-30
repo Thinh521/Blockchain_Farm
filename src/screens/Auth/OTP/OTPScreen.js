@@ -24,7 +24,7 @@ const OTPScreen = ({navigation, route}) => {
   const [timer, setTimer] = useState(10);
   const [canResend, setCanResend] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(false); // ✅ state loading
+  const [loading, setLoading] = useState(false);
   const inputRefs = useRef([]);
 
   useEffect(() => {

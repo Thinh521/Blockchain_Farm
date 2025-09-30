@@ -1,5 +1,5 @@
 import {ethers} from 'ethers';
-import {CONTRACT_ADDRESS} from '@env';
+import {CONTRACT_ADDRESS, API_URL} from '@env';
 import contractArtifact from '../screens/SmartConctract/contractABI.json';
 import {useQuery} from '@tanstack/react-query';
 
@@ -14,9 +14,10 @@ const fetchFarms = async () => {
     rpcProvider,
   );
 
+  // Lấy farms từ smart contract
   const farmsData = await contractRead.getAllFarms();
 
-  return farmsData.map(farm => ({
+  const farms = farmsData.map(farm => ({
     farmCode: farm.farmCode || farm[0],
     fullname: farm.fullname || farm[1],
     nameFarm: farm.nameFarm || farm[2],
@@ -28,6 +29,14 @@ const fetchFarms = async () => {
     area: farm.area?.toString?.() || farm[8]?.toString?.() || '',
     image: Array.isArray(farm.images || farm[9]) ? farm.images || farm[9] : [],
   }));
+
+  // Lấy danh sách farmCode từ BE
+  const res = await fetch(`${API_URL}/api/farms`);
+  const json = await res.json();
+  const validCodes = json.code === '200' ? json.data : [];
+
+  // Chỉ giữ farm nào có trong BE
+  return farms.filter(f => validCodes.includes(f.farmCode));
 };
 
 export const useFarms = () => {
