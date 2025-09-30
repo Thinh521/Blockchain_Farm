@@ -1,4 +1,4 @@
-import React, {useCallback} from 'react';
+import React, {useCallback, useMemo} from 'react';
 import {
   View,
   Text,
@@ -13,21 +13,122 @@ import {CONTRACT_ADDRESS, RPC_URL} from '@env';
 import {useQuery} from '@tanstack/react-query';
 import {useNavigation} from '@react-navigation/core';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
-
 import Button from '../../../components/CustomButton/CustomButton';
 import contractArtifact from '../../SmartConctract/contractABI.json';
+import {useFocusEffect} from '@react-navigation/native';
+import {useQueryClient} from '@tanstack/react-query';
 import TraceabilitySkeleton from '../../../components/CustomSkeleton/TraceabilitySkeleton';
-
 import api from '../../../api/baseApi';
-
 import styles from './TraceabilitySection.styles';
 import {scale} from '../../../utils/scaling';
+import {getUser} from '../../../utils/storage/authStorage';
 
-const TraceabilitySection = ({productCode, farmCode}) => {
+const STEP_CONFIG = [
+  {
+    title: 'Quy trình canh tác',
+    icon: '🌱',
+    responsible: 'Nông dân',
+    detailKeys: ['nameProcess', 'source', 'plantingDate', 'sowingDate'],
+    dateKey: ['sowingDate', 'plantingDate'],
+    locationKey: 'source',
+  },
+  {
+    title: 'Sử dụng thuốc bảo vệ thực vật',
+    icon: '💊',
+    detailKeys: [
+      'nameMedicine',
+      'quantityMedicine',
+      'medicineDate',
+      'medicineType',
+    ],
+    dateKey: 'medicineDate',
+    locationKey: null,
+  },
+  {
+    title: 'Sử dụng phân bón',
+    icon: '🌿',
+    detailKeys: [
+      'nameFertilizer',
+      'quantityFertilizer',
+      'fertilizerDate',
+      'fertilizerType',
+    ],
+    dateKey: 'fertilizerDate',
+    locationKey: null,
+  },
+  {
+    title: 'Thu hoạch',
+    icon: '🌾',
+    detailKeys: [
+      'harvestDate',
+      'estimatedQuantity',
+      'actualQuantity',
+      'quality',
+    ],
+    dateKey: 'harvestDate',
+    locationKey: null,
+  },
+  {
+    title: 'Phân phối',
+    icon: '🚚',
+    detailKeys: [
+      'distributorName',
+      'distributorPartner',
+      'distributionDate',
+      'transportMethod',
+    ],
+    dateKey: 'distributionDate',
+    locationKey: 'distributorPartner',
+    responsibleKey: 'distributorName',
+  },
+];
+
+const DETAIL_LABELS = {
+  nameProcess: 'Tên giống',
+  source: 'Nguồn gốc',
+  plantingDate: 'Ngày trồng',
+  sowingDate: 'Ngày gieo',
+  nameMedicine: 'Tên thuốc',
+  quantityMedicine: 'Số lượng thuốc',
+  medicineDate: 'Ngày sử dụng thuốc',
+  medicineType: 'Loại thuốc',
+  nameFertilizer: 'Tên phân bón',
+  quantityFertilizer: 'Số lượng phân bón',
+  fertilizerDate: 'Ngày bón phân',
+  fertilizerType: 'Loại phân bón',
+  harvestDate: 'Ngày thu hoạch',
+  estimatedQuantity: 'Sản lượng dự kiến',
+  actualQuantity: 'Sản lượng thực tế',
+  quality: 'Chất lượng',
+  distributorName: 'Nhà phân phối',
+  distributorPartner: 'Đối tác',
+  distributionDate: 'Ngày phân phối',
+  transportMethod: 'Phương thức vận chuyển',
+};
+
+const TraceabilitySection = ({productCode, farmCode, userId}) => {
+  const queryClient = useQueryClient();
+
   const navigation = useNavigation();
 
+  const storedUser = getUser();
+  const user = storedUser.userId;
+  
+  const canAddProcess = useMemo(() => {
+    return user && userId && user === userId;
+  }, [user, userId]);
+  
+
+  useFocusEffect(
+    useCallback(() => {
+      queryClient.invalidateQueries(['traceability', productCode]);
+    }, [queryClient, productCode]),
+  );
+
+  const hasProcessData = process =>
+    Object.values(process).some(value => value && value !== '');
+
   const fetchTraceability = async () => {
-    if (!productCode) return [];
     if (!productCode) return [];
 
     const rpcProvider = new ethers.JsonRpcProvider(RPC_URL);
@@ -39,128 +140,35 @@ const TraceabilitySection = ({productCode, farmCode}) => {
 
     const traceabilityResult =
       await contractRead.getCompleteProductTraceability(productCode);
-    await contractRead.getCompleteProductTraceability(productCode);
-
     const hashResponse = await api.get(`/api/process/${productCode}`);
-    const hashData = hashResponse.data?.process?.steps || [];
-    const hashesOnly = hashData.map(step => step.txHash);
+    const hashesOnly =
+      hashResponse.data?.process?.steps?.map(step => step.txHash) || [];
 
     const processData = traceabilityResult.slice(1, 6);
 
-    const formattedData = processData.map((process, index) => {
-      switch (index) {
-        case 0:
-          return {
-            id: index,
-            step: 'Bước 1',
-            title: '🌱 Quy trình canh tác',
-            date:
-              process.sowingDate || process.plantingDate || 'Không xác định',
-            location: process.source || 'Không xác định',
-            responsible: 'Nông dân',
-            status: 'Hoàn thành',
-            images: [],
-            hash: hashesOnly[index] || 'Không có mã hash',
-            details: {
-              nameProcess: process.nameProcess,
-              source: process.source,
-              plantingDate: process.plantingDate,
-              sowingDate: process.sowingDate,
-            },
-          };
-        case 1:
-          return {
-            id: index,
-            step: 'Bước 2',
-            title: '💊 Sử dụng thuốc bảo vệ thực vật',
-            description: `Thuốc: ${process.nameMedicine}\nSố lượng: ${process.quantityMedicine}\nLoại: ${process.medicineType}`,
-            date: process.medicineDate || 'Không xác định',
-            location: 'Trang trại',
-            responsible: 'Kỹ thuật viên',
-            status: 'Hoàn thành',
-            images: [],
-            hash: hashesOnly[index] || 'Không có mã hash',
-            details: {
-              nameMedicine: process.nameMedicine,
-              quantityMedicine: process.quantityMedicine,
-              medicineDate: process.medicineDate,
-              medicineType: process.medicineType,
-            },
-          };
-        case 2:
-          return {
-            id: index,
-            step: 'Bước 3',
-            title: '🌿 Sử dụng phân bón',
-            description: `Phân bón: ${process.nameFertilizer}\nSố lượng: ${process.quantityFertilizer}\nLoại: ${process.fertilizerType}`,
-            date: process.fertilizerDate || 'Không xác định',
-            location: 'Trang trại',
-            responsible: 'Kỹ thuật viên',
-            status: 'Hoàn thành',
-            images: [],
-            hash: hashesOnly[index] || 'Không có mã hash',
-            details: {
-              nameFertilizer: process.nameFertilizer,
-              quantityFertilizer: process.quantityFertilizer,
-              fertilizerDate: process.fertilizerDate,
-              fertilizerType: process.fertilizerType,
-            },
-          };
-        case 3:
-          return {
-            id: index,
-            step: 'Bước 4',
-            title: '🌾 Thu hoạch',
-            description: `Ngày thu hoạch: ${process.harvestDate}\nSản lượng dự kiến: ${process.estimatedQuantity}\nSản lượng thực tế: ${process.actualQuantity}`,
-            date: process.harvestDate || 'Không xác định',
-            location: 'Trang trại',
-            responsible: 'Đội thu hoạch',
-            status: 'Hoàn thành',
-            images: [],
-            hash: hashesOnly[index] || 'Không có mã hash',
-            details: {
-              harvestDate: process.harvestDate,
-              estimatedQuantity: process.estimatedQuantity,
-              actualQuantity: process.actualQuantity,
-              quality: process.quality,
-            },
-          };
-        case 4:
-          return {
-            id: index,
-            step: 'Bước 5',
-            title: '🚚 Phân phối',
-            description: `Nhà phân phối: ${process.distributorName}\nĐối tác: ${process.distributorPartner}\nPhương thức vận chuyển: ${process.transportMethod}`,
-            date: process.distributionDate || 'Không xác định',
-            location: process.distributorPartner || 'Không xác định',
-            responsible: process.distributorName || 'Nhà phân phối',
-            status: 'Hoàn thành',
-            images: [],
-            hash: hashesOnly[index] || 'Không có mã hash',
-            details: {
-              distributorName: process.distributorName,
-              distributorPartner: process.distributorPartner,
-              distributionDate: process.distributionDate,
-              transportMethod: process.transportMethod,
-            },
-          };
-        default:
-          return {
-            id: index,
-            step: `Bước ${index + 1}`,
-            title: 'Quy trình không xác định',
-            description: 'Không có thông tin',
-            date: 'Không xác định',
-            location: 'Không xác định',
-            responsible: 'Không xác định',
-            status: 'Hoàn thành',
-            images: [],
-            hash: 'Không có mã hash',
-          };
-      }
-    });
+    return processData
+      .map((process, index) => {
+        if (!hasProcessData(process)) return null;
 
-    return formattedData;
+        const config = STEP_CONFIG[index];
+
+        const details = Object.fromEntries(
+          config.detailKeys
+            .filter(key => process[key])
+            .map(key => [key, process[key]]),
+        );
+
+        return {
+          id: index,
+          step: `Bước ${index + 1}`,
+          title: config.title,
+          status: 'Hoàn thành',
+          hash: hashesOnly[index] || 'Không có mã hash',
+          details: Object.keys(details).length > 0 ? details : null,
+          icon: config.icon,
+        };
+      })
+      .filter(Boolean);
   };
 
   const {
@@ -172,79 +180,44 @@ const TraceabilitySection = ({productCode, farmCode}) => {
     queryFn: fetchTraceability,
     enabled: !!productCode,
   });
+  const showAddButton = useMemo(
+    () => traceabilityData.length < 5 && traceabilityData.length > 0,
+    [traceabilityData.length],
+  );
 
   const handleProcessPress = useCallback(() => {
     navigation.navigate('Process', {productCode, farmCode});
   }, [navigation, productCode, farmCode]);
 
-  const getDetailLabel = key => {
-    const labelMap = {
-      nameProcess: 'Tên giống',
-      source: 'Nguồn gốc',
-      plantingDate: 'Ngày trồng',
-      sowingDate: 'Ngày gieo',
-      nameMedicine: 'Tên thuốc',
-      quantityMedicine: 'Số lượng thuốc',
-      medicineDate: 'Ngày sử dụng thuốc',
-      medicineType: 'Loại thuốc',
-      nameFertilizer: 'Tên phân bón',
-      quantityFertilizer: 'Số lượng phân bón',
-      fertilizerDate: 'Ngày bón phân',
-      fertilizerType: 'Loại phân bón',
-      harvestDate: 'Ngày thu hoạch',
-      estimatedQuantity: 'Sản lượng dự kiến',
-      actualQuantity: 'Sản lượng thực tế',
-      quality: 'Chất lượng',
-      distributorName: 'Nhà phân phối',
-      distributorPartner: 'Đối tác',
-      distributionDate: 'Ngày phân phối',
-      transportMethod: 'Phương thức vận chuyển',
-    };
-    return labelMap[key] || key;
-  };
-
-  const getStepIcon = (index, total) => {
-    const icons = ['🌱', '🏪', '💧', '🌾', '📦', '🚚'];
-    return icons[index % icons.length];
-  };
+  const handleHashPress = useCallback(hash => {
+    if (hash && hash !== 'Không có mã hash') {
+      Linking.openURL(`https://zeroscan.org/tx/${hash}`).catch(err =>
+        console.log('Không thể mở URL:', err),
+      );
+    }
+  }, []);
 
   const getStatusColor = status => {
-    switch (status?.toLowerCase()) {
-      case 'hoàn thành':
-      case 'completed':
-        return '#10B981';
-      case 'đang thực hiện':
-      case 'in_progress':
-        return '#F59E0B';
-      case 'chờ xử lý':
-      case 'pending':
-        return '#6B7280';
-      default:
-        return '#10B981';
-    }
-  };
-
-  const handleHashPress = hash => {
-    if (hash && hash !== 'Không có mã hash') {
-      const url = `https://zeroscan.org/tx/${hash}`;
-      Linking.openURL(url).catch(err => console.log('Không thể mở URL:', err));
-    }
+    const colors = {
+      'hoàn thành': '#10B981',
+      completed: '#10B981',
+      'đang thực hiện': '#F59E0B',
+      in_progress: '#F59E0B',
+      'chờ xử lý': '#6B7280',
+      pending: '#6B7280',
+    };
+    return colors[status?.toLowerCase()] || '#10B981';
   };
 
   const renderTraceabilityItem = ({item, index}) => {
     const isLast = index === traceabilityData.length - 1;
+    const statusColor = getStatusColor(item.status);
 
     return (
       <View style={styles.traceabilityItem}>
         <View style={styles.traceabilityTimeline}>
-          <View
-            style={[
-              styles.timelineIcon,
-              {backgroundColor: getStatusColor(item.status)},
-            ]}>
-            <Text style={styles.timelineIconText}>
-              {getStepIcon(index, traceabilityData.length)}
-            </Text>
+          <View style={[styles.timelineIcon, {backgroundColor: statusColor}]}>
+            <Text style={styles.timelineIconText}>{item.icon}</Text>
           </View>
           {!isLast && <View style={styles.timelineLine} />}
         </View>
@@ -254,10 +227,7 @@ const TraceabilitySection = ({productCode, farmCode}) => {
             <View style={styles.traceabilityHeader}>
               <Text style={styles.traceabilityStep}>{item.step}</Text>
               <View
-                style={[
-                  styles.statusBadge,
-                  {backgroundColor: getStatusColor(item.status)},
-                ]}>
+                style={[styles.statusBadge, {backgroundColor: statusColor}]}>
                 <Text style={styles.statusText}>{item.status}</Text>
               </View>
             </View>
@@ -265,32 +235,19 @@ const TraceabilitySection = ({productCode, farmCode}) => {
             <Text style={styles.traceabilityTitle}>{item.title}</Text>
 
             <View>
-              {item.details && Object.keys(item.details).length > 0 && (
+              {item.details && (
                 <View style={styles.additionalDetails}>
                   <Text style={styles.additionalDetailsTitle}>Chi tiết</Text>
-                  {Object.entries(item.details).map(
-                    ([key, value]) =>
-                      value &&
-                      value !== 'Không xác định' && (
-                        <View key={key} style={styles.detailRow}>
-                          <Text style={styles.detailLabel}>
-                            • {getDetailLabel(key)}:{' '}
-                          </Text>
-                          <Text style={styles.detailValue} numberOfLines={1}>
-                            {value}
-                          </Text>
-                        </View>
-                      ),
-                  )}
-                </View>
-              )}
-
-              {item.description && (
-                <View>
-                  <Text style={styles.additionalDetailsTitle}>Mô tả</Text>
-                  <Text style={styles.traceabilityDescription}>
-                    {item.description}
-                  </Text>
+                  {Object.entries(item.details).map(([key, value]) => (
+                    <View key={key} style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>
+                        • {DETAIL_LABELS[key] || key}:{' '}
+                      </Text>
+                      <Text style={styles.detailValue} numberOfLines={1}>
+                        {value}
+                      </Text>
+                    </View>
+                  ))}
                 </View>
               )}
 
@@ -306,7 +263,7 @@ const TraceabilitySection = ({productCode, farmCode}) => {
               )}
             </View>
 
-            {item.images && item.images.length > 0 && (
+            {item.images?.length > 0 && (
               <View style={styles.traceabilityImages}>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   {item.images.map((image, imgIndex) => (
@@ -345,32 +302,46 @@ const TraceabilitySection = ({productCode, farmCode}) => {
         <TraceabilitySkeleton count={4} />
       ) : isError ? (
         <View style={styles.emptyTraceability}>
-          <Text style={styles.emptyText}>Lỗi tải dữ liệu</Text>
-          <Button.Main
-            title="Thêm quy trình"
-            style={{marginTop: scale(12)}}
-            onPress={handleProcessPress}
-          />
+          <Text style={styles.emptyText}>Chưa cập nhật quy trình</Text>
+          {canAddProcess && (
+            <Button.Main
+              title="Thêm quy trình"
+              style={{marginTop: scale(12)}}
+              onPress={handleProcessPress}
+            />
+          )}
         </View>
       ) : traceabilityData.length === 0 ? (
         <View style={styles.emptyTraceability}>
           <Text style={styles.emptyText}>
             📋 Chưa có thông tin truy xuất nguồn gốc
           </Text>
-          <Button.Main
-            title="Thêm quy trình"
-            style={{marginTop: 12}}
-            onPress={handleProcessPress}
-          />
+          {canAddProcess && (
+            <Button.Main
+              title="Thêm quy trình"
+              style={{marginTop: 12}}
+              onPress={handleProcessPress}
+            />
+          )}
         </View>
       ) : (
-        <FlatList
-          data={traceabilityData}
-          renderItem={renderTraceabilityItem}
-          keyExtractor={item => item.id.toString()}
-          showsVerticalScrollIndicator={false}
-          scrollEnabled={false}
-        />
+        <>
+          <FlatList
+            data={traceabilityData}
+            renderItem={renderTraceabilityItem}
+            keyExtractor={item => item.id.toString()}
+            showsVerticalScrollIndicator={false}
+            scrollEnabled={false}
+          />
+          {showAddButton && canAddProcess && (
+            <View style={styles.emptyTraceability}>
+              <Button.Main
+                title="Thêm quy trình"
+                onPress={handleProcessPress}
+              />
+            </View>
+          )}
+        </>
       )}
     </View>
   );

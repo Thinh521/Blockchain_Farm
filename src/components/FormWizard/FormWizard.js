@@ -28,7 +28,6 @@ const FormWizard = ({
   isSubmitting,
   isFormValid,
   submitButtonText = 'Xác nhận',
-  children,
 }) => {
   const [activeSection, setActiveSection] = useState(null);
 

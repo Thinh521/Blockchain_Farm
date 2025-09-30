@@ -17,6 +17,7 @@ const Input = forwardRef(
       disabled = false,
       readonly = false,
       value,
+      type = 'text',
       onChangeText,
       onFocus,
       onBlur,
@@ -42,6 +43,7 @@ const Input = forwardRef(
   ) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
+    const [showPicker, setShowPicker] = useState(false);
     const inputRef = useRef(null);
 
     useImperativeHandle(ref, () => ({
@@ -70,14 +72,25 @@ const Input = forwardRef(
       onClear?.();
     };
 
+    const handlePress = () => {
+      if (type === 'date') {
+        setShowPicker(true);
+      }
+    };
+
+    const onChangeDate = (event, selectedDate) => {
+      setShowPicker(false);
+      if (selectedDate) {
+        const formattedDate = selectedDate.toISOString().split('T')[0];
+        onChangeText?.(formattedDate);
+      }
+    };
+
     const showRightContent =
       isPassword || RightIcon || (showClearButton && value);
 
     const getContainerStyles = () => {
-      const base = [
-        styles.inputContainer,
-        containerStyle,
-      ];
+      const base = [styles.inputContainer, containerStyle];
       if (isFocused) base.push(styles.focusedContainer);
       if (disabled || readonly) base.push(styles.disabledContainer);
       if (isError) base.push(styles.errorContainer);
@@ -102,97 +115,111 @@ const Input = forwardRef(
           </View>
         )}
 
-        <View style={getContainerStyles()}>
-          {LeftIcon && (
-            <View style={styles.leftIconContainer}>
-              {typeof LeftIcon === 'function' ? (
-                <LeftIcon
-                  style={[
-                    styles.leftIcon,
-                    isFocused && styles.focusedIcon,
-                  ]}
-                />
-              ) : (
-                React.cloneElement(LeftIcon, {
-                  style: [
-                    styles.leftIcon,
-                    isFocused && styles.focusedIcon,
-                    LeftIcon.props?.style,
-                  ],
-                })
-              )}
-            </View>
-          )}
-
-          <TextInput
-            ref={inputRef}
-            style={getInputStyles()}
-            placeholder={placeholder}
-            placeholderTextColor={placeholderTextColor}
-            autoCapitalize="none"
-            keyboardType={keyboardType}
-            editable={!disabled && !readonly}
-            secureTextEntry={isPassword && !isPasswordVisible}
-            value={value}
-            onChangeText={onChangeText}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            onSubmitEditing={onSubmitEditing}
-            multiline={multiline}
-            numberOfLines={numberOfLines}
-            autoFocus={autoFocus}
-            returnKeyType={returnKeyType}
-            accessibilityLabel={accessibilityLabel || label}
-            clearButtonMode={clearButtonMode}
-            {...rest}
-          />
-
-          {showRightContent && (
-            <View style={styles.rightContent}>
-              {showClearButton && value && !isPassword && (
-                <TouchableOpacity
-                  onPress={handleClear}
-                  style={styles.clearButton}
-                  hitSlop={10}>
-                  <Text style={styles.clearButtonText}>×</Text>
-                </TouchableOpacity>
-              )}
-
-              {isPassword && !disabled && !readonly && (
-                <TouchableOpacity
-                  onPress={togglePasswordVisibility}
-                  style={styles.eyeButton}
-                  hitSlop={10}
-                  accessibilityLabel={
-                    isPasswordVisible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'
-                  }>
-                  {isPasswordVisible ? (
-                    <EyeIcon style={[styles.eyeIcon]} />
-                  ) : (
-                    <EyeOffIcon style={[styles.eyeIcon]} />
-                  )}
-                </TouchableOpacity>
-              )}
-
-              {RightIcon && !isPassword && (
-                <View style={styles.rightIconContainer}>
-                  <RightIcon
-                    style={[
-                      styles.rightIcon,
-                      styles.defaultIcon,
-                      isFocused && styles.focusedIcon,
-                    ]}
+        <TouchableOpacity
+          activeOpacity={type === 'date' ? 0.8 : 1}
+          onPress={type === 'date' ? () => setShowPicker(true) : undefined}>
+          <View style={getContainerStyles()}>
+            {LeftIcon && (
+              <View style={styles.leftIconContainer}>
+                {typeof LeftIcon === 'function' ? (
+                  <LeftIcon
+                    style={[styles.leftIcon, isFocused && styles.focusedIcon]}
                   />
-                </View>
-              )}
-            </View>
-          )}
-        </View>
+                ) : (
+                  React.cloneElement(LeftIcon, {
+                    style: [
+                      styles.leftIcon,
+                      isFocused && styles.focusedIcon,
+                      LeftIcon.props?.style,
+                    ],
+                  })
+                )}
+              </View>
+            )}
+
+            <TextInput
+              ref={inputRef}
+              style={getInputStyles()}
+              placeholder={placeholder}
+              placeholderTextColor={placeholderTextColor}
+              autoCapitalize="none"
+              keyboardType={keyboardType}
+              editable={type === 'date' ? false : !disabled && !readonly}
+              secureTextEntry={isPassword && !isPasswordVisible}
+              value={value}
+              onChangeText={type === 'date' ? undefined : onChangeText}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+              onSubmitEditing={onSubmitEditing}
+              multiline={multiline}
+              numberOfLines={numberOfLines}
+              autoFocus={autoFocus}
+              returnKeyType={returnKeyType}
+              accessibilityLabel={accessibilityLabel || label}
+              clearButtonMode={clearButtonMode}
+              {...rest}
+            />
+
+            {showRightContent && (
+              <View style={styles.rightContent}>
+                {showClearButton && value && !isPassword && (
+                  <TouchableOpacity
+                    onPress={handleClear}
+                    style={styles.clearButton}
+                    hitSlop={10}>
+                    <Text style={styles.clearButtonText}>×</Text>
+                  </TouchableOpacity>
+                )}
+
+                {isPassword && !disabled && !readonly && (
+                  <TouchableOpacity
+                    onPress={togglePasswordVisibility}
+                    style={styles.eyeButton}
+                    hitSlop={10}
+                    accessibilityLabel={
+                      isPasswordVisible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'
+                    }>
+                    {isPasswordVisible ? (
+                      <EyeIcon style={[styles.eyeIcon]} />
+                    ) : (
+                      <EyeOffIcon style={[styles.eyeIcon]} />
+                    )}
+                  </TouchableOpacity>
+                )}
+
+                {RightIcon && !isPassword && (
+                  <View style={styles.rightIconContainer}>
+                    <RightIcon
+                      style={[
+                        styles.rightIcon,
+                        styles.defaultIcon,
+                        isFocused && styles.focusedIcon,
+                      ]}
+                    />
+                  </View>
+                )}
+              </View>
+            )}
+          </View>
+        </TouchableOpacity>
 
         {/* ✅ hiện error dưới input */}
-        {error ? (
-          <Text style={styles.errorText}>{error}</Text>
-        ) : null}
+        {error && <Text style={styles.errorText}>{error}</Text>}
+
+        {showPicker && type === 'date' && (
+          <DateTimePicker
+            value={value ? new Date(value) : new Date()}
+            mode="date"
+            display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+            onChange={(event, selectedDate) => {
+              setShowPicker(false);
+              if (selectedDate) {
+                const formatted = selectedDate.toISOString().split('T')[0];
+                onChangeText?.(formatted);
+              }
+            }}
+          />
+        )}
       </View>
     );
   },

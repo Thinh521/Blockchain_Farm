@@ -1,44 +1,100 @@
 import React from 'react';
-import {View} from 'react-native';
-import StyledInput from './StyledInput';
+import {Text, View} from 'react-native';
+import {useForm, Controller} from 'react-hook-form';
 import DateInput from './DateInput';
+import Input from '../../../components/CustomInput/CustomInput';
+import Button from '../../../components/CustomButton/CustomButton';
 
-const PlantingProcessForm = ({farmingProcess, setFarmingProcess}) => {
+const PlantingProcessForm = ({onSubmit}) => {
+  const {
+    control,
+    handleSubmit,
+    formState: {errors},
+  } = useForm({
+    defaultValues: {
+      nameProcess: '',
+      source: '',
+      plantingDate: '',
+      sowingDate: '',
+    },
+  });
+
   return (
     <View>
-      <StyledInput
-        placeholder="Tên quy trình"
-        value={farmingProcess.nameProcess}
-        onChangeText={text =>
-          setFarmingProcess({...farmingProcess, nameProcess: text})
-        }
+      {/* Tên quy trình */}
+      <Controller
+        control={control}
+        name="nameProcess"
+        rules={{required: 'Tên quy trình là bắt buộc'}}
+        render={({field: {onChange, value}}) => (
+          <Input
+            style={{marginBottom: 20}}
+            placeholder="Tên quy trình"
+            value={value}
+            onChangeText={onChange}
+            error={errors.nameProcess?.message}
+            isError={!!errors.nameProcess}
+          />
+        )}
       />
 
-      <StyledInput
-        placeholder="Nguồn gốc"
-        value={farmingProcess.source}
-        onChangeText={text =>
-          setFarmingProcess({...farmingProcess, source: text})
-        }
+      {/* Nguồn gốc */}
+      <Controller
+        control={control}
+        name="source"
+        rules={{required: 'Nguồn gốc là bắt buộc'}}
+        render={({field: {onChange, value}}) => (
+          <Input
+            style={{marginBottom: 20}}
+            placeholder="Nguồn gốc"
+            value={value}
+            onChangeText={onChange}
+            error={errors.source?.message}
+            isError={!!errors.source}
+          />
+        )}
       />
 
       {/* Ngày trồng */}
-      <DateInput
-        placeholder="Ngày trồng"
-        value={farmingProcess.plantingDate}
-        onChange={date =>
-          setFarmingProcess({...farmingProcess, plantingDate: date})
-        }
+      <Controller
+        control={control}
+        name="plantingDate"
+        rules={{required: 'Ngày trồng là bắt buộc'}}
+        render={({field: {onChange, value}}) => (
+          <DateInput
+            style={{marginBottom: 20}}
+            placeholder="Ngày trồng"
+            value={value}
+            onChange={onChange}
+            error={errors.plantingDate?.message}
+            isError={!!errors.plantingDate}
+          />
+        )}
       />
 
       {/* Ngày gieo */}
-      <DateInput
-        placeholder="Ngày gieo"
-        value={farmingProcess.sowingDate}
-        onChange={date =>
-          setFarmingProcess({...farmingProcess, sowingDate: date})
-        }
+      <Controller
+        control={control}
+        name="sowingDate"
+        rules={{required: 'Ngày gieo là bắt buộc'}}
+        render={({field: {onChange, value}}) => (
+          <DateInput
+            style={{marginBottom: 20}}
+            placeholder="Ngày gieo"
+            value={value}
+            onChange={onChange}
+            error={errors.sowingDate?.message}
+            isError={!!errors.sowingDate}
+          />
+        )}
       />
+
+      {/* Nút Submit */}
+      <View style={{marginTop: 16}}>
+        <Button.Main
+          onPress={handleSubmit(onSubmit)}
+          title={'Hoàn thành quy trình'}></Button.Main>
+      </View>
     </View>
   );
 };

@@ -1,51 +1,119 @@
 import React from 'react';
-import {View} from 'react-native';
-import StyledInput from './StyledInput';
+import {Text, View} from 'react-native';
+import {useForm, Controller} from 'react-hook-form';
 import DateInput from './DateInput';
+import Input from '../../../components/CustomInput/CustomInput';
+import Button from '../../../components/CustomButton/CustomButton';
 
-const SprayingProcessForm = ({medicine, setMedicine}) => {
+const SprayingProcessForm = ({onSubmit}) => {
+  const {
+    control,
+    handleSubmit,
+    formState: {errors},
+  } = useForm({
+    defaultValues: {
+      nameMedicine: '',
+      quantityMedicine: '',
+      medicineDate: '',
+      medicineType: '',
+      applicationMethod: '',
+    },
+  });
+
   return (
     <View>
-      <StyledInput
-        placeholder="Tên thuốc"
-        value={medicine.nameMedicine}
-        onChangeText={text =>
-          setMedicine({...medicine, nameMedicine: text})
-        }
+      {/* Tên thuốc */}
+      <Controller
+        control={control}
+        name="nameMedicine"
+        rules={{required: 'Tên thuốc là bắt buộc'}}
+        render={({field: {onChange, value}}) => (
+          <Input
+            style={{marginBottom: 20}}
+            placeholder="Tên thuốc"
+            value={value}
+            onChangeText={onChange}
+            error={errors.nameMedicine?.message}
+            isError={!!errors.nameMedicine}
+          />
+        )}
       />
 
-      <StyledInput
-        placeholder="Số lượng thuốc"
-        value={medicine.quantityMedicine}
-        onChangeText={text =>
-          setMedicine({...medicine, quantityMedicine: text})
-        }
+      {/* Số lượng thuốc */}
+      <Controller
+        control={control}
+        name="quantityMedicine"
+        rules={{required: 'Số lượng thuốc là bắt buộc'}}
+        render={({field: {onChange, value}}) => (
+          <Input
+            style={{marginBottom: 20}}
+            placeholder="Số lượng thuốc"
+            value={value}
+            onChangeText={onChange}
+            error={errors.quantityMedicine?.message}
+            isError={!!errors.quantityMedicine}
+          />
+        )}
       />
 
-      <DateInput
-        placeholder="Ngày sử dụng"
-        value={medicine.medicineDate}
-        onChange={date =>
-          setMedicine({...medicine, medicineDate: date})
-        }
+      {/* Ngày sử dụng */}
+      <Controller
+        control={control}
+        name="medicineDate"
+        rules={{required: 'Ngày sử dụng là bắt buộc'}}
+        render={({field: {onChange, value}}) => (
+          <DateInput
+            style={{marginBottom: 20}}
+            placeholder="Ngày sử dụng"
+            value={value}
+            onChange={onChange}
+            error={errors.medicineDate?.message}
+            isError={!!errors.medicineDate}
+          />
+        )}
       />
 
-      <StyledInput
-        placeholder="Loại thuốc"
-        value={medicine.medicineType}
-        onChangeText={text =>
-          setMedicine({...medicine, medicineType: text})
-        }
+      {/* Loại thuốc */}
+      <Controller
+        control={control}
+        name="medicineType"
+        rules={{required: 'Loại thuốc là bắt buộc'}}
+        render={({field: {onChange, value}}) => (
+          <Input
+            style={{marginBottom: 20}}
+            placeholder="Loại thuốc"
+            value={value}
+            onChangeText={onChange}
+            error={errors.medicineType?.message}
+            isError={!!errors.medicineType}
+          />
+        )}
       />
 
-      <StyledInput
-        placeholder="Phương pháp sử dụng"
-        value={medicine.applicationMethod}
-        onChangeText={text =>
-          setMedicine({...medicine, applicationMethod: text})
-        }
-        multiline
+      {/* Phương pháp sử dụng */}
+      <Controller
+        control={control}
+        name="applicationMethod"
+        rules={{required: 'Phương pháp sử dụng là bắt buộc'}}
+        render={({field: {onChange, value}}) => (
+          <Input
+            style={{marginBottom: 20}}
+            placeholder="Phương pháp sử dụng"
+            value={value}
+            onChangeText={onChange}
+            error={errors.applicationMethod?.message}
+            isError={!!errors.applicationMethod}
+            multiline
+          />
+        )}
       />
+
+      {/* Nút Submit */}
+      <View style={{marginTop: 16}}>
+        <Button.Main
+          onPress={handleSubmit(onSubmit)}
+          title={'Hoàn thành quy trình'}></Button.Main>
+      </View>
     </View>
   );
 };

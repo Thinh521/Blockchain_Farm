@@ -29,6 +29,7 @@ const fetchProducts = async farmCode => {
   );
 
   const productsData = await contractRead.getProductByFarmCode(farmCode);
+  console.log('Products from SC:', productsData);
 
   const formattedProducts = productsData.map(product => {
     const images =
@@ -63,7 +64,7 @@ const fetchProducts = async farmCode => {
 };
 
 const CategoriesScreen = ({navigation, route}) => {
-  const {farmCode} = route.params || {};
+  const {farmCode, userId} = route.params || {};
 
   const {
     data: products = [],
@@ -81,9 +82,10 @@ const CategoriesScreen = ({navigation, route}) => {
       navigation.navigate('Product', {
         productCode: productItem.productCode,
         farmCode: farmCode,
+        userId: userId
       });
     },
-    [navigation, farmCode],
+    [navigation, farmCode, userId],
   );
 
   return (
@@ -126,7 +128,14 @@ const CategoriesScreen = ({navigation, route}) => {
             />
           </View>
         ) : products.length === 0 ? (
-          <EmptyState message="Chưa có sản phẩm nào" />
+          <View style={styles.center}>
+            <Button.Main
+              title="Thêm nông sản"
+              style={styles.addButton}
+              onPress={() => navigation.navigate('AddProduct', {farmCode})}
+            />
+            <EmptyState message="Chưa có sản phẩm nào" />
+          </View>
         ) : (
           <ProductList products={products} onPress={handleProductPress} />
         )}
