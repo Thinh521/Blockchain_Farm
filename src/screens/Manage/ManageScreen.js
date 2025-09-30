@@ -110,7 +110,7 @@ const ManageScreen = () => {
           },
         ]}>
         <FastImage
-          source={Images.logo_remove}
+          source={Images.logo_text}
           style={styles.logo}
           resizeMode="contain"
         />

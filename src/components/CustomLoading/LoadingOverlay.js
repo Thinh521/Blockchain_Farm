@@ -12,7 +12,7 @@ const LoadingOverlay = () => {
 
   return (
     <>
-      <StatusBar backgroundColor="transparent" barStyle="dark-content" />
+      <StatusBar backgroundColor="transparent" barStyle="dark-content"/>
 
       <View style={styles.overlay}>
         <LottieView

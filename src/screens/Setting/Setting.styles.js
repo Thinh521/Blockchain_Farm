@@ -18,7 +18,7 @@ export default StyleSheet.create({
     padding: scale(16),
     marginBottom: scale(20),
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.border_2,
   },
   profileInfo: {
     flexDirection: 'row',
@@ -63,7 +63,7 @@ export default StyleSheet.create({
     borderRadius: 16,
     marginBottom: scale(20),
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.border_2,
     overflow: 'hidden',
   },
   sectionHeader: {
@@ -157,35 +157,39 @@ export default StyleSheet.create({
     padding: scale(20),
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: Colors.border_2,
   },
-  appIcon: {
-    width: scale(64),
-    height: scale(64),
+  appContainer: {
+    marginBottom: scale(10),
+    padding: scale(10),
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.border,
   },
+  appIcon: {
+    width: scale(40),
+    height: scale(40),
+  },
   appName: {
+    color: Colors.primary,
     fontSize: FontSizes.regular,
-    color: Colors.title,
     fontWeight: FontWeights.semiBold,
-    marginBottom: 4,
+    marginBottom: scale(4),
   },
   appVersion: {
     fontSize: FontSizes.small,
     color: Colors.gray,
-    marginBottom: scale(16),
+    marginBottom: scale(30),
   },
   appLinks: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   appLink: {
-    fontSize: FontSizes.small,
     fontWeight: '500',
+    fontSize: FontSizes.small,
     color: Colors.primary,
   },
   separator: {
