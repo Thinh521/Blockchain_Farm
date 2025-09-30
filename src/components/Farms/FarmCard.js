@@ -84,7 +84,7 @@ const FarmCard = ({farm, favorites, toggleFavorite, isUserFarm}) => {
               style={[styles.actionBtn, {backgroundColor: '#EF4444'}]}
               onPress={() =>
                 navigation.navigate('Categories', {
-                  farmCode: farm.farmCode, 
+                  farmCode: farm.farmCode, userId: farm.userId
                 })
               }>
               <Text style={styles.actionBtnText}>Quản lí</Text>

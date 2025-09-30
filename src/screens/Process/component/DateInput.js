@@ -1,46 +1,65 @@
 import React, {useState} from 'react';
-import {TouchableOpacity, Platform, StyleSheet, View} from 'react-native';
+import {TouchableOpacity, Platform, StyleSheet, View, Text} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {format} from 'date-fns';
-import StyledInput from './StyledInput';
+import {format, parse} from 'date-fns';
+import Input from '../../../components/CustomInput/CustomInput';
 
-const DateInput = ({value, onChange, placeholder}) => {
+const DateInput = ({value, onChange, placeholder, style, error, isError}) => {
   const [showPicker, setShowPicker] = useState(false);
+
+  // Convert value string (dd/MM/yyyy) to Date object
+  const getDateValue = () => {
+    if (!value) return new Date();
+    
+    try {
+      // Nếu value là dd/MM/yyyy, parse nó
+      if (typeof value === 'string' && value.includes('/')) {
+        return parse(value, 'dd/MM/yyyy', new Date());
+      }
+      // Nếu là Date object hoặc ISO string
+      return new Date(value);
+    } catch (error) {
+      console.error('Date parsing error:', error);
+      return new Date();
+    }
+  };
 
   const handleChange = (event, selectedDate) => {
     setShowPicker(false);
-    if (selectedDate) {
-      // Lưu raw theo format dd/MM/yyyy
-      const raw = format(selectedDate, 'dd/MM/yyyy');
-      onChange(raw);
+    if (event.type === 'set' && selectedDate) {
+      // Format thành dd/MM/yyyy
+      const formatted = format(selectedDate, 'dd/MM/yyyy');
+      onChange(formatted);
     }
   };
 
   return (
-    <View>
+    <View style={style}>
       <TouchableOpacity
         style={styles.wrapper}
         onPress={() => setShowPicker(true)}
         activeOpacity={0.8}>
-        <StyledInput
+        <Input
           placeholder={placeholder}
-          value={value || ''} 
+          value={value || ''}
           editable={false}
           pointerEvents="none"
+          error={error}
+          isError={isError}
         />
 
         <Ionicons
           name="calendar-outline"
-          size={22}
-          color="#555"
+          size={20}
+          color="#bebbbbff"
           style={styles.icon}
         />
       </TouchableOpacity>
 
       {showPicker && (
         <DateTimePicker
-          value={value ? new Date(value) : new Date()}
+          value={getDateValue()}
           mode="date"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={handleChange}

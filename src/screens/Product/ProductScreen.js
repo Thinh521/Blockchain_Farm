@@ -16,25 +16,23 @@ import {useRoute, useNavigation} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import QRCode from 'react-native-qrcode-svg';
 import Clipboard from '@react-native-clipboard/clipboard';
-
 import contractArtifact from '../SmartConctract/contractABI.json';
 import TraceabilitySection from './components/TraceabilitySection';
 import {Arrow_Left_Line_Icon, QrTabIcon} from '../../assets/icons';
 import RelatedProducts from './components/RelatedProducts';
 import ProductSkeleton from '../../components/CustomSkeleton/ProductSkeleton';
 import Button from '../../components/CustomButton/CustomButton';
-
 import {formatCurrency} from '../../utils/formatCurrency';
 import api from '../../api/baseApi';
-
 import {Colors} from '../../theme/theme';
 import {scale} from '../../utils/scaling';
 import styles from './ProductScreen.style';
 
+
 const ProductScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const {productCode, farmCode} = route.params || {};
+  const {productCode, farmCode, userId} = route.params || {};
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showQRModal, setShowQRModal] = useState(false);
   const [hashes, setHashes] = useState([]);
@@ -243,6 +241,7 @@ const ProductScreen = () => {
         <TraceabilitySection
           productCode={product.productCode}
           farmCode={farmCode}
+          userId={userId} 
         />
 
         {/* Related */}

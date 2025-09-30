@@ -2,7 +2,6 @@ import React, {useState, useCallback, useEffect} from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
@@ -29,7 +28,7 @@ import ProgressIndicator from './component/ProgressIndicator';
 import {storage} from '../../utils/storage/storage';
 import {getUser} from '../../utils/storage/authStorage';
 
-const ProcessScreen = ({route, navigation}) => {
+const ProcessScreen = ({route}) => {
   const {isConnected} = useAppKitAccount();
   const {walletProvider} = useAppKitProvider();
   const {productCode} = route.params || {};
@@ -40,13 +39,17 @@ const ProcessScreen = ({route, navigation}) => {
   const [isCompleted, setIsCompleted] = useState(false);
   const STEP_KEY = `process_step_${productCode}`;
 
+
   useEffect(() => {
     const savedStep = storage.getString(STEP_KEY);
     if (savedStep) {
       if (savedStep === 'completed') {
         setIsCompleted(true);
       } else {
-        setCurrentStep(parseInt(savedStep, 10));
+        const stepNumber = Number(savedStep);
+        if (!isNaN(stepNumber)) {
+          setCurrentStep(stepNumber);
+        }
       }
     }
   }, [productCode]);
@@ -60,52 +63,6 @@ const ProcessScreen = ({route, navigation}) => {
   };
 
   const accessToken = getUser().accessToken;
-
-  // State cho các form
-  const [farmingProcess, setFarmingProcess] = useState({
-    productCode,
-    nameProcess: '',
-    source: '',
-    plantingDate: '',
-    sowingDate: '',
-  });
-
-  const [medicine, setMedicine] = useState({
-    productCode,
-    nameMedicine: '',
-    quantityMedicine: '',
-    medicineDate: '',
-    medicineType: '',
-    applicationMethod: '',
-  });
-
-  const [fertilizer, setFertilizer] = useState({
-    productCode,
-    nameFertilizer: '',
-    quantityFertilizer: '',
-    fertilizerDate: '',
-    fertilizerType: '',
-    applicationMethod: '',
-    expectedEffect: '',
-  });
-
-  const [harvest, setHarvest] = useState({
-    productCode,
-    harvestDate: '',
-    estimatedQuantity: '',
-    actualQuantity: '',
-    quality: '',
-    harvestMethod: '',
-  });
-
-  const [distribution, setDistribution] = useState({
-    productCode,
-    distributorName: '',
-    distributorPartner: '',
-    distributionDate: '',
-    transportMethod: '',
-    storageConditions: '',
-  });
 
   // Gửi mã hash về backend
   const sendToBackend = async (txHash, currentStep) => {
@@ -136,13 +93,6 @@ const ProcessScreen = ({route, navigation}) => {
     }
   };
 
-  // Kiểm tra form hợp lệ
-  const isFormValid = useCallback(formData => {
-    return Object.entries(formData)
-      .filter(([key]) => key !== 'productCode')
-      .every(([, value]) => value.trim() !== '');
-  }, []);
-
   // Lấy contract instance
   const getContract = useCallback(async () => {
     if (!isConnected || !walletProvider) {
@@ -155,87 +105,62 @@ const ProcessScreen = ({route, navigation}) => {
   }, [isConnected, walletProvider]);
 
   // Xử lý blockchain transaction cho từng step
-  const executeBlockchainTransaction = async (contract, currentStep) => {
+  const executeBlockchainTransaction = async (contract, currentStep, formData) => {
     let tx;
 
     switch (currentStep) {
       case 1:
-        if (!isFormValid(farmingProcess)) {
-          throw new Error(
-            'Vui lòng điền đầy đủ thông tin cho quy trình trồng trọt!',
-          );
-        }
         tx = await contract.addFarmingProcess(
-          farmingProcess.productCode,
-          farmingProcess.nameProcess,
-          farmingProcess.source,
-          farmingProcess.plantingDate,
-          farmingProcess.sowingDate,
+          productCode,
+          formData.nameProcess,
+          formData.source,
+          formData.plantingDate,
+          formData.sowingDate,
         );
         break;
 
       case 2:
-        if (!isFormValid(medicine)) {
-          throw new Error(
-            'Vui lòng điền đầy đủ thông tin cho quy trình thuốc!',
-          );
-        }
         tx = await contract.addMedicine(
-          medicine.productCode,
-          medicine.nameMedicine,
-          medicine.quantityMedicine,
-          medicine.medicineDate,
-          medicine.medicineType,
-          medicine.applicationMethod,
+          productCode,
+          formData.nameMedicine,
+          formData.quantityMedicine,
+          formData.medicineDate,
+          formData.medicineType,
+          formData.applicationMethod,
         );
         break;
 
       case 3:
-        if (!isFormValid(fertilizer)) {
-          throw new Error(
-            'Vui lòng điền đầy đủ thông tin cho quy trình phân bón!',
-          );
-        }
         tx = await contract.addFertilizer(
-          fertilizer.productCode,
-          fertilizer.nameFertilizer,
-          fertilizer.quantityFertilizer,
-          fertilizer.fertilizerDate,
-          fertilizer.fertilizerType,
-          fertilizer.applicationMethod,
-          fertilizer.expectedEffect,
+          productCode,
+          formData.nameFertilizer,
+          formData.quantityFertilizer,
+          formData.fertilizerDate,
+          formData.fertilizerType,
+          formData.applicationMethod,
+          formData.expectedEffect,
         );
         break;
 
       case 4:
-        if (!isFormValid(harvest)) {
-          throw new Error(
-            'Vui lòng điền đầy đủ thông tin cho quy trình thu hoạch!',
-          );
-        }
         tx = await contract.addHarvest(
-          harvest.productCode,
-          harvest.harvestDate,
-          harvest.estimatedQuantity,
-          harvest.actualQuantity,
-          harvest.quality,
-          harvest.harvestMethod,
+          productCode,
+          formData.harvestDate,
+          formData.estimatedQuantity,
+          formData.actualQuantity,
+          formData.quality,
+          formData.harvestMethod,
         );
         break;
 
       case 5:
-        if (!isFormValid(distribution)) {
-          throw new Error(
-            'Vui lòng điền đầy đủ thông tin cho quy trình phân phối!',
-          );
-        }
         tx = await contract.addDistribution(
-          distribution.productCode,
-          distribution.distributorName,
-          distribution.distributorPartner,
-          distribution.distributionDate,
-          distribution.transportMethod,
-          distribution.storageConditions,
+          productCode,
+          formData.distributorName,
+          formData.distributorPartner,
+          formData.distributionDate,
+          formData.transportMethod,
+          formData.storageConditions,
         );
         break;
 
@@ -246,9 +171,8 @@ const ProcessScreen = ({route, navigation}) => {
     return tx;
   };
 
-  // Xử lý submit
-  const handleSubmit = async () => {
-    console.log('🔽 Bắt đầu submit form cho step:', currentStep);
+  // Xử lý submit từ form
+  const handleFormSubmit = async (formData) => {
 
     if (!productCode) {
       showMessage({
@@ -275,14 +199,14 @@ const ProcessScreen = ({route, navigation}) => {
       // Lấy contract instance
       const contract = await getContract();
 
-      // Thực hiện transaction
-      const tx = await executeBlockchainTransaction(contract, currentStep);
+      // Thực hiện transaction với dữ liệu từ form
+      const tx = await executeBlockchainTransaction(contract, currentStep, formData);
 
       // Đợi transaction được confirm
       await tx.wait();
       const txHash = tx.hash;
       setTxHash(txHash);
-      console.log('🔗 Transaction Hash:', txHash); // 👈 Log đầy đủ hash
+      console.log('🔗 Transaction Hash:', txHash);
 
       // Gửi hash về backend
       await sendToBackend(txHash, currentStep);
@@ -291,7 +215,7 @@ const ProcessScreen = ({route, navigation}) => {
       if (currentStep < 5) {
         const nextStep = currentStep + 1;
         setCurrentStep(nextStep);
-        storage.set(STEP_KEY, nextStep);
+        storage.set(STEP_KEY, String(nextStep));
         setTxHash(null);
       } else {
         storage.set(STEP_KEY, 'completed');
@@ -301,9 +225,6 @@ const ProcessScreen = ({route, navigation}) => {
           description: 'Tất cả quy trình đã được thêm thành công!',
           type: 'success',
           duration: 2000,
-          onHide: () => {
-            navigation.navigate('NoBottomTab', {screen: 'MyFarms'});
-          },
         });
       }
     } catch (error) {
@@ -346,32 +267,23 @@ const ProcessScreen = ({route, navigation}) => {
         </View>
 
         {currentStep === 1 && (
-          <PlantingProcessForm
-            farmingProcess={farmingProcess}
-            setFarmingProcess={setFarmingProcess}
-          />
+          <PlantingProcessForm onSubmit={handleFormSubmit} />
         )}
 
         {currentStep === 2 && (
-          <SprayingProcessForm medicine={medicine} setMedicine={setMedicine} />
+          <SprayingProcessForm onSubmit={handleFormSubmit} />
         )}
 
         {currentStep === 3 && (
-          <FertilizingProcessForm
-            fertilizer={fertilizer}
-            setFertilizer={setFertilizer}
-          />
+          <FertilizingProcessForm onSubmit={handleFormSubmit} />
         )}
 
         {currentStep === 4 && (
-          <HarvestingProcessForm harvest={harvest} setHarvest={setHarvest} />
+          <HarvestingProcessForm onSubmit={handleFormSubmit} />
         )}
 
         {currentStep === 5 && (
-          <TransportationProcessForm
-            distribution={distribution}
-            setDistribution={setDistribution}
-          />
+          <TransportationProcessForm onSubmit={handleFormSubmit} />
         )}
       </View>
     );
@@ -412,19 +324,6 @@ const ProcessScreen = ({route, navigation}) => {
                 </Text>
               </View>
             )}
-
-            {/* Submit Button */}
-            <TouchableOpacity
-              style={[
-                styles.submitButton,
-                isLoading && styles.submitButtonDisabled,
-              ]}
-              onPress={handleSubmit}
-              disabled={isLoading}>
-              <Text style={styles.submitButtonText}>
-                {currentStep === 5 ? 'Hoàn thành' : 'Tiếp tục'}
-              </Text>
-            </TouchableOpacity>
           </>
         )}
 

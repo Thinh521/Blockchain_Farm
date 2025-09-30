@@ -6,14 +6,13 @@ import {
   useAppKitProvider,
 } from '@reown/appkit-ethers-react-native';
 import {CONTRACT_ADDRESS} from '@env';
-
 import contractArtifact from '../SmartConctract/contractABI.json';
 import FormWizard from '../../components/FormWizard/FormWizard';
 import Header from '../../components/Header/Header';
-
 import api from '../../api/baseApi';
 import {useUser} from '../../hooks/useUser';
 import {storage} from '../../utils/storage/storage';
+
 
 const RegisterManage = ({navigation, route}) => {
   const {isConnected} = useAppKitAccount();
@@ -71,19 +70,20 @@ const RegisterManage = ({navigation, route}) => {
     }));
   };
 
-  const handleImageSelect = (field, imageData, type) => {
-    if (type === 'single') {
-      setFormData(prev => ({
-        ...prev,
-        [field]: imageData,
-      }));
-    } else if (type === 'multiple') {
-      setFormData(prev => ({
-        ...prev,
-        [field]: [...prev[field], imageData],
-      }));
-    }
-  };
+const handleImageSelect = (field, imageData, type) => {
+  if (type === 'single') {
+    setFormData(prev => ({
+      ...prev,
+      [field]: imageData,
+    }));
+  } else if (type === 'multiple') {
+    setFormData(prev => ({
+      ...prev,
+      [field]: [...(prev[field] || []), ...imageData], // thêm ...imageData
+    }));
+  }
+};
+
 
   const handleImageRemove = (field, index = null) => {
     if (index === null) {
