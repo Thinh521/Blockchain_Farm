@@ -168,7 +168,6 @@ const NewsCard = ({
                       setShowMenu(false);
                       onEdit?.(item);
                     }}>
-                    
                     <View style={styles.menubox}>
                       <Ionicons name="create-outline" size={20} color="#000" />
                       <Text style={styles.menuText}>Chỉnh sửa</Text>
@@ -390,6 +389,8 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.small,
     color: Colors.gray,
     lineHeight: scale(18),
+    textAlign: 'justify',
+    marginBottom: scale(12),
   },
   menuContainer: {
     position: 'absolute',

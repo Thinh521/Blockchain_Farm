@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Text,
   View,
@@ -9,7 +9,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import {ethers} from 'ethers';
-import {CONTRACT_ADDRESS} from '@env';
+import {CONTRACT_ADDRESS, RPC_URL} from '@env';
 import {useAppKitAccount} from '@reown/appkit-ethers-react-native';
 import * as ImagePicker from 'react-native-image-picker';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -17,6 +17,7 @@ import {showMessage} from 'react-native-flash-message';
 import {useNavigation, useRoute} from '@react-navigation/core';
 import {Controller, useForm} from 'react-hook-form';
 import FastImage from 'react-native-fast-image';
+import {useQuery} from '@tanstack/react-query';
 
 import Input from '../../components/CustomInput/CustomInput';
 import Button from '../../components/CustomButton/CustomButton';
@@ -32,13 +33,32 @@ import {Colors} from '../../theme/theme';
 import {scale} from '../../utils/scaling';
 import styles from './AddNews.styles';
 
+const fetchFarmsByUserId = async (userId, isConnected) => {
+  if (!isConnected || !userId) {
+    throw new Error('Chưa có userId hoặc chưa kết nối ví');
+  }
+
+  const rpcProvider = new ethers.JsonRpcProvider(RPC_URL);
+  const contractRead = new ethers.Contract(
+    CONTRACT_ADDRESS,
+    contractArtifact.abi,
+    rpcProvider,
+  );
+
+  const farmsData = await contractRead.getFarmByUserId(userId);
+
+  return farmsData.map(farm => ({
+    farmCode: farm.farmCode || farm[0],
+    nameFarm: farm.nameFarm || farm[2],
+  }));
+};
+
 const AddNewsScreen = () => {
   const navigation = useNavigation();
   const {mode, news} = useRoute().params || {};
   const {isConnected} = useAppKitAccount();
   const {loading, setLoading} = useAppLoading();
 
-  const [farms, setFarms] = useState([]);
   const [selectedFarm, setSelectedFarm] = useState(null);
   const [images, setImages] = useState([]);
   const [oldImages, setOldImages] = useState([]);
@@ -46,6 +66,17 @@ const AddNewsScreen = () => {
 
   const userId = getUser()?.userId;
   const accessToken = getUser()?.accessToken;
+
+  const {
+    data: farms = [],
+    isLoading: isFarmsLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ['farms', userId],
+    queryFn: () => fetchFarmsByUserId(userId, isConnected),
+    enabled: !!userId && isConnected,
+  });
 
   const {
     control,
@@ -102,49 +133,10 @@ const AddNewsScreen = () => {
     }
   };
 
-  // Lấy danh sách nông trại từ Smart Contract
-  const getAllFarmsUserID = useCallback(async () => {
-    if (!isConnected || !userId) {
-      console.log('Chưa có userId hoặc chưa connect ví');
-      return;
-    }
-
-    try {
-      const rpcProvider = new ethers.JsonRpcProvider(
-        'https://rpc.zeroscan.org',
-      );
-      const contractRead = new ethers.Contract(
-        CONTRACT_ADDRESS,
-        contractArtifact.abi,
-        rpcProvider,
-      );
-
-      const farmsData = await contractRead.getFarmByUserId(userId);
-
-      const formattedFarms = farmsData.map(farm => ({
-        farmCode: farm.farmCode || farm[0],
-        nameFarm: farm.nameFarm || farm[2],
-      }));
-
-      setFarms(formattedFarms);
-    } catch (error) {
-      console.log('Lỗi getAllFarmsUserID:', error);
-      setFarms([]);
-    }
-  }, [isConnected, userId]);
-
-  useEffect(() => {
-    if (isConnected) {
-      getAllFarmsUserID();
-    }
-  }, [isConnected, getAllFarmsUserID]);
-
   // Submit tạo mới
   const handleCreate = async data => {
     const accessToken = getUser()?.accessToken;
     const formData = new FormData();
-
-    console.log('formData', formData);
 
     formData.append('farmCode', selectedFarm.farmCode);
     formData.append('title', data.title);
