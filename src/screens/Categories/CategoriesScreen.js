@@ -102,7 +102,7 @@ const CategoriesScreen = ({navigation, route}) => {
               <SkeletonPlaceholder.Item width={160} height={40} />
             </SkeletonPlaceholder>
           </View>
-        ) : products.length > 0 ? (
+        ) : products.length >= 0 ? (
           <View style={{alignItems: 'flex-end', marginBottom: scale(20)}}>
             <Button.Main
               title="Thêm nông sản"
