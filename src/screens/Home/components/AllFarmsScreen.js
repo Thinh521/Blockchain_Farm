@@ -32,7 +32,7 @@ const AllFarmsScreen = ({route}) => {
       {isLoading ? (
         <FarmCardSkeleton count={4} />
       ) : (
-        <View>
+        <View style={{flex: 1}}>
           <FarmList farms={farms} favorites={favorites} />
         </View>
       )}

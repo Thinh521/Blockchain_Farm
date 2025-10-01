@@ -2,121 +2,43 @@ import React, {useState, useRef, useEffect} from 'react';
 import {
   View,
   Text,
-  ScrollView,
   TouchableOpacity,
-  Image,
   StatusBar,
   SafeAreaView,
   Animated,
-  Modal,
   Linking,
   FlatList,
 } from 'react-native';
-import styles from './FarmDetail.styles';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import {Arrow_Left_Line_Icon} from '../../assets/icons';
+import {ethers} from 'ethers';
 import {useRoute} from '@react-navigation/core';
-import Button from '../../components/CustomButton/CustomButton';
 import FastImage from 'react-native-fast-image';
+import {CONTRACT_ADDRESS, RPC_URL} from '@env';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
+import Button from '../../components/CustomButton/CustomButton';
 import FarmSlider from '../../components/Farms/FarmSlider';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
 import ImageCarousel from './components/ImageCarousel';
 import Tabs from './components/Tabs';
 import BottomActionBar from './components/BottomActionBar';
-import {useFarms} from '../../hooks/useFarms';
-import {CONTRACT_ADDRESS} from '@env';
-import contractArtifact from '../SmartConctract/contractABI.json';
-import {ethers} from 'ethers';
 import NewsSlider from '../../components/News/NewsSlider';
-import {useNews} from '../../hooks/useNews';
-import {scale} from '../../utils/scaling';
-import NewsCardSkeleton from '../../components/CustomSkeleton/NewsCardSkeleton';
 import ImageViewerModal from '../../components/ImageViewerModal/ImageViewerModal';
+import NewsCardSkeleton from '../../components/CustomSkeleton/NewsCardSkeleton';
+import contractArtifact from '../SmartConctract/contractABI.json';
+import {Arrow_Left_Line_Icon} from '../../assets/icons';
+
 import {getProductsByFarm} from '../../api/productApi';
 import {useWishlist} from '../../hooks/useWishlist';
+import {useFarms} from '../../hooks/useFarms';
+import {useNews} from '../../hooks/useNews';
 
-const farmData = {
-  farmCode: 'F001',
-  fullname: 'Nguyễn Văn An',
-  nameFarm: 'Trang trại rau sạch An Phước',
-  userId: 'user001',
-  email: 'anvn@email.com',
-  phone: '0123456789',
-  description:
-    'Chuyên trồng rau xanh organic, không sử dụng thuốc trừ sâu, cam kết chất lượng tốt nhất cho sức khỏe. Trang trại được thành lập từ năm 2015 với diện tích 5.2 hecta, áp dụng công nghệ hiện đại trong canh tác và tuân thủ nghiêm ngặt các tiêu chuẩn organic quốc tế.',
-  location: 'Đà Lạt, Lâm Đồng',
-  area: '5.2',
-  images: [
-    'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=400',
-    'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400',
-    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400',
-    'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400',
-  ],
-  rating: 4.8,
-  reviews: 156,
-  established: '2015',
-  certifications: ['VietGAP', 'Organic', 'ISO 22000'],
-  products: [
-    {
-      name: 'Rau cải xanh',
-      price: '25,000',
-      unit: 'kg',
-      image:
-        'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=300',
-    },
-    {
-      name: 'Rau muống',
-      price: '15,000',
-      unit: 'kg',
-      image:
-        'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=300',
-    },
-    {
-      name: 'Cà chua cherry',
-      price: '45,000',
-      unit: 'kg',
-      image:
-        'https://images.unsplash.com/photo-1592841200221-a6898f307baa?w=300',
-    },
-    {
-      name: 'Rau xà lách',
-      price: '30,000',
-      unit: 'kg',
-      image:
-        'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=300',
-    },
-  ],
-  facilities: [
-    {
-      icon: 'water-outline',
-      name: 'Hệ thống tưới nhỏ giọt',
-      description: 'Tiết kiệm nước 40%',
-    },
-    {
-      icon: 'leaf-outline',
-      name: 'Nhà kính hiện đại',
-      description: 'Kiểm soát môi trường tốt nhất',
-    },
-    {
-      icon: 'shield-checkmark-outline',
-      name: 'Chứng nhận Organic',
-      description: 'Đạt chuẩn quốc tế',
-    },
-    {
-      icon: 'analytics-outline',
-      name: 'IoT Monitoring',
-      description: 'Giám sát 24/7',
-    },
-  ],
-  openHours: '6:00 - 18:00 (Thứ 2 - Chủ nhật)',
-  visitPrice: '50,000 VNĐ/người',
-};
+import {scale} from '../../utils/scaling';
+import styles from './FarmDetail.styles';
 
 const FarmDetailScreen = ({navigation}) => {
   const {farm, isFavorite: initialFavorite} = useRoute().params;
   const [favorite, setFavorite] = useState(initialFavorite);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [showImageModal, setShowImageModal] = useState(false);
   const {favorites, fetchWishlist, toggleFavorite} = useWishlist();
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
@@ -155,9 +77,7 @@ const FarmDetailScreen = ({navigation}) => {
         const apiProducts = await getProductsByFarm(farm.farmCode);
 
         // 🔹 2. Lấy từ smart contract
-        const rpcProvider = new ethers.JsonRpcProvider(
-          'https://rpc.zeroscan.org',
-        );
+        const rpcProvider = new ethers.JsonRpcProvider(RPC_URL);
         const contractRead = new ethers.Contract(
           CONTRACT_ADDRESS,
           contractArtifact.abi,
@@ -217,7 +137,7 @@ const FarmDetailScreen = ({navigation}) => {
 
     try {
       await toggleFavorite(farmCode);
-      setFavorite(prev => !prev); // vẫn giữ UI local cho farm chính
+      setFavorite(prev => !prev);
     } catch (err) {
       console.log('Lỗi toggle favorite:', err);
     } finally {
@@ -225,11 +145,11 @@ const FarmDetailScreen = ({navigation}) => {
     }
   };
   const handleCall = () => {
-    Linking.openURL(`tel:${farmData.phone}`);
+    Linking.openURL(`tel:${farm?.phone}`);
   };
 
   const handleEmail = () => {
-    Linking.openURL(`mailto:${farmData.email}`);
+    Linking.openURL(`mailto:${farm?.email}`);
   };
 
   const contactItems = [
@@ -260,7 +180,7 @@ const FarmDetailScreen = ({navigation}) => {
       id: 4,
       icon: 'location',
       label: 'Địa chỉ',
-      value: farmData.location,
+      value: farm?.location || 'Đà Lạt, Lâm Đồng',
       onPress: null,
     },
   ];
@@ -294,22 +214,20 @@ const FarmDetailScreen = ({navigation}) => {
           <View style={styles.infoItem}>
             <Ionicons name="calendar-outline" size={16} color="#6B7280" />
             <Text style={styles.infoLabel}>Thành lập</Text>
-            <Text style={styles.infoValue}>
-              {farmData.established || '2015'}
-            </Text>
+            <Text style={styles.infoValue}>{farm?.established || '2015'}</Text>
           </View>
           <View style={styles.infoItem}>
             <Ionicons name="time-outline" size={16} color="#6B7280" />
             <Text style={styles.infoLabel}>Giờ mở cửa</Text>
             <Text style={styles.infoValue}>
-              {farmData.openHours || '6:00 - 18:00 (Thứ 2 - Chủ nhật)'}
+              {farm?.openHours || '6:00 - 18:00 (Thứ 2 - Chủ nhật)'}
             </Text>
           </View>
           <View style={styles.infoItem}>
             <Ionicons name="cash-outline" size={16} color="#6B7280" />
             <Text style={styles.infoLabel}>Phí tham quan</Text>
             <Text style={styles.infoValue}>
-              {farmData.visitPrice || '50,000 VNĐ/người'}
+              {farm?.visitPrice || '50,000 VNĐ/người'}
             </Text>
           </View>
         </View>
@@ -322,35 +240,21 @@ const FarmDetailScreen = ({navigation}) => {
         </View>
 
         <View style={styles.certificationsContainer}>
-          {farmData.certifications.map((cert, index) => (
-            <View key={index} style={styles.certificationBadge}>
-              <Ionicons name="checkmark-circle" size={16} color="#10B981" />
-              <Text style={styles.certificationText}>{cert}</Text>
+          {farm?.certifications?.length > 0 ? (
+            farm.certifications.map((cert, index) => (
+              <View key={index} style={styles.certificationBadge}>
+                <Ionicons name="checkmark-circle" size={16} color="#10B981" />
+                <Text style={styles.certificationText}>{cert}</Text>
+              </View>
+            ))
+          ) : (
+            <View style={styles.certificationBadge}>
+              <Ionicons name="close-circle" size={16} color="#EF4444" />
+              <Text style={styles.certificationText}>Chưa có chứng nhận</Text>
             </View>
-          ))}
+          )}
         </View>
       </View>
-
-      {/* <View style={styles.infoCard}>
-        <View style={styles.cardHeader}>
-          <Ionicons name="construct" size={24} color="#059669" />
-          <Text style={styles.cardTitle}>Cơ sở vật chất</Text>
-        </View>
-
-        {farmData.facilities.map((facility, index) => (
-          <View key={index} style={styles.facilityItem}>
-            <View style={styles.facilityIcon}>
-              <Ionicons name={facility.icon} size={20} color="#059669" />
-            </View>
-            <View style={styles.facilityInfo}>
-              <Text style={styles.facilityName}>{facility.name}</Text>
-              <Text style={styles.facilityDescription}>
-                {facility.description}
-              </Text>
-            </View>
-          </View>
-        ))}
-      </View> */}
     </View>
   );
 
