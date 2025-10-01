@@ -452,9 +452,9 @@ export default StyleSheet.create({
     paddingVertical: 40,
   },
   emptyTitle: {
-    fontSize: 18,
+    fontSize: FontSizes.regular,
     fontWeight: FontWeights.semiBold,
-    color: '#374151',
+    color: Colors.gray,
     marginBottom: 8,
     textAlign: 'center',
   },

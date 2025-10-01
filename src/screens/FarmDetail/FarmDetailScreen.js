@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from 'react';
+import React, {useState, useRef, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -7,12 +7,8 @@ import {
   SafeAreaView,
   Animated,
   Linking,
-  FlatList,
 } from 'react-native';
-import {ethers} from 'ethers';
 import {useRoute} from '@react-navigation/core';
-import FastImage from 'react-native-fast-image';
-import {CONTRACT_ADDRESS, RPC_URL} from '@env';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import Button from '../../components/CustomButton/CustomButton';
@@ -24,13 +20,15 @@ import BottomActionBar from './components/BottomActionBar';
 import NewsSlider from '../../components/News/NewsSlider';
 import ImageViewerModal from '../../components/ImageViewerModal/ImageViewerModal';
 import NewsCardSkeleton from '../../components/CustomSkeleton/NewsCardSkeleton';
-import contractArtifact from '../SmartConctract/contractABI.json';
+import ProductCardSkeleton from '../../components/CustomSkeleton/ProductCardSkeleton';
+import ProductSlider from '../../components/Product/ProductSlider';
+import EmptyState from '../../components/EmptyState/EmptyState';
 import {Arrow_Left_Line_Icon} from '../../assets/icons';
 
-import {getProductsByFarm} from '../../api/productApi';
 import {useWishlist} from '../../hooks/useWishlist';
 import {useFarms} from '../../hooks/useFarms';
 import {useNews} from '../../hooks/useNews';
+import {useFarmProducts} from '../../hooks/useFarmProducts';
 
 import {scale} from '../../utils/scaling';
 import styles from './FarmDetail.styles';
@@ -42,16 +40,27 @@ const FarmDetailScreen = ({navigation}) => {
   const {favorites, fetchWishlist, toggleFavorite} = useWishlist();
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
-  const [products, setProducts] = useState([]);
-  const [loadingProducts, setLoadingProducts] = useState(true);
   const [farmImageViewerVisible, setFarmImageViewerVisible] = useState(false);
   const [farmImageIndex, setFarmImageIndex] = useState(0);
 
   const scrollY = useRef(new Animated.Value(0)).current;
 
-  const {farms, isLoading: farmsLoading, error, refetch} = useFarms();
+  const {
+    farms,
+    isLoading: isLoadingFarms,
+    error: errorFarms,
+    refetch: refetchFarms,
+  } = useFarms();
 
   const farmCode = farm?.farmCode;
+  const farmUserId = farm?.userId;
+
+  const {
+    data: products = [],
+    isLoading: isLoadingProducts,
+    error: productError,
+    refetch: refetchProducts,
+  } = useFarmProducts(farmCode);
 
   const {
     news,
@@ -66,70 +75,8 @@ const FarmDetailScreen = ({navigation}) => {
   } = useNews({farmCode});
 
   useEffect(() => {
-    let isMounted = true;
     fetchWishlist();
-
-    const fetchProducts = async () => {
-      try {
-        setLoadingProducts(true);
-
-        // 🔹 1. Lấy từ API backend
-        const apiProducts = await getProductsByFarm(farm.farmCode);
-
-        // 🔹 2. Lấy từ smart contract
-        const rpcProvider = new ethers.JsonRpcProvider(RPC_URL);
-        const contractRead = new ethers.Contract(
-          CONTRACT_ADDRESS,
-          contractArtifact.abi,
-          rpcProvider,
-        );
-
-        const scProducts = await contractRead.getProductByFarmCode(
-          farm.farmCode,
-        );
-
-        const formattedSC = scProducts.map(product => {
-          const images =
-            typeof product.image === 'string'
-              ? product.image
-                  .split(/[,|]/)
-                  .map(url => url.trim())
-                  .filter(Boolean)
-              : [];
-
-          return {
-            farmCode: product.farmCode,
-            productCode: product.productCode,
-            categoryName: product.categoryName,
-            name: product.name,
-            quantity: product.quantity,
-            price: product.price,
-            area: product.area,
-            image: images,
-            description: product.description,
-          };
-        });
-
-        // 🔹 3. So khớp: chỉ giữ những product tồn tại ở cả API & SC
-        const matchedProducts = formattedSC.filter(scProd =>
-          apiProducts.some(
-            apiProd => apiProd.productCode === scProd.productCode,
-          ),
-        );
-
-        if (isMounted) setProducts(matchedProducts);
-      } catch (err) {
-        console.error(' Error fetchProducts:', err);
-      } finally {
-        if (isMounted) setLoadingProducts(false);
-      }
-    };
-
-    fetchProducts();
-    return () => {
-      isMounted = false;
-    };
-  }, [farm.farmCode, fetchWishlist]);
+  }, [fetchWishlist]);
 
   const handleToggleFavorite = async farmCode => {
     if (loading) return;
@@ -144,6 +91,18 @@ const FarmDetailScreen = ({navigation}) => {
       setLoading(false);
     }
   };
+
+  const handleProductPress = useCallback(
+    products => {
+      navigation.navigate('Product', {
+        productCode: products.productCode,
+        farmCode: farmCode,
+        userId: farmUserId,
+      });
+    },
+    [navigation, farmCode, farmUserId],
+  );
+
   const handleCall = () => {
     Linking.openURL(`tel:${farm?.phone}`);
   };
@@ -259,83 +218,37 @@ const FarmDetailScreen = ({navigation}) => {
   );
 
   const renderProductsTab = () => (
-    <View style={styles.tabContent}>
-      <View style={styles.infoCard}>
-        <View style={styles.cardHeader}>
+    <View style={[styles.tabContent, {marginBottom: scale(20)}]}>
+      <View>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            marginBottom: scale(16),
+          }}>
           <Ionicons name="basket" size={20} color="#059669" />
           <Text style={styles.cardTitle}>Sản phẩm nổi bật</Text>
         </View>
 
-        {loadingProducts ? (
-          <Text style={{textAlign: 'center', margin: 10}}>
-            Đang tải sản phẩm...
-          </Text>
-        ) : products.length === 0 ? (
-          <Text style={{textAlign: 'center', marginTop: 10}}>
-            Chưa có nông sản nào.
-          </Text>
-        ) : products.length > 4 ? (
-          <FlatList
-            data={products}
-            keyExtractor={(item, index) => String(item.productCode || index)}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{paddingHorizontal: 8}}
-            renderItem={({item}) => (
-              <TouchableOpacity
-                style={[styles.productCard, {width: 160, marginRight: 12}]}
-                onPress={() =>
-                  navigation.navigate('Product', {
-                    productCode: item.productCode,
-                  })
-                }>
-                <FastImage
-                  source={{
-                    uri:
-                      item.image?.[0] ||
-                      'https://via.placeholder.com/300x200.png?text=No+Image',
-                  }}
-                  style={styles.productImage}
-                />
-                <View style={styles.productInfo}>
-                  <Text style={styles.productName} numberOfLines={1}>
-                    {item.name}
-                  </Text>
-                  <Text style={styles.productPrice}>{item.price} VNĐ</Text>
-                </View>
-              </TouchableOpacity>
-            )}
-          />
-        ) : (
-          // 🔹 Nếu ≤ 4 thì giữ grid như cũ
-          <View style={styles.productsGrid}>
-            {products.map((product, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.productCard}
-                onPress={() =>
-                  navigation.navigate('Product', {
-                    productCode: product.productCode,
-                  })
-                }>
-                <FastImage
-                  source={{
-                    uri:
-                      product.image?.[0] ||
-                      'https://via.placeholder.com/300x200.png?text=No+Image',
-                  }}
-                  style={styles.productImage}
-                />
-                <View style={styles.productInfo}>
-                  <Text style={styles.productName} numberOfLines={1}>
-                    {product.name}
-                  </Text>
-                  <Text style={styles.productPrice}>{product.price} VNĐ</Text>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
+        <View>
+          {isLoadingProducts ? (
+            <ProductCardSkeleton count={2} />
+          ) : productError ? (
+            <EmptyState
+              message={'Có lỗi khi tải sản phẩm'}
+              fullScreen
+              style={{minHeight: scale(150)}}
+              showRetry
+              onRetry={refetchProducts}
+            />
+          ) : products.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyTitle}>Chưa có nông sản nào</Text>
+            </View>
+          ) : (
+            <ProductSlider products={products} onPress={handleProductPress} />
+          )}
+        </View>
       </View>
     </View>
   );
@@ -454,7 +367,9 @@ const FarmDetailScreen = ({navigation}) => {
                   <Ionicons name="location-outline" size={16} color="#EF4444" />
                   <Text style={styles.locationText}>{farm.location}</Text>
                 </View>
-                <Text style={styles.description}>{farm.description}</Text>
+                <Text style={styles.description}>
+                  {farm.description || 'Không có thông tin'}
+                </Text>
               </View>
 
               <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -529,8 +444,16 @@ const FarmDetailScreen = ({navigation}) => {
                 </TouchableOpacity>
               </View>
 
-              {farmsLoading ? (
+              {isLoadingFarms ? (
                 <FarmCardSkeleton count={2} />
+              ) : errorFarms ? (
+                <EmptyState
+                  message={'Có lỗi khi tải nông trại'}
+                  fullScreen
+                  style={{minHeight: scale(150)}}
+                  showRetry
+                  onRetry={refetchFarms}
+                />
               ) : farms.length === 0 ? (
                 <View style={styles.emptyContainer}>
                   <Text style={styles.emptyTitle}>

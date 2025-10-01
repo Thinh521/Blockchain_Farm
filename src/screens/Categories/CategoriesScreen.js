@@ -29,7 +29,6 @@ const fetchProducts = async farmCode => {
   );
 
   const productsData = await contractRead.getProductByFarmCode(farmCode);
-  console.log('Products from SC:', productsData);
 
   const formattedProducts = productsData.map(product => {
     const images =
