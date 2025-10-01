@@ -16,18 +16,20 @@ import {useRoute, useNavigation} from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
 import QRCode from 'react-native-qrcode-svg';
 import Clipboard from '@react-native-clipboard/clipboard';
+
+import {Arrow_Left_Line_Icon, QrTabIcon} from '../../assets/icons';
 import contractArtifact from '../SmartConctract/contractABI.json';
 import TraceabilitySection from './components/TraceabilitySection';
-import {Arrow_Left_Line_Icon, QrTabIcon} from '../../assets/icons';
-import RelatedProducts from './components/RelatedProducts';
 import ProductSkeleton from '../../components/CustomSkeleton/ProductSkeleton';
+import RelatedProducts from './components/RelatedProducts';
 import Button from '../../components/CustomButton/CustomButton';
+
 import {formatCurrency} from '../../utils/formatCurrency';
 import api from '../../api/baseApi';
+
 import {Colors} from '../../theme/theme';
 import {scale} from '../../utils/scaling';
 import styles from './ProductScreen.style';
-
 
 const ProductScreen = () => {
   const route = useRoute();
@@ -77,7 +79,7 @@ const ProductScreen = () => {
     queryKey: ['product', productCode],
     queryFn: fetchProduct,
     enabled: !!productCode,
-  })
+  });
 
   // 🔹 fetch hashes riêng (API)
   React.useEffect(() => {
@@ -241,7 +243,7 @@ const ProductScreen = () => {
         <TraceabilitySection
           productCode={product.productCode}
           farmCode={farmCode}
-          userId={userId} 
+          userId={userId}
         />
 
         {/* Related */}
