@@ -148,6 +148,47 @@ const styles = StyleSheet.create({
     borderTopWidth: scale(1),
     borderTopColor: '#E0E0E0',
   },
+  dropdownButton: {
+    position: 'relative',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: scale(8),
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(16),
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+  },
+  dropdownList: {
+    position: 'absolute',
+    width: '100%',
+    left: 0,
+    top: scale(72),
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: scale(8),
+    marginTop: scale(2),
+    backgroundColor: Colors.white,
+    overflow: 'hidden',
+    zIndex: 1,
+  },
+  optionItem: {
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(20),
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  optionItemSelected: {
+    backgroundColor: Colors.primary + '20',
+  },
+  optionText: {
+    fontSize: FontSizes.small,
+  },
+  optionTextSelected: {
+    color: Colors.primary,
+    fontWeight: FontWeights.bold,
+  },
 });
 
 export default styles;

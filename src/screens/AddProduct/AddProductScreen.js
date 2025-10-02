@@ -1,23 +1,23 @@
-// AddProductScreen.js - Sử dụng FormWizard component
-import React, { useState, useEffect } from 'react';
-import { StatusBar } from 'react-native';
-import { showMessage } from 'react-native-flash-message';
-import { ethers } from 'ethers';
+import React, {useState, useEffect} from 'react';
+import {showMessage} from 'react-native-flash-message';
+import {ethers} from 'ethers';
 import {
   useAppKitAccount,
   useAppKitProvider,
 } from '@reown/appkit-ethers-react-native';
-import { CONTRACT_ADDRESS } from '@env';
-import contractArtifact from '../SmartConctract/contractABI.json';
-import { storage } from '../../utils/storage/storage';
-import api from '../../api/baseApi';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
-import FormWizard from '../../components/FormWizard/FormWizard';
+import {CONTRACT_ADDRESS} from '@env';
 
-const AddProductScreen = ({ navigation, route }) => {
-  const { farmCode } = route.params || {};
-  const { address, isConnected } = useAppKitAccount();
-  const { walletProvider } = useAppKitProvider();
+import contractArtifact from '../SmartConctract/contractABI.json';
+import FormWizard from '../../components/FormWizard/FormWizard';
+import Header from '../../components/Header/Header';
+
+import {storage} from '../../utils/storage/storage';
+import api from '../../api/baseApi';
+
+const AddProductScreen = ({navigation, route}) => {
+  const {farmCode} = route.params || {};
+  const {isConnected} = useAppKitAccount();
+  const {walletProvider} = useAppKitProvider();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -58,30 +58,28 @@ const AddProductScreen = ({ navigation, route }) => {
     }));
   };
 
-const handleImageSelect = (field, imageData, type) => {
-  if (type === 'single') {
-    setFormData(prev => ({
-      ...prev,
-      [field]: imageData,
-    }));
-  } else if (type === 'multiple') {
-    const newImages = Array.isArray(imageData) ? imageData : [imageData];
-    setFormData(prev => ({
-      ...prev,
-      [field]: [...prev[field], ...newImages],
-    }));
-  }
-};
+  const handleImageSelect = (field, imageData, type) => {
+    if (type === 'single') {
+      setFormData(prev => ({
+        ...prev,
+        [field]: imageData,
+      }));
+    } else if (type === 'multiple') {
+      const newImages = Array.isArray(imageData) ? imageData : [imageData];
+      setFormData(prev => ({
+        ...prev,
+        [field]: [...prev[field], ...newImages],
+      }));
+    }
+  };
 
   const handleImageRemove = (field, index = null) => {
     if (index === null) {
-      // Remove single image
       setFormData(prev => ({
         ...prev,
         [field]: null,
       }));
     } else {
-      // Remove from array
       setFormData(prev => ({
         ...prev,
         [field]: prev[field].filter((_, i) => i !== index),
@@ -132,7 +130,8 @@ const handleImageSelect = (field, imageData, type) => {
 
       // Upload images
       const hasMainImage = formData.images && formData.images.uri;
-      const hasDetailImages = formData.detailImages && formData.detailImages.length > 0;
+      const hasDetailImages =
+        formData.detailImages && formData.detailImages.length > 0;
 
       if (hasMainImage || hasDetailImages) {
         const formDataToSend = new FormData();
@@ -237,7 +236,8 @@ const handleImageSelect = (field, imageData, type) => {
       console.error('Lỗi:', error);
       showMessage({
         message: 'Lỗi',
-        description: error.reason || error.message || 'Đã xảy ra lỗi khi thêm sản phẩm.',
+        description:
+          error.reason || error.message || 'Đã xảy ra lỗi khi thêm sản phẩm.',
         type: 'danger',
       });
     } finally {
@@ -265,11 +265,11 @@ const handleImageSelect = (field, imageData, type) => {
     {
       title: 'Thông tin chung',
       description: 'tên sản phẩm, danh mục, số lượng, giá',
-      isCompleted: (data) => 
-        data.productCode && 
-        data.name && 
-        data.categoryName && 
-        data.quantity && 
+      isCompleted: data =>
+        data.productCode &&
+        data.name &&
+        data.categoryName &&
+        data.quantity &&
         data.price,
       fields: [
         {
@@ -279,10 +279,10 @@ const handleImageSelect = (field, imageData, type) => {
           placeholder: 'Nhập tên sản phẩm',
         },
         {
-          type: 'input',
+          type: 'select',
           field: 'categoryName',
           label: 'Danh mục',
-          placeholder: 'Nhập danh mục sản phẩm',
+          options: ['Trái cây', 'Rau củ', 'Hoa'],
         },
         {
           type: 'input',
@@ -303,7 +303,7 @@ const handleImageSelect = (field, imageData, type) => {
     {
       title: 'Mô tả',
       description: 'Mô tả sản phẩm',
-      isCompleted: (data) => data.description.length > 0,
+      isCompleted: data => data.description.length > 0,
       fields: [
         {
           type: 'input',
@@ -317,7 +317,7 @@ const handleImageSelect = (field, imageData, type) => {
     {
       title: 'Hình ảnh sản phẩm chính',
       description: 'Tải lên ảnh chính của sản phẩm',
-      isCompleted: (data) => data.images !== null,
+      isCompleted: data => data.images !== null,
       fields: [
         {
           type: 'image',
@@ -330,7 +330,7 @@ const handleImageSelect = (field, imageData, type) => {
     {
       title: 'Hình ảnh chi tiết',
       description: 'Tải lên hình ảnh chi tiết sản phẩm',
-      isCompleted: (data) => data.detailImages.length > 0,
+      isCompleted: data => data.detailImages.length > 0,
       fields: [
         {
           type: 'image',
@@ -343,7 +343,13 @@ const handleImageSelect = (field, imageData, type) => {
 
   return (
     <>
-      <StatusBar backgroundColor={Colors.green} barStyle="light-content" />
+      <Header
+        title="Thêm nông sản"
+        subtitle="Thêm & quản lí nông sản của nông trại"
+        emoji="🌾"
+        showBack={true}
+      />
+
       <FormWizard
         menuItems={menuItems}
         formData={formData}
