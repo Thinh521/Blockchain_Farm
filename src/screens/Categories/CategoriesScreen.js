@@ -1,7 +1,6 @@
 import React, {useCallback} from 'react';
 import {View, SafeAreaView} from 'react-native';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
-
 import Header from '../../components/Header/Header';
 import Button from '../../components/CustomButton/CustomButton';
 import ProductCardSkeleton from '../../components/CustomSkeleton/ProductCardSkeleton';
@@ -12,7 +11,7 @@ import {scale} from '../../utils/scaling';
 import styles from './Categories.styles';
 
 const CategoriesScreen = ({navigation, route}) => {
-  const {farmCode, userId} = route.params || {};
+  const {farmCode} = route.params || {};
 
   const {
     data: products = [],
@@ -20,16 +19,16 @@ const CategoriesScreen = ({navigation, route}) => {
     error: productError,
     refetch: refetchProducts,
   } = useFarmProducts(farmCode);
-
+  console.log('products', products);
+  
   const handleProductPress = useCallback(
     productItem => {
       navigation.navigate('Product', {
         productCode: productItem.productCode,
         farmCode: farmCode,
-        userId: userId,
       });
     },
-    [navigation, farmCode, userId],
+    [navigation, farmCode],
   );
 
   return (

@@ -10,9 +10,6 @@ import {getUser} from '../../utils/storage/authStorage';
 
 const CategoryListScreen = ({navigation, route}) => {
   const {categoryName, allProducts = []} = route.params || {};
-  const userId = getUser()?.userId;
-  console.log('userId',userId);
-  
 
 const filteredProducts = useMemo(() => {
   return allProducts.filter(
@@ -25,10 +22,9 @@ const filteredProducts = useMemo(() => {
       navigation.navigate('Product', {
         productCode: productItem.productCode,
         farmCode: productItem.farmCode,
-        userId: userId,
       });
     },
-    [navigation, userId],
+    [navigation],
   );
 
   return (

@@ -5,7 +5,7 @@ import {deleteUser, saveUser} from '../../utils/storage/authStorage.js';
 // Đăng ký
 export const registerApi = async data => {
   try {
-    const res = await api.post(`/api/auth/register`, data);
+    const res = await api.post('/api/auth/register', data);
 
     if (res.data?.code === '200') {
       return {success: true, data: res.data};
@@ -28,7 +28,11 @@ export const registerApi = async data => {
 
 export const loginApi = async ({emailPhone, password}) => {
   try {
-    const res = await api.post('/api/auth/login', {emailPhone, password}, { withCredentials: true });
+    const res = await api.post(
+      '/api/auth/login',
+      {emailPhone, password},
+      {withCredentials: true},
+    );
 
     if (res.data?.code !== '200') {
       return {
@@ -57,17 +61,16 @@ export const loginApi = async ({emailPhone, password}) => {
   }
 };
 
-
 // Đăng xuất
 export const logoutApi = async () => {
   try {
-    const res = await api.post('/api/auth/logout', {}, { withCredentials: true });
+    const res = await api.post('/api/auth/logout', {}, {withCredentials: true});
 
     if (res.data?.code === '200') {
       deleteUser('accessToken');
       deleteUser('refreshToken');
       deleteUser('userId');
-      return { success: true, data: res.data };
+      return {success: true, data: res.data};
     }
 
     return {
@@ -84,7 +87,6 @@ export const logoutApi = async () => {
     };
   }
 };
-
 
 // Quên mật khẩu
 export const forgotPasswordApi = async ({email}) => {

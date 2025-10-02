@@ -4,11 +4,11 @@ import {
   Text,
   ActivityIndicator,
   ScrollView,
+  StatusBar,
 } from 'react-native';
 import {ethers} from 'ethers';
 import {CONTRACT_ADDRESS} from '@env';
 import contractArtifact from '../SmartConctract/contractABI.json';
-import {StatusBar} from 'react-native';
 import {showMessage} from 'react-native-flash-message';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import api from '../../api/tokenApi';
@@ -17,15 +17,12 @@ import {
   useAppKitAccount,
   useAppKitProvider,
 } from '@reown/appkit-ethers-react-native';
-
-// Import các components
 import PlantingProcessForm from './component/PlantingProcessForm';
 import SprayingProcessForm from './component/SprayingProcessForm';
 import FertilizingProcessForm from './component/FertilizingProcessForm';
 import HarvestingProcessForm from './component/HarvestingProcessForm';
 import TransportationProcessForm from './component/TransportationProcessForm';
 import ProgressIndicator from './component/ProgressIndicator';
-import {storage} from '../../utils/storage/storage';
 import {getUser} from '../../utils/storage/authStorage';
 
 const ProcessScreen = ({route}) => {
@@ -37,22 +34,6 @@ const ProcessScreen = ({route}) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isCompleted, setIsCompleted] = useState(false);
-  const STEP_KEY = `process_step_${productCode}`;
-
-
-  useEffect(() => {
-    const savedStep = storage.getString(STEP_KEY);
-    if (savedStep) {
-      if (savedStep === 'completed') {
-        setIsCompleted(true);
-      } else {
-        const stepNumber = Number(savedStep);
-        if (!isNaN(stepNumber)) {
-          setCurrentStep(stepNumber);
-        }
-      }
-    }
-  }, [productCode]);
 
   const stepNameMap = {
     1: 'planting',
@@ -64,15 +45,46 @@ const ProcessScreen = ({route}) => {
 
   const accessToken = getUser().accessToken;
 
-  // Gửi mã hash về backend
+  // fetch step từ backend
+  const fetchProcess = async () => {
+    try {
+      const res = await api.get(`/api/process/${productCode}`);
+      const steps = res.data?.process?.steps || [];
+
+      // tìm step có hash cao nhất
+      let lastHashedIndex = -1;
+      steps.forEach((s, i) => {
+        if (s.txHash) {
+          lastHashedIndex = i;
+        }
+      });
+
+      if (lastHashedIndex === -1) {
+        // chưa có step nào -> bắt đầu từ 1
+        setCurrentStep(1);
+      } else if (lastHashedIndex === steps.length - 1) {
+        // tất cả đã có hash -> completed
+        setIsCompleted(true);
+      } else {
+        // bước tiếp theo là +1
+        setCurrentStep(lastHashedIndex + 2);
+      }
+    } catch (err) {
+      console.log('Lỗi fetch process:', err);
+    }
+  };
+
+  useEffect(() => {
+    if (productCode) {
+      fetchProcess();
+    }
+  }, [productCode]);
+
+  // gửi txHash về backend
   const sendToBackend = async (txHash, currentStep) => {
     try {
       const stepName = stepNameMap[currentStep];
-      const payload = {
-        productCode,
-        stepName,
-        txHash,
-      };
+      const payload = {productCode, stepName, txHash};
 
       await api.post(`/api/process/step`, payload, {
         headers: {Authorization: `Bearer ${accessToken}`},
@@ -93,7 +105,7 @@ const ProcessScreen = ({route}) => {
     }
   };
 
-  // Lấy contract instance
+  // lấy contract instance
   const getContract = useCallback(async () => {
     if (!isConnected || !walletProvider) {
       throw new Error('Wallet not connected');
@@ -104,8 +116,12 @@ const ProcessScreen = ({route}) => {
     return new ethers.Contract(CONTRACT_ADDRESS, contractArtifact.abi, signer);
   }, [isConnected, walletProvider]);
 
-  // Xử lý blockchain transaction cho từng step
-  const executeBlockchainTransaction = async (contract, currentStep, formData) => {
+  // xử lý transaction theo step
+  const executeBlockchainTransaction = async (
+    contract,
+    currentStep,
+    formData,
+  ) => {
     let tx;
 
     switch (currentStep) {
@@ -118,7 +134,6 @@ const ProcessScreen = ({route}) => {
           formData.sowingDate,
         );
         break;
-
       case 2:
         tx = await contract.addMedicine(
           productCode,
@@ -129,7 +144,6 @@ const ProcessScreen = ({route}) => {
           formData.applicationMethod,
         );
         break;
-
       case 3:
         tx = await contract.addFertilizer(
           productCode,
@@ -141,7 +155,6 @@ const ProcessScreen = ({route}) => {
           formData.expectedEffect,
         );
         break;
-
       case 4:
         tx = await contract.addHarvest(
           productCode,
@@ -152,7 +165,6 @@ const ProcessScreen = ({route}) => {
           formData.harvestMethod,
         );
         break;
-
       case 5:
         tx = await contract.addDistribution(
           productCode,
@@ -163,7 +175,6 @@ const ProcessScreen = ({route}) => {
           formData.storageConditions,
         );
         break;
-
       default:
         throw new Error('Invalid step');
     }
@@ -171,9 +182,8 @@ const ProcessScreen = ({route}) => {
     return tx;
   };
 
-  // Xử lý submit từ form
-  const handleFormSubmit = async (formData) => {
-
+  // submit form
+  const handleFormSubmit = async formData => {
     if (!productCode) {
       showMessage({
         message: 'Lỗi',
@@ -186,7 +196,7 @@ const ProcessScreen = ({route}) => {
     if (!isConnected || !walletProvider) {
       showMessage({
         message: 'Lỗi',
-        description: 'Vui lòng kết nối ví trước khi thực hiện!',
+        description: 'Vui lòng kết nối ví!',
         type: 'danger',
       });
       return;
@@ -196,37 +206,28 @@ const ProcessScreen = ({route}) => {
     setError(null);
 
     try {
-      // Lấy contract instance
       const contract = await getContract();
+      const tx = await executeBlockchainTransaction(
+        contract,
+        currentStep,
+        formData,
+      );
 
-      // Thực hiện transaction với dữ liệu từ form
-      const tx = await executeBlockchainTransaction(contract, currentStep, formData);
-
-      // Đợi transaction được confirm
       await tx.wait();
       const txHash = tx.hash;
       setTxHash(txHash);
       console.log('🔗 Transaction Hash:', txHash);
 
-      // Gửi hash về backend
       await sendToBackend(txHash, currentStep);
 
-      // Chuyển step hoặc hoàn thành
-      if (currentStep < 5) {
-        const nextStep = currentStep + 1;
-        setCurrentStep(nextStep);
-        storage.set(STEP_KEY, String(nextStep));
-        setTxHash(null);
-      } else {
-        storage.set(STEP_KEY, 'completed');
-        setIsCompleted(true);
-        showMessage({
-          message: 'Hoàn thành',
-          description: 'Tất cả quy trình đã được thêm thành công!',
-          type: 'success',
-          duration: 2000,
-        });
-      }
+      // refetch để cập nhật step mới
+      await fetchProcess();
+
+      showMessage({
+        message: 'Thành công',
+        description: 'Quy trình đã được ghi nhận!',
+        type: 'success',
+      });
     } catch (error) {
       console.error('❌ Lỗi:', error);
       setError(error);
@@ -241,7 +242,7 @@ const ProcessScreen = ({route}) => {
     }
   };
 
-  // Render form theo step
+  // render form
   const renderForm = () => {
     const stepTitles = {
       1: 'Quy trình trồng trọt',
@@ -251,13 +252,7 @@ const ProcessScreen = ({route}) => {
       5: 'Quy trình phân phối',
     };
 
-    const stepIcons = {
-      1: '🌱',
-      2: '💊',
-      3: '🌿',
-      4: '🌾',
-      5: '🚚',
-    };
+    const stepIcons = {1: '🌱', 2: '💊', 3: '🌿', 4: '🌾', 5: '🚚'};
 
     return (
       <View style={styles.formContainer}>
@@ -269,19 +264,15 @@ const ProcessScreen = ({route}) => {
         {currentStep === 1 && (
           <PlantingProcessForm onSubmit={handleFormSubmit} />
         )}
-
         {currentStep === 2 && (
           <SprayingProcessForm onSubmit={handleFormSubmit} />
         )}
-
         {currentStep === 3 && (
           <FertilizingProcessForm onSubmit={handleFormSubmit} />
         )}
-
         {currentStep === 4 && (
           <HarvestingProcessForm onSubmit={handleFormSubmit} />
         )}
-
         {currentStep === 5 && (
           <TransportationProcessForm onSubmit={handleFormSubmit} />
         )}
@@ -302,7 +293,6 @@ const ProcessScreen = ({route}) => {
             <ProgressIndicator currentStep={currentStep} />
             {renderForm()}
 
-            {/* Status Messages */}
             {isLoading && (
               <View style={styles.statusContainer}>
                 <ActivityIndicator size="large" color="#4CAF50" />
