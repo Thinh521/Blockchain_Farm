@@ -100,14 +100,15 @@ export default StyleSheet.create({
     borderBottomColor: '#f3f4f6',
   },
   dropdownItemSelected: {
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.primary + '20',
   },
   dropdownItemText: {
     fontSize: FontSizes.small,
     marginLeft: scale(10),
   },
   dropdownItemTextSelected: {
-    fontWeight: FontWeights.semiBold,
+    color: Colors.primary,
+    fontWeight: FontWeights.bold,
   },
   input: {
     lineHeight: scale(18),

@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
+  Modal,
+  FlatList,
 } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -12,11 +14,11 @@ import {launchImageLibrary} from 'react-native-image-picker';
 
 import Button from '../../components/CustomButton/CustomButton';
 import Input from '../../components/CustomInput/CustomInput';
-
-import styles from './FormWizard.style';
 import Images from '../../assets/images/images';
+
 import {scale} from '../../utils/scaling';
 import {Colors} from '../../theme/theme';
+import styles from './FormWizard.style';
 
 const FormWizard = ({
   menuItems,
@@ -30,6 +32,7 @@ const FormWizard = ({
   submitButtonText = 'Xác nhận',
 }) => {
   const [activeSection, setActiveSection] = useState(null);
+  const [openSelectField, setOpenSelectField] = useState(null);
 
   const handleMenuItemPress = sectionIndex => {
     setActiveSection(activeSection === sectionIndex ? null : sectionIndex);
@@ -61,7 +64,6 @@ const FormWizard = ({
     onImageRemove(field, index);
   };
 
-  // Render image upload component
   const renderImageUpload = (
     field,
     type = 'single',
@@ -96,7 +98,6 @@ const FormWizard = ({
       );
     }
 
-    // Multiple images
     return (
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={styles.farmImagesContainer}>
@@ -124,7 +125,6 @@ const FormWizard = ({
     );
   };
 
-  // Render input field
   const renderInput = config => {
     const {
       field,
@@ -157,6 +157,63 @@ const FormWizard = ({
       return menuItems[sectionIndex].isCompleted(formData);
     }
     return false;
+  };
+
+  const renderSelect = config => {
+    const {field, label, options = []} = config;
+    const isOpen = openSelectField === field;
+
+    return (
+      <View style={styles.inputGroup}>
+        {label && <Text style={styles.inputLabel}>{label}</Text>}
+
+        <TouchableOpacity
+          style={styles.dropdownButton}
+          onPress={() => setOpenSelectField(isOpen ? null : field)}
+          activeOpacity={0.7}>
+          <Text
+            style={{
+              color: formData[field] ? Colors.text : '#999',
+              flex: 1,
+            }}>
+            {formData[field] || 'Chọn danh mục'}
+          </Text>
+          <Icon
+            name={isOpen ? 'arrow-drop-up' : 'arrow-drop-down'}
+            size={24}
+            color="#666"
+          />
+        </TouchableOpacity>
+
+        {isOpen && (
+          <View style={styles.dropdownList}>
+            {options.map((item, index) => {
+              const isSelected = formData[field] === item;
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={[
+                    styles.optionItem,
+                    isSelected && styles.optionItemSelected,
+                  ]}
+                  onPress={() => {
+                    onInputChange(field, item);
+                    setOpenSelectField(null);
+                  }}>
+                  <Text
+                    style={[
+                      styles.optionText,
+                      isSelected && styles.optionTextSelected,
+                    ]}>
+                    {item}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
+      </View>
+    );
   };
 
   return (
@@ -204,7 +261,6 @@ const FormWizard = ({
 
                 {activeSection === index && (
                   <View style={styles.formSection}>
-                    {/* Render custom content hoặc default fields */}
                     {item.renderContent ? (
                       item.renderContent({
                         formData,
@@ -218,6 +274,8 @@ const FormWizard = ({
                           <View key={fieldIndex}>
                             {fieldConfig.type === 'input' &&
                               renderInput(fieldConfig)}
+                            {fieldConfig.type === 'select' &&
+                              renderSelect(fieldConfig)}
                             {fieldConfig.type === 'image' &&
                               renderImageUpload(
                                 fieldConfig.field,
