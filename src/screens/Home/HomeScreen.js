@@ -1,4 +1,4 @@
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -13,8 +13,6 @@ import FastImage from 'react-native-fast-image';
 import {useFocusEffect, useNavigation} from '@react-navigation/core';
 
 import {
-  Flower_Line_Icon,
-  Leaf_Line_Icon,
   NotificationIcon,
   Search_Line_Icon,
   Sun_Line_Icon,
@@ -29,14 +27,16 @@ import Categories from './components/Categories';
 import FarmList from '../../components/Farms/FarmList';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
 import ErrorState from '../../components/ErrorState/ErrorState';
-
 import {useFarms} from '../../hooks/useFarms';
 import {useUser} from '../../hooks/useUser';
 import {useWishlist} from '../../hooks/useWishlist';
 import useDebouncedSearching from '../../hooks/useDebouncedSearching';
-
 import styles from './Home.styles';
 import {scale} from '../../utils/scaling';
+import {ethers} from 'ethers';
+import {getAllProducts} from '../../api/productApi';
+import contractArtifact from '../SmartConctract/contractABI.json';
+import {CONTRACT_ADDRESS, RPC_URL} from '@env';
 
 const HomeScreen = () => {
   const navigation = useNavigation();
@@ -49,12 +49,69 @@ const HomeScreen = () => {
   const {farms, isLoading, error, refetch} = useFarms();
   const {data: user} = useUser();
 
-  const categories = [
-    {id: 'all', name: 'Tất cả', icon: Leaf_Line_Icon},
-    {id: 'vegetable', name: 'Rau củ', icon: Flower_Line_Icon},
-    {id: 'fruit', name: 'Trái cây', icon: Sun_Line_Icon},
-    {id: 'livestock', name: 'Chăn nuôi', icon: User_Line_Icon},
-  ];
+  const [allProducts, setAllProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const products = await getAllProducts();
+
+        // kết nối smart contract
+        const rpcProvider = new ethers.JsonRpcProvider(RPC_URL);
+        const contractRead = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          contractArtifact.abi,
+          rpcProvider,
+        );
+
+        // Lấy dữ liệu chi tiết từ SC cho từng productCode
+        const productDetails = await Promise.all(
+          products.map(async p => {
+            try {
+              const productData = await contractRead.getProduct(p.productCode);
+
+              return {
+                farmCode: productData[0],
+                productCode: productData[1],
+                categoryName: productData[2],
+                name: productData[3],
+                quantity: productData[4],
+                price: productData[5],
+                description: productData[6],
+                images:
+                  typeof productData[7] === 'string'
+                    ? productData[7].split(/[,|]/).map(url => url.trim())
+                    : [],
+              };
+            } catch (err) {
+              console.log(' Lỗi fetch product từ SC:', err);
+              return null;
+            }
+          }),
+        );
+
+        // lọc sản phẩm null
+        setAllProducts(productDetails.filter(Boolean));
+      } catch (err) {
+        console.log('❌ Lỗi fetchProducts:', err);
+      } finally {
+        setLoadingProducts(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const normalizeCategory = name => {
+    if (!name) return 'Khác';
+    const clean = name.trim().toLowerCase();
+    return clean.charAt(0).toUpperCase() + clean.slice(1); // viết hoa chữ đầu
+  };
+
+  const categories = Array.from(
+    new Set(allProducts.map(p => normalizeCategory(p.categoryName))),
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -154,6 +211,8 @@ const HomeScreen = () => {
                   categories={categories}
                   selectedCategory={selectedCategory}
                   onSelectCategory={setSelectedCategory}
+                  navigation={navigation}
+                  allProducts={allProducts}
                 />
               </>
             )}

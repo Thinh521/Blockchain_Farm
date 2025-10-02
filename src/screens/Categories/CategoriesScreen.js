@@ -7,9 +7,7 @@ import Button from '../../components/CustomButton/CustomButton';
 import ProductCardSkeleton from '../../components/CustomSkeleton/ProductCardSkeleton';
 import ProductList from '../../components/Product/ProductList';
 import EmptyState from '../../components/EmptyState/EmptyState';
-
 import { useFarmProducts } from '../../hooks/useFarmProducts';
-
 import {scale} from '../../utils/scaling';
 import styles from './Categories.styles';
 

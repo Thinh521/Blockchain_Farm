@@ -15,7 +15,13 @@ import {scale} from '../../utils/scaling';
 const {width} = Dimensions.get('window');
 
 const ProductCard = ({item, onPress}) => {
-  const imageSource = item.image?.length > 0 ? {uri: item.image[0]} : Images.bg;
+const imageSource =
+  (item.images && item.images.length > 0)
+    ? {uri: item.images[0]}
+    : (item.image && item.image.length > 0)
+      ? {uri: item.image[0]}
+      : Images.bg;
+
 
   return (
     <TouchableOpacity

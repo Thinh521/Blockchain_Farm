@@ -58,3 +58,13 @@ export const fetchProductsFromFarm = async farmCode => {
   // 4. Chỉ giữ sản phẩm tồn tại ở cả backend
   return formatted.filter(p => backendCodes.includes(p.productCode));
 };
+// Lấy tất cả sản phẩm
+export const getAllProducts = async () => {
+  try {
+    const res = await api.get(`${API_URL}/api/products`);
+    return res.data?.data || [];
+  } catch (error) {
+    console.error('❌ Lỗi khi fetch all products:', error);
+    return [];
+  }
+};

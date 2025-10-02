@@ -3,26 +3,35 @@ import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {Colors, FontSizes, FontWeights} from '../../../theme/theme';
 import {scale} from '../../../utils/scaling';
 
-const Categories = ({categories, selectedCategory, onSelectCategory}) => {
+const Categories = ({
+  categories,
+  selectedCategory,
+  onSelectCategory,
+  navigation,
+  allProducts,
+}) => {
   const renderCategory = ({item}) => (
     <TouchableOpacity
       style={[
         styles.categoryButton,
-        selectedCategory === item.id && styles.categoryButtonActive,
+        selectedCategory === item && styles.categoryButtonActive,
       ]}
-      onPress={() => onSelectCategory(item.id)}>
-      <item.icon
-        style={{
-          color: selectedCategory === item.id ? '#059669' : '#6B7280',
-          width: scale(16),
-        }}
-      />
+      onPress={() => {
+        onSelectCategory(item);
+        navigation.navigate('NoBottomTab', {
+          screen: 'CategoryList',
+          params: {
+            categoryName: item,
+            allProducts: allProducts,
+          },
+        });
+      }}>
       <Text
         style={[
           styles.categoryText,
-          selectedCategory === item.id && styles.categoryTextActive,
+          selectedCategory === item && styles.categoryTextActive,
         ]}>
-        {item.name}
+        {item}
       </Text>
     </TouchableOpacity>
   );
@@ -39,7 +48,7 @@ const Categories = ({categories, selectedCategory, onSelectCategory}) => {
       <FlatList
         data={categories}
         renderItem={renderCategory}
-        keyExtractor={item => item.id}
+        keyExtractor={(item, index) => index.toString()} // ✅ dùng index làm key
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.categoryList}
