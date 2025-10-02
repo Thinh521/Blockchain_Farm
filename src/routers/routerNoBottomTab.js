@@ -21,6 +21,7 @@ import AddProductScreen from '../screens/AddProduct/AddProductScreen';
 import ProductScreen from '../screens/Product/ProductScreen';
 import AllNewsScreen from '../screens/New/AllNewsScreen';
 import ProcessScreen from '../screens/Process/ProcessSreen';
+import CategoryListScreen from '../screens/CategoryList/CategoryListScreen';
 
 const routerNoBottomTab = [
   {
@@ -254,6 +255,14 @@ const routerNoBottomTab = [
         fontWeight: 'bold',
         fontSize: 18,
       },
+    },
+  },
+  {
+    name: 'CategoryList',
+    component: CategoryListScreen,
+    hasLayout: false,
+    options: {
+      headerShown: false,
     },
   },
 ];
