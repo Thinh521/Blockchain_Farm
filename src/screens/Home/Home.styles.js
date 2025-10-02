@@ -110,7 +110,7 @@ export default StyleSheet.create({
   mainContent: {
     flex: 1,
     paddingHorizontal: scale(20),
-    paddingTop: scale(20),
+    paddingTop: scale(10),
     backgroundColor: Colors.background,
   },
   emptyContainer: {

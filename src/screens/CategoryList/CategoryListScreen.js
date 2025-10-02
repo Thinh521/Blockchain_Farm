@@ -1,24 +1,27 @@
 import React, {useMemo, useCallback} from 'react';
 import {View, SafeAreaView} from 'react-native';
+
 import Header from '../../components/Header/Header';
 import ProductCardSkeleton from '../../components/CustomSkeleton/ProductCardSkeleton';
 import ProductList from '../../components/Product/ProductList';
 import EmptyState from '../../components/EmptyState/EmptyState';
-import {scale} from '../../utils/scaling';
-import styles from '../Categories/Categories.styles';
+
 import {getUser} from '../../utils/storage/authStorage';
 
-const CategoryListScreen = ({navigation, route}) => {
-  const {categoryName, allProducts = []} = route.params || {};
-  const userId = getUser()?.userId;
-  console.log('userId',userId);
-  
+import {scale} from '../../utils/scaling';
+import styles from '../Categories/Categories.styles';
 
-const filteredProducts = useMemo(() => {
-  return allProducts.filter(
-    p => p.categoryName?.trim().toLowerCase() === categoryName?.trim().toLowerCase()
-  );
-}, [allProducts, categoryName]);
+const CategoryListScreen = ({navigation, route}) => {
+  const {categoryName, allCategories = []} = route.params || {};
+  const userId = getUser()?.userId;
+
+  const filteredProducts = useMemo(() => {
+    return allCategories.filter(
+      p =>
+        p.categoryName?.trim().toLowerCase() ===
+        categoryName?.trim().toLowerCase(),
+    );
+  }, [allCategories, categoryName]);
 
   const handleProductPress = useCallback(
     productItem => {
@@ -35,12 +38,12 @@ const filteredProducts = useMemo(() => {
     <SafeAreaView style={styles.container}>
       <Header
         title={categoryName}
-        subtitle="Danh sách sản phẩm trong danh mục"
-        emoji="🛍️"
+        subtitle="Danh sách nông sản trong danh mục"
+        emoji="🌾"
         showBack={true}
       />
 
-      <View style={{flex: 1, padding: scale(20)}}>
+      <View style={{flex: 1}}>
         {false ? (
           <ProductCardSkeleton count={4} />
         ) : filteredProducts.length === 0 ? (

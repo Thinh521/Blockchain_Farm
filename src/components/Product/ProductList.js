@@ -1,6 +1,7 @@
 import React from 'react';
 import {FlatList} from 'react-native';
 import ProductCard from './ProductCard';
+import {scale} from '../../utils/scaling';
 
 const ProductList = ({products, onPress}) => {
   return (
@@ -13,6 +14,7 @@ const ProductList = ({products, onPress}) => {
       columnWrapperStyle={{
         justifyContent: 'space-between',
       }}
+      contentContainerStyle={{padding: scale(20)}}
     />
   );
 };

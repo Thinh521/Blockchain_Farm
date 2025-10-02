@@ -7,7 +7,7 @@ import Button from '../../components/CustomButton/CustomButton';
 import ProductCardSkeleton from '../../components/CustomSkeleton/ProductCardSkeleton';
 import ProductList from '../../components/Product/ProductList';
 import EmptyState from '../../components/EmptyState/EmptyState';
-import { useFarmProducts } from '../../hooks/useFarmProducts';
+import {useFarmProducts} from '../../hooks/useFarmProducts';
 import {scale} from '../../utils/scaling';
 import styles from './Categories.styles';
 
@@ -41,15 +41,25 @@ const CategoriesScreen = ({navigation, route}) => {
         showBack={true}
       />
 
-      <View style={{flex: 1, padding: scale(20)}}>
+      <View style={{flex: 1}}>
         {isLoadingProducts ? (
-          <View style={{alignItems: 'flex-end', marginBottom: scale(20)}}>
+          <View
+            style={{
+              alignItems: 'flex-end',
+              padding: scale(20),
+              paddingBottom: 0,
+            }}>
             <SkeletonPlaceholder borderRadius={16} speed={1000}>
-              <SkeletonPlaceholder.Item width={160} height={40} />
+              <SkeletonPlaceholder.Item width={170} height={48} />
             </SkeletonPlaceholder>
           </View>
-        )  : products.length >= 0 ? (
-          <View style={{alignItems: 'flex-end', marginBottom: scale(20)}}>
+        ) : products.length >= 0 ? (
+          <View
+            style={{
+              alignItems: 'flex-end',
+              padding: scale(20),
+              paddingBottom: 0,
+            }}>
             <Button.Main
               title="Thêm nông sản"
               style={styles.addButton}
@@ -59,16 +69,18 @@ const CategoriesScreen = ({navigation, route}) => {
         ) : null}
 
         {isLoadingProducts ? (
-          <ProductCardSkeleton count={4} />
+          <View style={{padding: scale(20)}}>
+            <ProductCardSkeleton count={4} />
+          </View>
         ) : productError ? (
-            <EmptyState
-              message={'Có lỗi khi tải sản phẩm'}
-              fullScreen
-              style={{minHeight: scale(150)}}
-              showRetry
-              onRetry={refetchProducts}
-            />
-          ) : products.length === 1 ? (
+          <EmptyState
+            message={'Có lỗi khi tải sản phẩm'}
+            fullScreen
+            style={{minHeight: scale(150)}}
+            showRetry
+            onRetry={refetchProducts}
+          />
+        ) : products.length === 1 ? (
           <EmptyState
             message="Chưa có sản phẩm nào"
             style={{marginTop: scale(200)}}

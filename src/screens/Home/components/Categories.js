@@ -1,5 +1,10 @@
 import React from 'react';
 import {FlatList, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
+import EmptyState from '../../../components/EmptyState/EmptyState';
+import CategorySkeleton from '../../../components/CustomSkeleton/CategorySkeleton';
+
 import {Colors, FontSizes, FontWeights} from '../../../theme/theme';
 import {scale} from '../../../utils/scaling';
 
@@ -8,8 +13,21 @@ const Categories = ({
   selectedCategory,
   onSelectCategory,
   navigation,
-  allProducts,
+  allCategories,
+  isLoadingCategories,
+  isErrorCategories,
+  refetchCategories,
 }) => {
+  const getCategoryIcon = name => {
+    const lower = name.toLowerCase();
+
+    if (lower.includes('trái cây')) return 'nutrition-outline';
+    if (lower.includes('rau')) return 'leaf-outline';
+    if (lower.includes('hoa')) return 'flower-outline';
+
+    return 'pricetag-outline';
+  };
+
   const renderCategory = ({item}) => (
     <TouchableOpacity
       style={[
@@ -22,10 +40,15 @@ const Categories = ({
           screen: 'CategoryList',
           params: {
             categoryName: item,
-            allProducts: allProducts,
+            allCategories: allCategories,
           },
         });
       }}>
+      <Ionicons
+        name={getCategoryIcon(item)}
+        size={18}
+        color={selectedCategory === item ? Colors.green : '#6B7280'}
+      />
       <Text
         style={[
           styles.categoryText,
@@ -39,21 +62,33 @@ const Categories = ({
   return (
     <View style={styles.categoriesSection}>
       <View style={styles.categoriesHeader}>
-        <Text style={styles.categoriesTitle}>Danh mục sản phẩm</Text>
+        <Text style={styles.categoriesTitle}>Danh mục nông sản</Text>
         <TouchableOpacity style={styles.seeAllButton}>
           <Text style={styles.seeAllText}>Xem tất cả</Text>
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={categories}
-        renderItem={renderCategory}
-        keyExtractor={(item, index) => index.toString()} // ✅ dùng index làm key
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoryList}
-        contentContainerStyle={styles.categoryListContent}
-      />
+      {isLoadingCategories ? (
+        <CategorySkeleton count={3} />
+      ) : isErrorCategories ? (
+        <EmptyState
+          message={'Có lỗi khi tải danh mục'}
+          fullScreen
+          style={{minHeight: scale(150)}}
+          showRetry
+          onRetry={refetchCategories}
+        />
+      ) : (
+        <FlatList
+          data={categories}
+          renderItem={renderCategory}
+          keyExtractor={(item, index) => index.toString()}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.categoryList}
+          contentContainerStyle={styles.categoryListContent}
+        />
+      )}
     </View>
   );
 };
