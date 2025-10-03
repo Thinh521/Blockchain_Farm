@@ -6,13 +6,11 @@ import ProductCardSkeleton from '../../components/CustomSkeleton/ProductCardSkel
 import ProductList from '../../components/Product/ProductList';
 import EmptyState from '../../components/EmptyState/EmptyState';
 
-import {getUser} from '../../utils/storage/authStorage';
-
 import {scale} from '../../utils/scaling';
 import styles from '../Categories/Categories.styles';
 
 const CategoryListScreen = ({navigation, route}) => {
-  const {categoryName, allProducts = []} = route.params || {};
+  const {categoryName, allCategories = []} = route.params || {};
 
 
   const filteredProducts = useMemo(() => {
