@@ -12,8 +12,8 @@ import {scale} from '../../utils/scaling';
 import styles from '../Categories/Categories.styles';
 
 const CategoryListScreen = ({navigation, route}) => {
-  const {categoryName, allCategories = []} = route.params || {};
-  const userId = getUser()?.userId;
+  const {categoryName, allProducts = []} = route.params || {};
+
 
   const filteredProducts = useMemo(() => {
     return allCategories.filter(
@@ -28,10 +28,9 @@ const CategoryListScreen = ({navigation, route}) => {
       navigation.navigate('Product', {
         productCode: productItem.productCode,
         farmCode: productItem.farmCode,
-        userId: userId,
       });
     },
-    [navigation, userId],
+    [navigation],
   );
 
   return (

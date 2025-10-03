@@ -113,11 +113,9 @@ const TraceabilitySection = ({productCode, farmCode, userId}) => {
 
   const storedUser = getUser();
   const user = storedUser.userId;
-  
   const canAddProcess = useMemo(() => {
     return user && userId && user === userId;
   }, [user, userId]);
-  
 
   useFocusEffect(
     useCallback(() => {

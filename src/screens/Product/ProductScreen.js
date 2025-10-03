@@ -1,4 +1,4 @@
-import React, {useMemo, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -25,7 +25,7 @@ import RelatedProducts from './components/RelatedProducts';
 import Button from '../../components/CustomButton/CustomButton';
 
 import {formatCurrency} from '../../utils/formatCurrency';
-import api from '../../api/baseApi';
+import api from '../../api/tokenApi';
 
 import {Colors} from '../../theme/theme';
 import {scale} from '../../utils/scaling';
@@ -34,11 +34,29 @@ import styles from './ProductScreen.style';
 const ProductScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const {productCode, farmCode, userId} = route.params || {};
+  const {productCode, farmCode} = route.params || {};
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showQRModal, setShowQRModal] = useState(false);
   const [hashes, setHashes] = useState([]);
   const scrollY = useRef(new Animated.Value(0)).current;
+
+const [userId, setUserId] = useState(null);
+
+useEffect(() => {
+  const fetchUserId = async () => {
+    try {
+      const res = await api.get(`/api/products/details/${productCode}`);
+      setUserId(res.data?.data?.userId);
+    } catch (e) {
+      console.log('Lỗi fetch userId:', e);
+    }
+  };
+
+  if (productCode) {
+    fetchUserId();
+  }
+}, [productCode]);
+
 
   // 🔹 fetch product detail
   const fetchProduct = async () => {

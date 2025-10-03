@@ -9,7 +9,7 @@ import {CONTRACT_ADDRESS} from '@env';
 import contractArtifact from '../SmartConctract/contractABI.json';
 import FormWizard from '../../components/FormWizard/FormWizard';
 import Header from '../../components/Header/Header';
-import api from '../../api/baseApi';
+import api from '../../api/tokenApi';
 import {useUser} from '../../hooks/useUser';
 import {storage} from '../../utils/storage/storage';
 

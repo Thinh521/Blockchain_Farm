@@ -12,7 +12,7 @@ import FormWizard from '../../components/FormWizard/FormWizard';
 import Header from '../../components/Header/Header';
 
 import {storage} from '../../utils/storage/storage';
-import api from '../../api/baseApi';
+import api from '../../api/tokenApi';
 
 const AddProductScreen = ({navigation, route}) => {
   const {farmCode} = route.params || {};
