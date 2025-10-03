@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   View,
   Text,
@@ -8,17 +8,13 @@ import {
   StatusBar,
   SafeAreaView,
 } from 'react-native';
-import {API_URL} from '@env';
+import {ethers} from 'ethers';
+import {useQuery} from '@tanstack/react-query';
+import {CONTRACT_ADDRESS, RPC_URL, API_URL} from '@env';
 import FastImage from 'react-native-fast-image';
 import {useFocusEffect, useNavigation} from '@react-navigation/core';
 
-import {
-  NotificationIcon,
-  Search_Line_Icon,
-  Sun_Line_Icon,
-  User_Line_Icon,
-  UserIcon,
-} from '../../assets/icons';
+import {NotificationIcon, Search_Line_Icon, UserIcon} from '../../assets/icons';
 import Images from '../../assets/images/images';
 import Carousel from './components/Carousel';
 import Features from './components/Features';
@@ -27,90 +23,86 @@ import Categories from './components/Categories';
 import FarmList from '../../components/Farms/FarmList';
 import FarmCardSkeleton from '../../components/CustomSkeleton/FarmCardSkeleton';
 import ErrorState from '../../components/ErrorState/ErrorState';
+import contractArtifact from '../SmartConctract/contractABI.json';
+
 import {useFarms} from '../../hooks/useFarms';
 import {useUser} from '../../hooks/useUser';
-import {useWishlist} from '../../hooks/useWishlist';
 import useDebouncedSearching from '../../hooks/useDebouncedSearching';
-import styles from './Home.styles';
-import {scale} from '../../utils/scaling';
-import {ethers} from 'ethers';
+import {useWishlist} from '../../hooks/useWishlist';
 import {getAllProducts} from '../../api/productApi';
-import contractArtifact from '../SmartConctract/contractABI.json';
-import {CONTRACT_ADDRESS, RPC_URL} from '@env';
+
+import {scale} from '../../utils/scaling';
+import {Colors} from '../../theme/theme';
+import styles from './Home.styles';
+
+const fetchProducts = async () => {
+  const products = await getAllProducts();
+
+  const rpcProvider = new ethers.JsonRpcProvider(RPC_URL);
+
+  const contractRead = new ethers.Contract(
+    CONTRACT_ADDRESS,
+    contractArtifact.abi,
+    rpcProvider,
+  );
+
+  const productDetails = await Promise.all(
+    products.map(async p => {
+      try {
+        const productData = await contractRead.getProduct(p.productCode);
+
+        return {
+          farmCode: productData[0],
+          productCode: productData[1],
+          categoryName: productData[2],
+          name: productData[3],
+          quantity: productData[4],
+          price: productData[5],
+          description: productData[6],
+          images:
+            typeof productData[7] === 'string'
+              ? productData[7].split(/[,|]/).map(url => url.trim())
+              : [],
+        };
+      } catch (err) {
+        console.log('Lỗi fetch product từ SC:', err);
+        return null;
+      }
+    }),
+  );
+
+  return productDetails.filter(Boolean);
+};
 
 const HomeScreen = () => {
   const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const {favorites, fetchWishlist} = useWishlist();
 
   const isSearching = useDebouncedSearching(searchQuery, 500);
 
+  const {
+    data: allCategories = [],
+    isLoading: isLoadingCategories,
+    isError: isErrorCategories,
+    refetch: refetchCategories,
+  } = useQuery({
+    queryKey: ['products'],
+    queryFn: fetchProducts,
+  });
+
+  const {favorites, fetchWishlist} = useWishlist();
   const {farms, isLoading, error, refetch} = useFarms();
   const {data: user} = useUser();
-
-  const [allProducts, setAllProducts] = useState([]);
-  const [loadingProducts, setLoadingProducts] = useState(true);
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const products = await getAllProducts();
-
-        // kết nối smart contract
-        const rpcProvider = new ethers.JsonRpcProvider(RPC_URL);
-        const contractRead = new ethers.Contract(
-          CONTRACT_ADDRESS,
-          contractArtifact.abi,
-          rpcProvider,
-        );
-
-        // Lấy dữ liệu chi tiết từ SC cho từng productCode
-        const productDetails = await Promise.all(
-          products.map(async p => {
-            try {
-              const productData = await contractRead.getProduct(p.productCode);
-
-              return {
-                farmCode: productData[0],
-                productCode: productData[1],
-                categoryName: productData[2],
-                name: productData[3],
-                quantity: productData[4],
-                price: productData[5],
-                description: productData[6],
-                images:
-                  typeof productData[7] === 'string'
-                    ? productData[7].split(/[,|]/).map(url => url.trim())
-                    : [],
-              };
-            } catch (err) {
-              console.log(' Lỗi fetch product từ SC:', err);
-              return null;
-            }
-          }),
-        );
-
-        // lọc sản phẩm null
-        setAllProducts(productDetails.filter(Boolean));
-      } catch (err) {
-        console.log('❌ Lỗi fetchProducts:', err);
-      } finally {
-        setLoadingProducts(false);
-      }
-    };
-
-    fetchProducts();
-  }, []);
 
   const normalizeCategory = name => {
     if (!name) return 'Khác';
     const clean = name.trim().toLowerCase();
-    return clean.charAt(0).toUpperCase() + clean.slice(1); // viết hoa chữ đầu
+    return clean.charAt(0).toUpperCase() + clean.slice(1);
   };
 
   const categories = Array.from(
-    new Set(allProducts.map(p => normalizeCategory(p.categoryName))),
+    new Set(allCategories.map(p => normalizeCategory(p.categoryName))),
   );
 
   useFocusEffect(
@@ -127,7 +119,7 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#059669" />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
 
       {/* Header */}
       <View style={styles.header}>
@@ -177,7 +169,7 @@ const HomeScreen = () => {
               <Search_Line_Icon style={{color: '#9CA3AF', width: 20}} />
               <TextInput
                 style={styles.searchInput}
-                placeholder="Tìm kiếm trang trại, sản phẩm..."
+                placeholder="Tìm kiếm nông trại, nông sản..."
                 placeholderTextColor="#9CA3AF"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
@@ -199,7 +191,7 @@ const HomeScreen = () => {
                 {/* Carousel Section */}
                 <View style={styles.carouselSection}>
                   <Text style={[styles.sectionTitle, {paddingHorizontal: 20}]}>
-                    Trang trại nổi bật
+                    Nông trại nổi bật
                   </Text>
                   <View style={{alignItems: 'center'}}>
                     <Carousel />
@@ -212,7 +204,10 @@ const HomeScreen = () => {
                   selectedCategory={selectedCategory}
                   onSelectCategory={setSelectedCategory}
                   navigation={navigation}
-                  allProducts={allProducts}
+                  allCategories={allCategories}
+                  isLoadingCategories={isLoadingCategories}
+                  isErrorCategories={isErrorCategories}
+                  refetchCategories={refetchCategories}
                 />
               </>
             )}
@@ -221,9 +216,9 @@ const HomeScreen = () => {
             <View style={styles.mainContent}>
               <View style={styles.resultsHeader}>
                 <View>
-                  <Text style={styles.sectionTitle}>Trang Trại Nổi Bật</Text>
+                  <Text style={styles.sectionTitle}>Nông Trại Nổi Bật</Text>
                   <Text style={styles.resultsCount}>
-                    Tìm thấy {filteredFarms.length} trang trại phù hợp
+                    Tìm thấy {filteredFarms.length} nông trại phù hợp
                   </Text>
                 </View>
                 <TouchableOpacity
@@ -247,7 +242,7 @@ const HomeScreen = () => {
                 <FarmCardSkeleton count={4} />
               ) : error ? (
                 <ErrorState
-                  message="Không thể tải trang trại"
+                  message="Không thể tải nông trại"
                   onRetry={refetch}
                   style={{minHeight: scale(250)}}
                 />
@@ -256,11 +251,11 @@ const HomeScreen = () => {
               ) : filteredFarms.length === 0 ? (
                 <View style={styles.emptyContainer}>
                   <Text style={styles.emptyTitle}>
-                    Không tìm thấy trang trại nào
+                    Không tìm thấy nông trại nào
                   </Text>
                   <Text style={styles.emptySubtitle}>
                     Thử thay đổi từ khóa tìm kiếm hoặc chọn danh mục khác để
-                    khám phá thêm nhiều trang trại
+                    khám phá thêm nhiều nông trại
                   </Text>
                 </View>
               ) : (

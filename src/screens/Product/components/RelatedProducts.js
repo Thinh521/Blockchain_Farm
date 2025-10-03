@@ -16,7 +16,6 @@ const RelatedProducts = ({farmCode, currentProductCode, navigation}) => {
     data: products = [],
     isLoading,
     isError,
-    error,
     refetch,
   } = useRelatedProducts(farmCode, currentProductCode);
 
@@ -29,14 +28,14 @@ const RelatedProducts = ({farmCode, currentProductCode, navigation}) => {
     <View style={styles.sectionContainer}>
       {/* Header */}
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Sản phẩm cùng trang trại</Text>
+        <Text style={styles.sectionTitle}>Nông sản cùng nông trại</Text>
 
         {isLoading ? (
           <SkeletonPlaceholder borderRadius={16} speed={1000}>
             <SkeletonPlaceholder.Item width={80} height={14} />
           </SkeletonPlaceholder>
         ) : (
-          <Text style={styles.sectionSubtitle}>{products.length} sản phẩm</Text>
+          <Text style={styles.sectionSubtitle}>{products.length} nông sản</Text>
         )}
       </View>
 
@@ -45,7 +44,7 @@ const RelatedProducts = ({farmCode, currentProductCode, navigation}) => {
         <ProductCardSkeleton count={2} />
       ) : isError ? (
         <EmptyState
-          message={'Có lỗi khi tải sản phẩm'}
+          message={'Có lỗi khi tải nông sản'}
           fullScreen
           style={{minHeight: scale(150)}}
           showRetry
@@ -53,7 +52,7 @@ const RelatedProducts = ({farmCode, currentProductCode, navigation}) => {
         />
       ) : products.length === 0 ? (
         <EmptyState
-          message="Chưa có sản phẩm nào"
+          message="Chưa có nông sản nào"
           fullScreen
           style={{minHeight: scale(150)}}
         />

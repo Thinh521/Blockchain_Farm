@@ -227,7 +227,7 @@ const FarmDetailScreen = ({navigation}) => {
             marginBottom: scale(16),
           }}>
           <Ionicons name="basket" size={20} color="#059669" />
-          <Text style={styles.cardTitle}>Sản phẩm nổi bật</Text>
+          <Text style={styles.cardTitle}>Nông sản nổi bật</Text>
         </View>
 
         <View>
@@ -235,7 +235,7 @@ const FarmDetailScreen = ({navigation}) => {
             <ProductCardSkeleton count={2} />
           ) : productError ? (
             <EmptyState
-              message={'Có lỗi khi tải sản phẩm'}
+              message={'Có lỗi khi tải nông sản'}
               fullScreen
               style={{minHeight: scale(150)}}
               showRetry
@@ -422,9 +422,9 @@ const FarmDetailScreen = ({navigation}) => {
             <View style={styles.mainContent}>
               <View style={styles.resultsHeader}>
                 <View>
-                  <Text style={styles.sectionTitle}>Trang Trại Nổi Bật</Text>
+                  <Text style={styles.sectionTitle}>Nông Trại Nổi Bật</Text>
                   <Text style={styles.resultsCount}>
-                    Tìm thấy {farms.length} trang trại phù hợp
+                    Tìm thấy {farms.length} nông trại phù hợp
                   </Text>
                 </View>
                 <TouchableOpacity
@@ -457,7 +457,7 @@ const FarmDetailScreen = ({navigation}) => {
               ) : farms.length === 0 ? (
                 <View style={styles.emptyContainer}>
                   <Text style={styles.emptyTitle}>
-                    Không tìm thấy trang trại nào
+                    Không tìm thấy nông trại nào
                   </Text>
                 </View>
               ) : (

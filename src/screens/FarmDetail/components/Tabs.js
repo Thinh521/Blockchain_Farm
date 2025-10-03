@@ -6,7 +6,7 @@ import styles from '../../FarmDetail/FarmDetail.styles';
 const Tabs = ({activeTab, setActiveTab}) => {
   const tabs = [
     {id: 'overview', label: 'Tổng quan', icon: 'information-circle-outline'},
-    {id: 'products', label: 'Sản phẩm', icon: 'basket-outline'},
+    {id: 'products', label: 'Nông sản', icon: 'basket-outline'},
     {id: 'contact', label: 'Liên hệ', icon: 'call-outline'},
   ];
 
