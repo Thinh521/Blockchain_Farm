@@ -15,6 +15,7 @@ import Input from '../../components/CustomInput/CustomInput';
 import Button from '../../components/CustomButton/CustomButton';
 import {validateEmail} from '../../utils/validation/validation';
 import {forgotPasswordApi} from '../../api/auth/auth';
+import LoadingOverlay from '../../components/CustomLoading/LoadingOverlay';
 
 const ForgotPasswordScreen = ({navigation}) => {
   const {
@@ -127,6 +128,8 @@ const ForgotPasswordScreen = ({navigation}) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {loading && <LoadingOverlay />}
     </SafeAreaView>
   );
 };

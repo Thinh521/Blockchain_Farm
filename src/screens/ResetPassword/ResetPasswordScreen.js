@@ -17,7 +17,7 @@ import Button from '../../components/CustomButton/CustomButton';
 import {resetPasswordApi} from '../../api/auth/auth';
 import {ErrorMap} from '../../utils/errorMapper/errorMapper';
 import {Arrow_Left_S_Icon} from '../../assets/icons';
-
+import LoadingOverlay from '../../components/CustomLoading/LoadingOverlay';
 const ResetPasswordScreen = ({navigation, route}) => {
   const {email} = route.params || {};
   const [loading, setLoading] = useState(false);
@@ -49,9 +49,7 @@ const ResetPasswordScreen = ({navigation, route}) => {
           description: 'Mật khẩu đã được đặt lại thành công',
           type: 'success',
         });
-        navigation.navigate('NobottomTab', {
-          screen: 'Login',
-        });
+        navigation.navigate('Login');
       } else {
         showMessage({
           message: 'Lỗi',
@@ -161,6 +159,8 @@ const ResetPasswordScreen = ({navigation, route}) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {loading && <LoadingOverlay />}
     </SafeAreaView>
   );
 };
