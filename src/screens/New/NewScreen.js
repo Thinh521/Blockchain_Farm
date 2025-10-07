@@ -1,4 +1,4 @@
-import React, {useMemo, useState, useRef, useCallback} from 'react';
+import React, {useMemo, useState, useRef, useCallback, useEffect} from 'react';
 import {View, TouchableOpacity, FlatList, TextInput, Text} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useNavigation} from '@react-navigation/core';
@@ -46,9 +46,19 @@ const NewScreen = () => {
   const [activeTab, setActiveTab] = useState('date');
   const [tempDateFilter, setTempDateFilter] = useState(null);
   const [tempInteractionFilter, setTempInteractionFilter] = useState(null);
+  const [isDataReady, setIsDataReady] = useState(false);
 
   const bottomSheetRef = useRef(null);
   const snapPoints = useMemo(() => ['70%'], []);
+
+  useEffect(() => {
+    if (!isLoading) {
+      const timer = setTimeout(() => setIsDataReady(true), 300);
+      return () => clearTimeout(timer);
+    } else {
+      setIsDataReady(false);
+    }
+  }, [isLoading]);
 
   const openFilter = () => {
     setTempDateFilter(
@@ -291,7 +301,7 @@ const NewScreen = () => {
               <NewsCardSkeleton count={2} />
             ) : isSearching ? (
               <NewsCardSkeleton count={1} />
-            ) : filteredNews.length === 0 ? (
+            ) :!isLoading && isDataReady && filteredNews.length === 0 ? (
               <View style={styles.emptyWrapper}>
                 <FastImage
                   source={Images.nomessage}

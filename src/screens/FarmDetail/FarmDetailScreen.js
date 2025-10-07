@@ -32,6 +32,8 @@ import {useFarmProducts} from '../../hooks/useFarmProducts';
 
 import {scale} from '../../utils/scaling';
 import styles from './FarmDetail.styles';
+import {showMessage} from 'react-native-flash-message';
+import {getUser} from '../../utils/storage/authStorage';
 
 const FarmDetailScreen = ({navigation}) => {
   const {farm, isFavorite: initialFavorite} = useRoute().params;
@@ -44,6 +46,9 @@ const FarmDetailScreen = ({navigation}) => {
   const [farmImageIndex, setFarmImageIndex] = useState(0);
 
   const scrollY = useRef(new Animated.Value(0)).current;
+
+  const user = getUser();
+  const isLoggedIn = !!user;
 
   const {
     farms,
@@ -308,13 +313,19 @@ const FarmDetailScreen = ({navigation}) => {
         </Text>
         <TouchableOpacity
           style={styles.headerHeart}
-          onPress={() => handleToggleFavorite(farm.farmCode)}
-          disabled={loading}>
-          <Ionicons
-            name={favorite ? 'heart' : 'heart-outline'}
-            size={20}
-            color={favorite ? '#EF4444' : '#FFFFFF'}
-          />
+          onPress={() => {
+            if (isLoggedIn) {
+              // 👉 Nếu đã đăng nhập thì chuyển trang yêu thích
+              navigation.navigate('WishlistScreen');
+            } else {
+              // 👉 Nếu chưa đăng nhập thì hiện cảnh báo
+              showMessage({
+                message: 'Bạn cần đăng nhập để sử dụng chức năng này',
+                type: 'warning',
+              });
+            }
+          }}>
+          <Ionicons name="heart-outline" size={20} color="#FFFFFF" />
         </TouchableOpacity>
       </Animated.View>
 

@@ -112,7 +112,8 @@ const TraceabilitySection = ({productCode, farmCode, userId}) => {
   const navigation = useNavigation();
 
   const storedUser = getUser();
-  const user = storedUser.userId;
+  const user = storedUser?.userId ?? null;
+
   const canAddProcess = useMemo(() => {
     return user && userId && user === userId;
   }, [user, userId]);
