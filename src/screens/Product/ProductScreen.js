@@ -8,6 +8,7 @@ import {
   Modal,
   Animated,
   StatusBar,
+  Alert,
 } from 'react-native';
 import {ethers} from 'ethers';
 import {useQuery} from '@tanstack/react-query';
@@ -30,6 +31,9 @@ import api from '../../api/tokenApi';
 import {Colors} from '../../theme/theme';
 import {scale} from '../../utils/scaling';
 import styles from './ProductScreen.style';
+import RNFS from 'react-native-fs';
+import {PermissionsAndroid, Platform} from 'react-native';
+import {showMessage} from 'react-native-flash-message';
 
 const ProductScreen = () => {
   const route = useRoute();
@@ -40,23 +44,59 @@ const ProductScreen = () => {
   const [hashes, setHashes] = useState([]);
   const scrollY = useRef(new Animated.Value(0)).current;
 
-const [userId, setUserId] = useState(null);
+  const [userId, setUserId] = useState(null);
 
-useEffect(() => {
-  const fetchUserId = async () => {
+  const qrRef = useRef(null);
+
+  const handleDownloadQR = async () => {
+    if (!qrRef.current) return;
+
     try {
-      const res = await api.get(`/api/products/details/${productCode}`);
-      setUserId(res.data?.data?.userId);
-    } catch (e) {
-      console.log('Lỗi fetch userId:', e);
+      qrRef.current.toDataURL(async data => {
+        const fileName = `qr_${Date.now()}.png`;
+        const path = `${RNFS.DownloadDirectoryPath}/${fileName}`;
+
+        if (Platform.OS === 'android') {
+          const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          );
+          if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+            Alert.alert('Quyền bị từ chối', 'Không thể lưu ảnh nếu không cấp quyền.');
+            return;
+          }
+        }
+
+        const whiteBackground =
+          'iVBORw0KGgoAAAANSUhEUgAAAZAAAAGQCAYAAADP9Z3fAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABaUlEQVR4nO3BMQEAAADCoPdPbQ43oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADgHh3NAAH4gCwAAAAASUVORK5CYII=';
+
+        const whitePath = `${RNFS.CachesDirectoryPath}/white_bg.png`;
+        await RNFS.writeFile(whitePath, whiteBackground, 'base64');
+
+        const paddedQR = data;
+        await RNFS.writeFile(path, paddedQR, 'base64');
+
+        Alert.alert('Thành công', 'Mã QR đã được lưu thành công');
+      });
+    } catch (error) {
+      console.log('Lỗi tải QR:', error);
+      Alert.alert('Lỗi', 'Không thể tải mã QR');
     }
   };
 
-  if (productCode) {
-    fetchUserId();
-  }
-}, [productCode]);
+  useEffect(() => {
+    const fetchUserId = async () => {
+      try {
+        const res = await api.get(`/api/products/details/${productCode}`);
+        setUserId(res.data?.data?.userId);
+      } catch (e) {
+        console.log('Lỗi fetch userId:', e);
+      }
+    };
 
+    if (productCode) {
+      fetchUserId();
+    }
+  }, [productCode]);
 
   // 🔹 fetch product detail
   const fetchProduct = async () => {
@@ -287,7 +327,7 @@ useEffect(() => {
                     style={styles.modalImages}
                     resizeMode={FastImage.resizeMode.cover}
                   />
-                  <Text style={styles.productName}>Mận</Text>
+                  <Text style={styles.productName}>{product.name}</Text>
                 </View>
                 <TouchableOpacity
                   style={styles.closeWrapper}
@@ -299,9 +339,12 @@ useEffect(() => {
               {/* QR Code */}
               <QRCode
                 value={qrValue}
-                size={180}
+                size={300}
                 backgroundColor="#ffffff"
                 color="#000000"
+                getRef={qrRef}
+                quietZone={30}
+                ecl="H"
               />
 
               {/* Nút hành động */}
@@ -313,8 +356,7 @@ useEffect(() => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.actionButton}
-                  // onPress={handleDownloadQR}
-                >
+                  onPress={handleDownloadQR}>
                   <Text style={styles.actionText}>Tải xuống</Text>
                 </TouchableOpacity>
               </View>
