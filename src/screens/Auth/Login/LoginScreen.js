@@ -49,7 +49,6 @@ const LoginScreen = ({navigation}) => {
 
     try {
       const data = await loginApi(values);
-      console.log('Kết quả login:', data);
 
       if (data.success) {
         queryClient.invalidateQueries(['user']);

@@ -1,5 +1,5 @@
 import React, {useState, forwardRef, useImperativeHandle, useRef} from 'react';
-import {TextInput, TouchableOpacity, View, Text} from 'react-native';
+import {TextInput, TouchableOpacity, View, Text, Platform} from 'react-native';
 import styles from './CustomInput.styles';
 import {EyeIcon, EyeOffIcon} from '../../assets/icons/index';
 

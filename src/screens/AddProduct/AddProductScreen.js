@@ -181,7 +181,9 @@ const AddProductScreen = ({navigation, route}) => {
 
       const imageUrlString = uploadedImages.join(',');
 
-      const tx = await contract.addProduct({
+
+// registerProduct
+      const tx = await contract.registerProduct({
         farmCode: farmCode,
         productCode: formData.productCode,
         categoryName: formData.categoryName,

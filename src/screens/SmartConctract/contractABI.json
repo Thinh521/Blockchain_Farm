@@ -1,7 +1,7 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "AgriculturalTraceabilitySystem",
-  "sourceName": "contracts/truyxuat.sol",
+  "contractName": "TraceabilityMain",
+  "sourceName": "src/contracts/TraceabilityMain.sol",
   "abi": [
     {
       "inputs": [],
@@ -13,24 +13,73 @@
       "inputs": [
         {
           "indexed": true,
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "registrationNumber",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "location",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "businessType",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string[]",
+          "name": "images",
+          "type": "string[]"
+        }
+      ],
+      "name": "BusinessRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
           "internalType": "string",
           "name": "productCode",
           "type": "string"
         },
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "creator",
-          "type": "address"
+          "indexed": false,
+          "internalType": "string",
+          "name": "oldCategory",
+          "type": "string"
         },
         {
           "indexed": false,
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
+          "internalType": "string",
+          "name": "newCategory",
+          "type": "string"
         }
       ],
-      "name": "DistributionAdded",
+      "name": "CategoryUpdated",
       "type": "event"
     },
     {
@@ -38,33 +87,70 @@
       "inputs": [
         {
           "indexed": true,
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "registrationNumber",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "location",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "productionType",
+          "type": "string"
+        },
+        {
+          "indexed": false,
+          "internalType": "string[]",
+          "name": "images",
+          "type": "string[]"
+        }
+      ],
+      "name": "CompanyRegistered",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
           "internalType": "string",
           "name": "farmCode",
           "type": "string"
         },
         {
-          "indexed": true,
+          "indexed": false,
           "internalType": "string",
           "name": "userId",
           "type": "string"
         },
         {
-          "indexed": true,
-          "internalType": "address",
-          "name": "owner",
-          "type": "address"
-        },
-        {
           "indexed": false,
-          "internalType": "uint256",
-          "name": "area",
-          "type": "uint256"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
+          "internalType": "string",
+          "name": "nameFarm",
+          "type": "string"
         }
       ],
       "name": "FarmRegistered",
@@ -74,53 +160,10 @@
       "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
+          "indexed": false,
           "internalType": "string",
           "name": "farmCode",
           "type": "string"
-        },
-        {
-          "indexed": false,
-          "internalType": "enum DataTypes.FarmStatus",
-          "name": "oldStatus",
-          "type": "uint8"
-        },
-        {
-          "indexed": false,
-          "internalType": "enum DataTypes.FarmStatus",
-          "name": "newStatus",
-          "type": "uint8"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
-        }
-      ],
-      "name": "FarmStatusChanged",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "string",
-          "name": "farmCode",
-          "type": "string"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "updater",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
         }
       ],
       "name": "FarmUpdated",
@@ -130,189 +173,77 @@
       "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
+          "indexed": false,
           "internalType": "string",
           "name": "productCode",
           "type": "string"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "creator",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
         }
       ],
-      "name": "FarmingProcessAdded",
+      "name": "ProductDeleted",
       "type": "event"
     },
     {
       "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
-          "internalType": "string",
-          "name": "productCode",
-          "type": "string"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "creator",
-          "type": "address"
-        },
-        {
           "indexed": false,
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
-        }
-      ],
-      "name": "FertilizerAdded",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "string",
-          "name": "productCode",
-          "type": "string"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "creator",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
-        }
-      ],
-      "name": "HarvestAdded",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "string",
-          "name": "productCode",
-          "type": "string"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "creator",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "timestamp",
-          "type": "uint256"
-        }
-      ],
-      "name": "MedicineAdded",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
           "internalType": "string",
           "name": "farmCode",
           "type": "string"
         },
         {
-          "indexed": true,
+          "indexed": false,
           "internalType": "string",
           "name": "productCode",
           "type": "string"
         },
         {
-          "indexed": true,
+          "indexed": false,
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "indexed": false,
           "internalType": "string",
           "name": "categoryName",
           "type": "string"
         },
         {
           "indexed": false,
-          "internalType": "enum DataTypes.ProductStatus",
-          "name": "status",
-          "type": "uint8"
+          "internalType": "uint256",
+          "name": "quantity",
+          "type": "uint256"
         },
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "timestamp",
+          "name": "price",
           "type": "uint256"
         }
       ],
-      "name": "ProductAdded",
+      "name": "ProductRegistered",
       "type": "event"
     },
     {
       "anonymous": false,
       "inputs": [
         {
-          "indexed": true,
+          "indexed": false,
           "internalType": "string",
           "name": "productCode",
           "type": "string"
         },
         {
           "indexed": false,
-          "internalType": "enum DataTypes.ProductStatus",
-          "name": "oldStatus",
-          "type": "uint8"
-        },
-        {
-          "indexed": false,
-          "internalType": "enum DataTypes.ProductStatus",
-          "name": "newStatus",
-          "type": "uint8"
-        },
-        {
-          "indexed": false,
           "internalType": "uint256",
-          "name": "timestamp",
+          "name": "quantity",
           "type": "uint256"
-        }
-      ],
-      "name": "ProductStatusChanged",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "string",
-          "name": "productCode",
-          "type": "string"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "updater",
-          "type": "address"
         },
         {
           "indexed": false,
           "internalType": "uint256",
-          "name": "timestamp",
+          "name": "price",
           "type": "uint256"
         }
       ],
@@ -320,101 +251,41 @@
       "type": "event"
     },
     {
-      "inputs": [],
-      "name": "MAX_AREA",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "MAX_IMAGES",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "MIN_AREA",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "NAME",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "VERSION",
-      "outputs": [
-        {
-          "internalType": "string",
-          "name": "",
-          "type": "string"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
       "inputs": [
         {
           "internalType": "string",
-          "name": "_productCode",
+          "name": "productCode",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_distributorName",
+          "name": "distributorName",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_distributorPartner",
+          "name": "distributorPartner",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_distributionDate",
+          "name": "distributionDate",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_transportMethod",
+          "name": "transportMethod",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_storageConditions",
+          "name": "storageConditions",
           "type": "string"
+        },
+        {
+          "internalType": "string[]",
+          "name": "images",
+          "type": "string[]"
         }
       ],
       "name": "addDistribution",
@@ -426,28 +297,33 @@
       "inputs": [
         {
           "internalType": "string",
-          "name": "_productCode",
+          "name": "productCode",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_nameProcess",
+          "name": "detail",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_source",
+          "name": "nameProcess",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_plantingDate",
+          "name": "source",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_sowingDate",
+          "name": "plantingDate",
           "type": "string"
+        },
+        {
+          "internalType": "string[]",
+          "name": "images",
+          "type": "string[]"
         }
       ],
       "name": "addFarmingProcess",
@@ -459,38 +335,43 @@
       "inputs": [
         {
           "internalType": "string",
-          "name": "_productCode",
+          "name": "productCode",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_nameFertilizer",
+          "name": "nameFertilizer",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_quantityFertilizer",
+          "name": "quantity",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_fertilizerDate",
+          "name": "fertilizerDate",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_fertilizerType",
+          "name": "fertilizerType",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_applicationMethod",
+          "name": "applicationMethod",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_expectedEffect",
+          "name": "expectedEffect",
           "type": "string"
+        },
+        {
+          "internalType": "string[]",
+          "name": "images",
+          "type": "string[]"
         }
       ],
       "name": "addFertilizer",
@@ -502,33 +383,38 @@
       "inputs": [
         {
           "internalType": "string",
-          "name": "_productCode",
+          "name": "productCode",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_harvestDate",
+          "name": "harvestDate",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_estimatedQuantity",
+          "name": "estimatedQuantity",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_actualQuantity",
+          "name": "actualQuantity",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_quality",
+          "name": "quality",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_harvestMethod",
+          "name": "harvestMethod",
           "type": "string"
+        },
+        {
+          "internalType": "string[]",
+          "name": "images",
+          "type": "string[]"
         }
       ],
       "name": "addHarvest",
@@ -540,33 +426,38 @@
       "inputs": [
         {
           "internalType": "string",
-          "name": "_productCode",
+          "name": "productCode",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_nameMedicine",
+          "name": "nameMedicine",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_quantityMedicine",
+          "name": "quantity",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_medicineDate",
+          "name": "medicineDate",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_medicineType",
+          "name": "medicineType",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_applicationMethod",
+          "name": "applicationMethod",
           "type": "string"
+        },
+        {
+          "internalType": "string[]",
+          "name": "images",
+          "type": "string[]"
         }
       ],
       "name": "addMedicine",
@@ -577,84 +468,99 @@
     {
       "inputs": [
         {
-          "components": [
-            {
-              "internalType": "string",
-              "name": "farmCode",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "productCode",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "categoryName",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "name",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "quantity",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "price",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "description",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "image",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "batchCode",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "certification",
-              "type": "string"
-            },
-            {
-              "internalType": "enum DataTypes.CertificationLevel",
-              "name": "certificationLevel",
-              "type": "uint8"
-            }
-          ],
-          "internalType": "struct DataTypes.ProductInput",
-          "name": "_productData",
-          "type": "tuple"
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
         }
       ],
-      "name": "addProduct",
-      "outputs": [],
-      "stateMutability": "nonpayable",
+      "name": "businesses",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "registrationNumber",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "location",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "businessType",
+          "type": "string"
+        },
+        {
+          "internalType": "bool",
+          "name": "isRegistered",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
       "inputs": [
         {
-          "internalType": "string",
-          "name": "_farmCode",
-          "type": "string"
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
         }
       ],
-      "name": "deactivateFarm",
-      "outputs": [],
-      "stateMutability": "nonpayable",
+      "name": "companies",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "id",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "string",
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "registrationNumber",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "location",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "productionType",
+          "type": "string"
+        },
+        {
+          "internalType": "bool",
+          "name": "isRegistered",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
       "type": "function"
     },
     {
@@ -665,14 +571,7 @@
           "type": "string"
         }
       ],
-      "name": "deactivateProduct",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "emergencyPause",
+      "name": "deleteProduct",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -734,17 +633,12 @@
               "type": "string[]"
             },
             {
-              "internalType": "uint256",
-              "name": "createdAt",
-              "type": "uint256"
-            },
-            {
               "internalType": "bool",
-              "name": "isActive",
+              "name": "exists",
               "type": "bool"
             }
           ],
-          "internalType": "struct DataTypes.Farm[]",
+          "internalType": "struct FarmRegistry.Farm[]",
           "name": "",
           "type": "tuple[]"
         }
@@ -756,89 +650,17 @@
       "inputs": [
         {
           "internalType": "string",
-          "name": "_productCode",
+          "name": "productCode",
           "type": "string"
         }
       ],
-      "name": "getCompleteProductTraceability",
+      "name": "getAllProcesses",
       "outputs": [
         {
           "components": [
             {
               "internalType": "string",
-              "name": "farmCode",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "productCode",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "categoryName",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "name",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "quantity",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "price",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "description",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "image",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "batchCode",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "certification",
-              "type": "string"
-            },
-            {
-              "internalType": "uint256",
-              "name": "createdAt",
-              "type": "uint256"
-            },
-            {
-              "internalType": "enum DataTypes.ProductStatus",
-              "name": "status",
-              "type": "uint8"
-            },
-            {
-              "internalType": "enum DataTypes.CertificationLevel",
-              "name": "certificationLevel",
-              "type": "uint8"
-            }
-          ],
-          "internalType": "struct DataTypes.Product",
-          "name": "product",
-          "type": "tuple"
-        },
-        {
-          "components": [
-            {
-              "internalType": "string",
-              "name": "productCode",
+              "name": "detail",
               "type": "string"
             },
             {
@@ -857,27 +679,22 @@
               "type": "string"
             },
             {
-              "internalType": "string",
-              "name": "sowingDate",
-              "type": "string"
+              "internalType": "string[]",
+              "name": "images",
+              "type": "string[]"
             },
             {
               "internalType": "uint256",
-              "name": "createdAt",
+              "name": "timestamp",
               "type": "uint256"
             }
           ],
-          "internalType": "struct DataTypes.FarmingProcess",
-          "name": "farmingProcess",
-          "type": "tuple"
+          "internalType": "struct ProcessRegistry.FarmingProcess[]",
+          "name": "",
+          "type": "tuple[]"
         },
         {
           "components": [
-            {
-              "internalType": "string",
-              "name": "productCode",
-              "type": "string"
-            },
             {
               "internalType": "string",
               "name": "nameMedicine",
@@ -885,7 +702,7 @@
             },
             {
               "internalType": "string",
-              "name": "quantityMedicine",
+              "name": "quantity",
               "type": "string"
             },
             {
@@ -904,22 +721,22 @@
               "type": "string"
             },
             {
+              "internalType": "string[]",
+              "name": "images",
+              "type": "string[]"
+            },
+            {
               "internalType": "uint256",
-              "name": "createdAt",
+              "name": "timestamp",
               "type": "uint256"
             }
           ],
-          "internalType": "struct DataTypes.Medicine",
-          "name": "medicine",
-          "type": "tuple"
+          "internalType": "struct ProcessRegistry.Medicine[]",
+          "name": "",
+          "type": "tuple[]"
         },
         {
           "components": [
-            {
-              "internalType": "string",
-              "name": "productCode",
-              "type": "string"
-            },
             {
               "internalType": "string",
               "name": "nameFertilizer",
@@ -927,7 +744,7 @@
             },
             {
               "internalType": "string",
-              "name": "quantityFertilizer",
+              "name": "quantity",
               "type": "string"
             },
             {
@@ -951,22 +768,22 @@
               "type": "string"
             },
             {
+              "internalType": "string[]",
+              "name": "images",
+              "type": "string[]"
+            },
+            {
               "internalType": "uint256",
-              "name": "createdAt",
+              "name": "timestamp",
               "type": "uint256"
             }
           ],
-          "internalType": "struct DataTypes.Fertilizer",
-          "name": "fertilizer",
-          "type": "tuple"
+          "internalType": "struct ProcessRegistry.Fertilizer[]",
+          "name": "",
+          "type": "tuple[]"
         },
         {
           "components": [
-            {
-              "internalType": "string",
-              "name": "productCode",
-              "type": "string"
-            },
             {
               "internalType": "string",
               "name": "harvestDate",
@@ -993,22 +810,22 @@
               "type": "string"
             },
             {
+              "internalType": "string[]",
+              "name": "images",
+              "type": "string[]"
+            },
+            {
               "internalType": "uint256",
-              "name": "createdAt",
+              "name": "timestamp",
               "type": "uint256"
             }
           ],
-          "internalType": "struct DataTypes.Harvest",
-          "name": "harvest",
-          "type": "tuple"
+          "internalType": "struct ProcessRegistry.Harvest[]",
+          "name": "",
+          "type": "tuple[]"
         },
         {
           "components": [
-            {
-              "internalType": "string",
-              "name": "productCode",
-              "type": "string"
-            },
             {
               "internalType": "string",
               "name": "distributorName",
@@ -1035,14 +852,19 @@
               "type": "string"
             },
             {
+              "internalType": "string[]",
+              "name": "images",
+              "type": "string[]"
+            },
+            {
               "internalType": "uint256",
-              "name": "createdAt",
+              "name": "timestamp",
               "type": "uint256"
             }
           ],
-          "internalType": "struct DataTypes.Distribution",
-          "name": "distribution",
-          "type": "tuple"
+          "internalType": "struct ProcessRegistry.Distribution[]",
+          "name": "",
+          "type": "tuple[]"
         }
       ],
       "stateMutability": "view",
@@ -1050,32 +872,303 @@
     },
     {
       "inputs": [],
-      "name": "getContractInfo",
+      "name": "getAllProducts",
       "outputs": [
         {
-          "internalType": "string",
-          "name": "name",
-          "type": "string"
-        },
+          "components": [
+            {
+              "internalType": "string",
+              "name": "farmCode",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "productCode",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "categoryName",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "quantity",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "price",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "image",
+              "type": "string"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ProductRegistry.Product[]",
+          "name": "",
+          "type": "tuple[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getBusiness",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "id",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "internalType": "string",
+              "name": "registrationNumber",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "location",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "businessType",
+              "type": "string"
+            },
+            {
+              "internalType": "string[]",
+              "name": "images",
+              "type": "string[]"
+            },
+            {
+              "internalType": "bool",
+              "name": "isRegistered",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct BusinessRegistry.Business",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
         {
           "internalType": "string",
-          "name": "version",
+          "name": "_registrationNumber",
           "type": "string"
-        },
+        }
+      ],
+      "name": "getBusinessByRegNumber",
+      "outputs": [
         {
-          "internalType": "uint256",
-          "name": "totalFarms",
-          "type": "uint256"
-        },
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "id",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "internalType": "string",
+              "name": "registrationNumber",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "location",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "businessType",
+              "type": "string"
+            },
+            {
+              "internalType": "string[]",
+              "name": "images",
+              "type": "string[]"
+            },
+            {
+              "internalType": "bool",
+              "name": "isRegistered",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct BusinessRegistry.Business",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
         {
-          "internalType": "uint256",
-          "name": "totalProducts",
-          "type": "uint256"
-        },
+          "internalType": "bytes32",
+          "name": "_id",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getCompany",
+      "outputs": [
         {
-          "internalType": "address",
-          "name": "contractOwner",
-          "type": "address"
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "id",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "internalType": "string",
+              "name": "registrationNumber",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "location",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "productionType",
+              "type": "string"
+            },
+            {
+              "internalType": "string[]",
+              "name": "images",
+              "type": "string[]"
+            },
+            {
+              "internalType": "bool",
+              "name": "isRegistered",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct CompanyRegistry.Company",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_registrationNumber",
+          "type": "string"
+        }
+      ],
+      "name": "getCompanyByRegNumber",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "id",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "address",
+              "name": "wallet",
+              "type": "address"
+            },
+            {
+              "internalType": "string",
+              "name": "registrationNumber",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "location",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "productionType",
+              "type": "string"
+            },
+            {
+              "internalType": "string[]",
+              "name": "images",
+              "type": "string[]"
+            },
+            {
+              "internalType": "bool",
+              "name": "isRegistered",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct CompanyRegistry.Company",
+          "name": "",
+          "type": "tuple"
         }
       ],
       "stateMutability": "view",
@@ -1144,17 +1237,12 @@
               "type": "string[]"
             },
             {
-              "internalType": "uint256",
-              "name": "createdAt",
-              "type": "uint256"
-            },
-            {
               "internalType": "bool",
-              "name": "isActive",
+              "name": "exists",
               "type": "bool"
             }
           ],
-          "internalType": "struct DataTypes.Farm",
+          "internalType": "struct FarmRegistry.Farm",
           "name": "",
           "type": "tuple"
         }
@@ -1170,7 +1258,7 @@
           "type": "string"
         }
       ],
-      "name": "getFarmByUserId",
+      "name": "getFarmsByUser",
       "outputs": [
         {
           "components": [
@@ -1225,17 +1313,12 @@
               "type": "string[]"
             },
             {
-              "internalType": "uint256",
-              "name": "createdAt",
-              "type": "uint256"
-            },
-            {
               "internalType": "bool",
-              "name": "isActive",
+              "name": "exists",
               "type": "bool"
             }
           ],
-          "internalType": "struct DataTypes.Farm[]",
+          "internalType": "struct FarmRegistry.Farm[]",
           "name": "",
           "type": "tuple[]"
         }
@@ -1267,23 +1350,23 @@
             },
             {
               "internalType": "string",
-              "name": "categoryName",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
               "name": "name",
               "type": "string"
             },
             {
               "internalType": "string",
-              "name": "quantity",
+              "name": "categoryName",
               "type": "string"
             },
             {
-              "internalType": "string",
+              "internalType": "uint256",
+              "name": "quantity",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
               "name": "price",
-              "type": "string"
+              "type": "uint256"
             },
             {
               "internalType": "string",
@@ -1296,32 +1379,12 @@
               "type": "string"
             },
             {
-              "internalType": "string",
-              "name": "batchCode",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "certification",
-              "type": "string"
-            },
-            {
-              "internalType": "uint256",
-              "name": "createdAt",
-              "type": "uint256"
-            },
-            {
-              "internalType": "enum DataTypes.ProductStatus",
-              "name": "status",
-              "type": "uint8"
-            },
-            {
-              "internalType": "enum DataTypes.CertificationLevel",
-              "name": "certificationLevel",
-              "type": "uint8"
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
             }
           ],
-          "internalType": "struct DataTypes.Product",
+          "internalType": "struct ProductRegistry.Product",
           "name": "",
           "type": "tuple"
         }
@@ -1333,11 +1396,11 @@
       "inputs": [
         {
           "internalType": "string",
-          "name": "_farmCode",
+          "name": "_categoryName",
           "type": "string"
         }
       ],
-      "name": "getProductByFarmCode",
+      "name": "getProductsByCategory",
       "outputs": [
         {
           "components": [
@@ -1353,23 +1416,23 @@
             },
             {
               "internalType": "string",
-              "name": "categoryName",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
               "name": "name",
               "type": "string"
             },
             {
               "internalType": "string",
-              "name": "quantity",
+              "name": "categoryName",
               "type": "string"
             },
             {
-              "internalType": "string",
+              "internalType": "uint256",
+              "name": "quantity",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
               "name": "price",
-              "type": "string"
+              "type": "uint256"
             },
             {
               "internalType": "string",
@@ -1382,32 +1445,12 @@
               "type": "string"
             },
             {
-              "internalType": "string",
-              "name": "batchCode",
-              "type": "string"
-            },
-            {
-              "internalType": "string",
-              "name": "certification",
-              "type": "string"
-            },
-            {
-              "internalType": "uint256",
-              "name": "createdAt",
-              "type": "uint256"
-            },
-            {
-              "internalType": "enum DataTypes.ProductStatus",
-              "name": "status",
-              "type": "uint8"
-            },
-            {
-              "internalType": "enum DataTypes.CertificationLevel",
-              "name": "certificationLevel",
-              "type": "uint8"
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
             }
           ],
-          "internalType": "struct DataTypes.Product[]",
+          "internalType": "struct ProductRegistry.Product[]",
           "name": "",
           "type": "tuple[]"
         }
@@ -1416,16 +1459,157 @@
       "type": "function"
     },
     {
-      "inputs": [],
-      "name": "owner",
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_farmCode",
+          "type": "string"
+        }
+      ],
+      "name": "getProductsByFarm",
       "outputs": [
         {
-          "internalType": "address",
+          "components": [
+            {
+              "internalType": "string",
+              "name": "farmCode",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "productCode",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "categoryName",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "quantity",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "price",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "description",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "image",
+              "type": "string"
+            },
+            {
+              "internalType": "bool",
+              "name": "exists",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ProductRegistry.Product[]",
           "name": "",
-          "type": "address"
+          "type": "tuple[]"
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "_wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "_registrationNumber",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_location",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_businessType",
+          "type": "string"
+        },
+        {
+          "internalType": "string[]",
+          "name": "_images",
+          "type": "string[]"
+        }
+      ],
+      "name": "registerBusiness",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "_wallet",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "_registrationNumber",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_location",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_productionType",
+          "type": "string"
+        },
+        {
+          "internalType": "string[]",
+          "name": "_images",
+          "type": "string[]"
+        }
+      ],
+      "name": "registerCompany",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -1489,56 +1673,10 @@
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "newOwner",
-          "type": "address"
-        }
-      ],
-      "name": "transferOwnership",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "string",
           "name": "_farmCode",
           "type": "string"
         },
-        {
-          "internalType": "string",
-          "name": "_nameFarm",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_description",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_location",
-          "type": "string"
-        },
-        {
-          "internalType": "uint256",
-          "name": "_area",
-          "type": "uint256"
-        },
-        {
-          "internalType": "string[]",
-          "name": "_images",
-          "type": "string[]"
-        }
-      ],
-      "name": "updateFarm",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
         {
           "internalType": "string",
           "name": "_productCode",
@@ -1551,13 +1689,18 @@
         },
         {
           "internalType": "string",
-          "name": "_quantity",
+          "name": "_categoryName",
           "type": "string"
         },
         {
-          "internalType": "string",
+          "internalType": "uint256",
+          "name": "_quantity",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
           "name": "_price",
-          "type": "string"
+          "type": "uint256"
         },
         {
           "internalType": "string",
@@ -1568,16 +1711,73 @@
           "internalType": "string",
           "name": "_image",
           "type": "string"
-        },
+        }
+      ],
+      "name": "registerProduct",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalBusinesses",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalCompanies",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
         {
           "internalType": "string",
-          "name": "_batchCode",
+          "name": "_productCode",
           "type": "string"
         },
         {
           "internalType": "string",
-          "name": "_certification",
+          "name": "_newCategory",
           "type": "string"
+        }
+      ],
+      "name": "updateCategory",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_productCode",
+          "type": "string"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_quantity",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_price",
+          "type": "uint256"
         }
       ],
       "name": "updateProduct",

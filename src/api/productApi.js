@@ -30,7 +30,8 @@ export const fetchProductsFromFarm = async farmCode => {
     rpcProvider,
   );
 
-  const scProducts = await contractRead.getProductByFarmCode(farmCode);
+  const scProducts = await contractRead.getProductsByFarm(farmCode);
+  console.log('scProducts', scProducts);
 
   // 3. Format dữ liệu
   const formatted = scProducts.map(product => {
