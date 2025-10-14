@@ -79,7 +79,7 @@ const CategoriesScreen = ({navigation, route}) => {
             showRetry
             onRetry={refetchProducts}
           />
-        ) : products.length === 1 ? (
+        ) : products.length === 0 ? (
           <EmptyState
             message="Chưa có sản phẩm nào"
             style={{marginTop: scale(200)}}

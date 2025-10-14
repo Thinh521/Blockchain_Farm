@@ -128,10 +128,11 @@ const ProcessScreen = ({route}) => {
       case 1:
         tx = await contract.addFarmingProcess(
           productCode,
+          formData.description, // 🆕 thêm mô tả
           formData.nameProcess,
           formData.source,
           formData.plantingDate,
-          formData.sowingDate,
+          formData.images || [], // 🆕 thêm danh sách ảnh
         );
         break;
       case 2:
@@ -142,8 +143,10 @@ const ProcessScreen = ({route}) => {
           formData.medicineDate,
           formData.medicineType,
           formData.applicationMethod,
+          formData.images || [], // 🆕 thêm ảnh
         );
         break;
+
       case 3:
         tx = await contract.addFertilizer(
           productCode,
@@ -153,8 +156,10 @@ const ProcessScreen = ({route}) => {
           formData.fertilizerType,
           formData.applicationMethod,
           formData.expectedEffect,
+          formData.images || [], // 🆕 thêm ảnh
         );
         break;
+
       case 4:
         tx = await contract.addHarvest(
           productCode,
@@ -163,8 +168,10 @@ const ProcessScreen = ({route}) => {
           formData.actualQuantity,
           formData.quality,
           formData.harvestMethod,
+          formData.images || [], // 🆕 thêm ảnh
         );
         break;
+
       case 5:
         tx = await contract.addDistribution(
           productCode,
@@ -173,8 +180,10 @@ const ProcessScreen = ({route}) => {
           formData.distributionDate,
           formData.transportMethod,
           formData.storageConditions,
+          formData.images || [],
         );
         break;
+
       default:
         throw new Error('Invalid step');
     }

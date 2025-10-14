@@ -45,7 +45,7 @@ const fetchFarmsByUserId = async (userId, isConnected) => {
     rpcProvider,
   );
 
-  const farmsData = await contractRead.getFarmByUserId(userId);
+  const farmsData = await contractRead.getFarmByUser(userId);
 
   return farmsData.map(farm => ({
     farmCode: farm.farmCode || farm[0],

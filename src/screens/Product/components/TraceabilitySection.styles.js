@@ -1,182 +1,229 @@
 import {StyleSheet} from 'react-native';
-import {Colors, FontSizes, FontWeights} from '../../../theme/theme';
-import {scale} from '../../../utils/scaling';
 
-const traceabilityStyles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
-    marginTop: scale(20),
-    backgroundColor: Colors.white,
+    flex: 1,
+    backgroundColor: '#fff',
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: scale(20),
-    marginVertical: scale(20),
-    marginBottom: scale(30),
-  },
-  sectionTitle: {
-    color: Colors.title,
-    fontSize: FontSizes.regular,
-    fontWeight: FontWeights.semiBold,
-  },
-  sectionSubtitle: {
-    color: Colors.gray,
-    fontSize: FontSizes.small,
-  },
-  traceabilityItem: {
-    flexDirection: 'row',
-    marginBottom: scale(16),
-    paddingHorizontal: scale(20),
-  },
-  traceabilityTimeline: {
-    alignItems: 'center',
-    marginRight: scale(14),
-  },
-  timelineIcon: {
-    width: scale(40),
-    height: scale(40),
-    borderRadius: 999,
+  centerContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1,
+    padding: 20,
+    backgroundColor: '#F5F5F5',
   },
-  timelineIconText: {
-    fontSize: FontSizes.regular,
+  header: {
+    backgroundColor: '#fff',
+    padding: 20,
+    paddingTop: 40,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
   },
-  timelineLine: {
-    position: 'absolute',
-    top: 40,
-    width: 2,
-    height: '100%',
-    backgroundColor: '#E5E7EB',
-    marginTop: 8,
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 5,
   },
-  traceabilityContent: {
+  productCode: {
+    fontSize: 14,
+    color: '#666',
+  },
+  scrollView: {
     flex: 1,
   },
-  traceabilityCard: {
-    borderRadius: scale(12),
-    backgroundColor: Colors.white,
-    padding: scale(16),
-    borderWidth: 1,
-    borderColor: Colors.border_2,
+  scrollContent: {
+    padding: 16,
   },
-  traceabilityHeader: {
-    marginBottom: scale(14),
+  timeline: {
+    paddingBottom: 20,
+  },
+  processCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  processHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    marginBottom: 16,
   },
-  traceabilityStep: {
-    color: Colors.title,
-    fontSize: FontSizes.regular,
-    fontWeight: FontWeights.semiBold,
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  processHeaderText: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  stepLabel: {
+    fontSize: 12,
+    color: '#999',
+  },
+  processTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginTop: 2,
   },
   statusBadge: {
-    borderRadius: 9999,
-    paddingVertical: scale(4),
-    paddingHorizontal: scale(12),
+    backgroundColor: '#10B981',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
   },
   statusText: {
-    fontSize: FontSizes.small,
-    fontWeight: FontWeights.semiBold,
-    color: Colors.white,
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
   },
-  traceabilityTitle: {
-    color: Colors.title,
-    fontSize: FontSizes.regular,
-    fontWeight: FontWeights.bold,
-    marginBottom: scale(10),
-  },
-  traceabilityDescription: {
-    color: Colors.gray,
-    fontSize: FontSizes.small,
-    lineHeight: scale(18),
-    marginBottom: scale(12),
-  },
-  additionalDetails: {
-    marginTop: scale(4),
-    marginBottom: scale(10),
-    paddingTop: scale(10),
-    borderTopWidth: 1,
-    borderTopColor: Colors.border_2,
-  },
-  additionalDetailsTitle: {
-    color: '#374151',
-    marginBottom: scale(8),
-    fontSize: FontSizes.medium,
-    fontWeight: FontWeights.semiBold,
-  },
-  detailRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: scale(6),
-  },
-  detailLabel: {
-    fontWeight: '500',
-    color: Colors.gray,
-    fontSize: FontSizes.small,
-  },
-  detailValue: {
-    flex: 1,
-    color: Colors.title,
-    fontSize: FontSizes.small,
-    fontWeight: FontWeights.semiBold,
-  },
-  traceabilityImages: {
-    marginTop: 8,
-  },
-  traceabilityImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    marginRight: 8,
-    backgroundColor: '#F3F4F6',
-  },
-  traceabilityLoading: {
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-  emptyTraceability: {
-    alignItems: 'center',
-    paddingVertical: 24,
+  detailsSection: {
     backgroundColor: '#F9FAFB',
-    borderRadius: 12,
-    marginTop: 8,
+    padding: 20,
+    borderRadius: 8,
+    marginBottom: 12,
   },
-  emptyText: {
-    textAlign: 'center',
-    color: '#9CA3AF',
+  sectionTitle: {
     fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
   },
-  hashText: {
-    color: Colors.title,
-    fontFamily: 'monospace',
-    fontSize: FontSizes.small,
-    backgroundColor: Colors.white,
-    padding: scale(8),
-    borderRadius: scale(6),
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderStyle: 'dashed',
+  detailItem: {
+    flexDirection: 'row',
+    marginBottom: 6,
   },
-  hashCard: {
-    backgroundColor: '#f9f9f9',
+  detailBullet: {
+    fontSize: 13,
+    color: '#666',
+    minWidth: 100,
+  },
+  detailText: {
+    fontSize: 13,
+    color: '#333',
+    flex: 1,
+  },
+  imageButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E3F2FD',
     padding: 10,
     borderRadius: 8,
-    marginBottom: 8,
-    elevation: 2,
+    marginBottom: 12,
   },
-  hashStep: {
-    fontWeight: FontWeights.semiBold,
-    color: '#333',
+  imageButtonText: {
+    color: '#2196F3',
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 8,
   },
-  hashTextSmall: {
+  hashContainer: {
+    backgroundColor: '#F3F4F6',
+    padding: 10,
+    borderRadius: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  hashLabel: {
     fontSize: 12,
     color: '#666',
-    marginTop: 4,
+    marginRight: 6,
+  },
+  hashValue: {
+    fontSize: 12,
+    color: '#333',
+    fontFamily: 'monospace',
+    flex: 1,
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  footerText: {
+    fontSize: 12,
+    color: '#666',
+    marginLeft: 8,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+  },
+  errorText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  emptyText: {
+    marginTop: 16,
+    fontSize: 18,
+    color: '#666',
+    fontWeight: '600',
+  },
+  emptySubText: {
+    marginTop: 8,
+    fontSize: 14,
+    color: '#999',
+  },
+  retryButton: {
+    marginTop: 20,
+    backgroundColor: '#2196F3',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  // Modal styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '90%',
+    maxHeight: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  modalScrollView: {
+    padding: 16,
+  },
+  modalImage: {
+    width: '100%',
+    height: 300,
+    marginBottom: 12,
+    borderRadius: 8,
   },
 });
 
-export default traceabilityStyles;
+export default styles;

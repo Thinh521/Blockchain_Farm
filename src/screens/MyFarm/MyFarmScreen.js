@@ -19,6 +19,7 @@ import {useQuery} from '@tanstack/react-query';
 
 const fetchFarmsByUser = async ({queryKey}) => {
   const [, userId] = queryKey;
+  
 
   if (!userId) throw new Error('Missing userId');
 
@@ -29,7 +30,7 @@ const fetchFarmsByUser = async ({queryKey}) => {
     rpcProvider,
   );
 
-  const farmsData = await contractRead.getFarmByUserId(userId);
+  const farmsData = await contractRead.getFarmsByUser(userId);
 
   return farmsData.map((farm, idx) => ({
     farmCode: farm.farmCode || farm[0],

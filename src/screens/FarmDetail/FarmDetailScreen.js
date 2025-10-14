@@ -315,17 +315,20 @@ const FarmDetailScreen = ({navigation}) => {
           style={styles.headerHeart}
           onPress={() => {
             if (isLoggedIn) {
-              // 👉 Nếu đã đăng nhập thì chuyển trang yêu thích
-              navigation.navigate('WishlistScreen');
+              handleToggleFavorite(farm.farmCode);
             } else {
-              // 👉 Nếu chưa đăng nhập thì hiện cảnh báo
               showMessage({
                 message: 'Bạn cần đăng nhập để sử dụng chức năng này',
                 type: 'warning',
               });
             }
-          }}>
-          <Ionicons name="heart-outline" size={20} color="#FFFFFF" />
+          }}
+          disabled={loading}>
+          <Ionicons
+            name={favorite ? 'heart' : 'heart-outline'}
+            size={20}
+            color={favorite ? '#EF4444' : '#FFFFFF'}
+          />
         </TouchableOpacity>
       </Animated.View>
 
