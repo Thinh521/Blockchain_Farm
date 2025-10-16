@@ -9,6 +9,7 @@ import {
   Image,
   Linking,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ethers} from 'ethers';
@@ -20,6 +21,7 @@ import TraceabilitySkeleton from '../../../components/CustomSkeleton/Traceabilit
 import Button from '../../../components/CustomButton/CustomButton';
 import {useNavigation} from '@react-navigation/native';
 import {getUser} from '../../../utils/storage/authStorage';
+import ExpandableText from './ExpandableText'; // Thêm import ExpandableText từ cùng thư mục như Process1
 
 const TraceabilityProcess = ({productCode, farmCode, userId}) => {
   const [loading, setLoading] = useState(true);
@@ -55,6 +57,14 @@ const TraceabilityProcess = ({productCode, farmCode, userId}) => {
     4: '#2196F3',
   };
 
+  const processLabels = [
+    'Gieo trồng',
+    'Phun thuốc',
+    'Bón phân',
+    'Thu hoạch',
+    'Phân phối',
+  ];
+
   useEffect(() => {
     fetchTraceabilityData();
   }, []);
@@ -64,9 +74,11 @@ const TraceabilityProcess = ({productCode, farmCode, userId}) => {
       setLoading(true);
       setError(null);
 
+      // Lấy hash từ API
       const hashResponse = await api.get(`/api/process/${productCode}`);
       const hashesOnly =
         hashResponse.data?.process?.steps?.map(step => step.txHash) || [];
+      console.log('🔗 Transaction Hashes:', hashesOnly);
       setHashes(hashesOnly);
 
       const rpcProvider = new ethers.JsonRpcProvider(RPC_URL);
@@ -76,18 +88,14 @@ const TraceabilityProcess = ({productCode, farmCode, userId}) => {
         rpcProvider,
       );
 
-      const traceabilityResult = await contractRead.getAllProcesses(productCode);
-
-      const processLabels = [
-        'Gieo trồng',
-        'Phun thuốc',
-        'Bón phân',
-        'Thu hoạch',
-        'Phân phối',
-      ];
+      const traceabilityResult = await contractRead.getAllProcesses(
+        productCode,
+      );
+      console.log('🧾 Raw Traceability Data:', traceabilityResult);
 
       const formattedProcesses = [];
 
+      // Duyệt qua 5 loại quy trình
       for (let i = 0; i < 5; i++) {
         const processArray = traceabilityResult[i];
         if (processArray && processArray.length > 0) {
@@ -95,60 +103,76 @@ const TraceabilityProcess = ({productCode, farmCode, userId}) => {
             const p = processArray[j];
             if (p && Object.keys(p).length > 0) {
               const values = Object.values(p);
-              let formattedProcess = { stepName: processLabels[i] };
 
+              let formattedProcess = {
+                stepName: processLabels[i],
+                timestamp:
+                  Number(values[values.length - 1]) || Date.now() / 1000,
+              };
+
+              // Map theo từng struct riêng biệt
               switch (i) {
-                case 0:
+                case 0: // Planting
                   formattedProcess = {
                     ...formattedProcess,
                     nameProcess: 'Quy trình Canh tác',
-                    detail: values[0],
-                    location: values[2],
-                    date: values[3],
+                    detail: values[0] || 'Không có mô tả', // detail
+                    stepName: values[1] || processLabels[i], // plantingName
+                    location: values[2] || 'Không rõ địa điểm', // location
+                    date: values[3] || 'Không có ngày', // plantingDate
                     images: Array.isArray(values[4]) ? values[4] : [],
                   };
                   break;
-                case 1:
+
+                case 1: // Medicine
                   formattedProcess = {
                     ...formattedProcess,
-                    nameProcess: 'Quy trình Phun thuốc',
                     nameMedicine: values[0],
+                    nameProcess: 'Quy trình Phun thuốc',
                     location: values[1],
-                    date: values[2],
-                    medicineType: values[3],
+                    date: values[2] || 'Không có ngày',
+                    medicineType: values[3] || '',
+                    applicationMethod: values[4] || '',
                     images: Array.isArray(values[5]) ? values[5] : [],
                   };
                   break;
-                case 2:
+
+                case 2: // Fertilizer
                   formattedProcess = {
                     ...formattedProcess,
-                    nameProcess: 'Quy trình Bón phân',
                     nameFertilizer: values[0],
+                    nameProcess: 'Quy trình Bón phân',
                     location: values[1],
-                    date: values[2],
-                    fertilizerType: values[3],
+                    date: values[2] || 'Không có ngày',
+                    fertilizerType: values[3] || '',
+                    applicationMethod: values[4] || '',
+                    expectedEffect: values[5] || '',
                     images: Array.isArray(values[6]) ? values[6] : [],
                   };
                   break;
-                case 3:
+
+                case 3: // Harvest
                   formattedProcess = {
                     ...formattedProcess,
                     nameProcess: 'Quy trình Thu hoạch',
-                    date: values[0],
+                    date: values[0] || 'Không có ngày',
                     estimatedQuantity: values[1],
                     actualQuantity: values[2],
                     quality: values[3],
+                    harvestMethod: values[4] || '',
                     images: Array.isArray(values[5]) ? values[5] : [],
                   };
                   break;
-                case 4:
+
+                case 4: // Distribution
                   formattedProcess = {
                     ...formattedProcess,
                     nameProcess: 'Quy trình Vận chuyển',
                     distributorName: values[0],
                     distributorPartner: values[1],
-                    date: values[2],
-                    transportMethod: values[3],
+                    date: values[2] || 'Không có ngày',
+                    transportMethod: values[3] || '',
+                    storageConditions: values[4] || '',
                     images: Array.isArray(values[5]) ? values[5] : [],
                   };
                   break;
@@ -159,6 +183,8 @@ const TraceabilityProcess = ({productCode, farmCode, userId}) => {
           }
         }
       }
+
+      console.log('✅ Formatted Processes:', formattedProcesses);
 
       if (formattedProcesses.length === 0) {
         setError('Chưa có quy trình nào được ghi nhận.');
@@ -184,6 +210,20 @@ const TraceabilityProcess = ({productCode, farmCode, userId}) => {
   };
 
   const openImageModal = images => {
+    console.log('🖼️ Selected Images URIs (full):', images); // Log full array
+    if (!images || !Array.isArray(images) || images.length === 0) {
+      Alert.alert('Thông báo', 'Không có ảnh để hiển thị!');
+      return;
+    }
+    // Kiểm tra từng URI có phải file:// không
+    images.forEach((uri, idx) => {
+      console.log(`🖼️ URI ${idx + 1}:`, uri);
+      if (uri.startsWith('file://')) {
+        console.log(`✅ Local file detected for ${idx + 1}`);
+      } else {
+        console.log(`⚠️ Non-local URI for ${idx + 1} (có thể cần HTTPS)`);
+      }
+    });
     setSelectedImages(images);
     setImageModalVisible(true);
   };
@@ -192,11 +232,209 @@ const TraceabilityProcess = ({productCode, farmCode, userId}) => {
     navigation.navigate('Process', {productCode, farmCode});
   };
 
+  const renderProcessItem = (process, index) => {
+    const hash = hashes[index] || null;
+    const icon = processIcons[index] || 'help-circle';
+    const color = processColors[index] || '#9E9E9E';
+
+    return (
+      <View key={index} style={styles.processCard}>
+        {/* Header với icon và status */}
+        <View style={styles.processHeader}>
+          <View style={[styles.iconContainer, {backgroundColor: color}]}>
+            <Icon name={icon} size={24} color="#fff" />
+          </View>
+          <View style={styles.processHeaderText}>
+            <Text style={styles.stepLabel}>Bước {index + 1}</Text>
+            <Text style={styles.processTitle}>{process.nameProcess}</Text>
+          </View>
+          <View style={styles.statusBadge}>
+            <Text style={styles.statusText}>Hoàn thành</Text>
+          </View>
+        </View>
+
+        {/* Chi tiết */}
+        <View style={styles.detailsSection}>
+          <Text style={styles.sectionTitle}>Chi tiết</Text>
+
+          {/* Planting - Bước 1 */}
+          {process.stepName && index === 0 && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>• Tên giống:</Text>
+              <Text style={styles.detailText}>{process.stepName}</Text>
+            </View>
+          )}
+
+          {/* Medicine - Bước 2 */}
+          {process.nameMedicine && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>• Tên thuốc:</Text>
+              <Text style={styles.detailText}>{process.nameMedicine}</Text>
+            </View>
+          )}
+
+          {process.medicineType && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>• Loại thuốc:</Text>
+              <Text style={styles.detailText}>{process.medicineType}</Text>
+            </View>
+          )}
+
+          {/* Fertilizer - Bước 3 */}
+          {process.nameFertilizer && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>• Tên phân bón:</Text>
+              <Text style={styles.detailText}>{process.nameFertilizer}</Text>
+            </View>
+          )}
+
+          {process.fertilizerType && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>• Loại phân:</Text>
+              <Text style={styles.detailText}>{process.fertilizerType}</Text>
+            </View>
+          )}
+
+          {/* Common fields */}
+          {process.location && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>
+                {index === 0 ? '• Nguồn gốc:' : '• Số lượng:'}
+              </Text>
+              <Text style={styles.detailText}>{process.location}</Text>
+            </View>
+          )}
+
+          {process.date && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>
+                {index === 0
+                  ? '• Ngày trồng:'
+                  : index === 1
+                  ? '• Ngày phun thuốc:'
+                  : index === 2
+                  ? '• Ngày bón phân:'
+                  : index === 3
+                  ? '• Ngày thu hoạch:'
+                  : '• Ngày phân phối:'}
+              </Text>
+              <Text style={styles.detailText}>{process.date}</Text>
+            </View>
+          )}
+
+          {process.applicationMethod && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>• Phương pháp:</Text>
+              <ExpandableText text={process.applicationMethod} />
+            </View>
+          )}
+
+          {process.expectedEffect && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>• Hiệu quả:</Text>
+              <ExpandableText text={process.expectedEffect} />
+            </View>
+          )}
+
+          {/* Harvest - Bước 4 */}
+          {process.estimatedQuantity && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>• Sản lượng dự kiến:</Text>
+              <Text style={styles.detailText}>
+                {process.estimatedQuantity}/kg
+              </Text>
+            </View>
+          )}
+
+          {process.actualQuantity && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>• Sản lượng thực tế:</Text>
+              <Text style={styles.detailText}>{process.actualQuantity}/kg</Text>
+            </View>
+          )}
+
+          {process.harvestMethod && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>• Phương pháp:</Text>
+              <ExpandableText text={process.harvestMethod} />
+            </View>
+          )}
+
+          {process.quality && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>• Chất lượng:</Text>
+              <Text style={styles.detailText}>{process.quality}</Text>
+            </View>
+          )}
+
+          {/* Distribution - Bước 5 */}
+          {process.distributorName && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>• Nhà phân phối:</Text>
+              <Text style={styles.detailText}>{process.distributorName}</Text>
+            </View>
+          )}
+
+          {process.distributorPartner && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>• Đối tác phân phối:</Text>
+              <Text style={styles.detailText}>
+                {process.distributorPartner}
+              </Text>
+            </View>
+          )}
+
+          {process.transportMethod && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>• Phương thức vận chuyển:</Text>
+              <Text style={styles.detailText}>{process.transportMethod}</Text>
+            </View>
+          )}
+
+          {process.storageConditions && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>• Bảo quản:</Text>
+              <Text style={styles.detailText}>{process.storageConditions}</Text>
+            </View>
+          )}
+
+          {process.detail && (
+            <View style={styles.detailItem}>
+              <Text style={styles.detailBullet}>• Chi tiết:</Text>
+              <ExpandableText text={process.detail} />
+            </View>
+          )}
+        </View>
+
+        {/* Ảnh xác nhận */}
+        {process.images && process.images.length > 0 && (
+          <TouchableOpacity
+            style={styles.imageButton}
+            onPress={() => openImageModal(process.images)}>
+            <Icon name="image-outline" size={20} color="#2196F3" />
+            <Text style={styles.imageButtonText}>Ảnh xác nhận</Text>
+          </TouchableOpacity>
+        )}
+
+        {/* Hash blockchain */}
+        {hash && (
+          <TouchableOpacity
+            style={styles.hashContainer}
+            onPress={() => Linking.openURL(`https://zeroscan.org/tx/${hash}`)}>
+            <Text style={styles.hashLabel}>Mã hash:</Text>
+            <Text style={styles.hashValue}>{formatHash(hash)}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
+
   if (loading) return <TraceabilitySkeleton count={5} />;
 
   if (error) {
     return (
       <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color="#2196F3" />
         <Text style={styles.errorText}>{error}</Text>
         {canAddProcess && (
           <Button.Main title="Thêm quy trình" onPress={handleAddProcess} />
@@ -210,6 +448,9 @@ const TraceabilityProcess = ({productCode, farmCode, userId}) => {
       <View style={styles.centerContainer}>
         <Icon name="package-variant" size={64} color="#999" />
         <Text style={styles.emptyText}>Chưa có thông tin truy xuất</Text>
+        <Text style={styles.emptySubText}>
+          Sản phẩm này chưa có quy trình nào
+        </Text>
         {canAddProcess && (
           <Button.Main title="Thêm quy trình" onPress={handleAddProcess} />
         )}
@@ -235,68 +476,7 @@ const TraceabilityProcess = ({productCode, farmCode, userId}) => {
           />
         }>
         <View style={styles.timeline}>
-          {processes.map((process, index) => (
-            <View key={index} style={styles.processCard}>
-              <View style={styles.processHeader}>
-                <View
-                  style={[
-                    styles.iconContainer,
-                    {backgroundColor: processColors[index] || '#999'},
-                  ]}>
-                  <Icon
-                    name={processIcons[index] || 'help-circle'}
-                    size={24}
-                    color="#fff"
-                  />
-                </View>
-                <View style={styles.processHeaderText}>
-                  <Text style={styles.stepLabel}>Bước {index + 1}</Text>
-                  <Text style={styles.processTitle}>{process.nameProcess}</Text>
-                </View>
-                <View style={styles.statusBadge}>
-                  <Text style={styles.statusText}>Hoàn thành</Text>
-                </View>
-              </View>
-
-              <View style={styles.detailsSection}>
-                <Text style={styles.sectionTitle}>Chi tiết</Text>
-                {process.location && (
-                  <View style={styles.detailItem}>
-                    <Text style={styles.detailBullet}>• Khu vực:</Text>
-                    <Text style={styles.detailText}>{process.location}</Text>
-                  </View>
-                )}
-                {process.date && (
-                  <View style={styles.detailItem}>
-                    <Text style={styles.detailBullet}>• Ngày thực hiện:</Text>
-                    <Text style={styles.detailText}>{process.date}</Text>
-                  </View>
-                )}
-              </View>
-
-              {process.images && process.images.length > 0 && (
-                <TouchableOpacity
-                  style={styles.imageButton}
-                  onPress={() => openImageModal(process.images)}>
-                  <Icon name="image-outline" size={20} color="#2196F3" />
-                  <Text style={styles.imageButtonText}>Ảnh xác nhận</Text>
-                </TouchableOpacity>
-              )}
-
-              {hashes[index] && (
-                <TouchableOpacity
-                  style={styles.hashContainer}
-                  onPress={() =>
-                    Linking.openURL(`https://zeroscan.org/tx/${hashes[index]}`)
-                  }>
-                  <Text style={styles.hashLabel}>Mã hash:</Text>
-                  <Text style={styles.hashValue}>
-                    {formatHash(hashes[index])}
-                  </Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          ))}
+          {processes.map((process, index) => renderProcessItem(process, index))}
         </View>
 
         {/* ✅ Nút thêm quy trình (khi chưa đủ 5) */}
@@ -314,29 +494,71 @@ const TraceabilityProcess = ({productCode, farmCode, userId}) => {
         </View>
       </ScrollView>
 
-      {/* Modal ảnh */}
+      {/* Modal hiển thị ảnh */}
       <Modal
         visible={imageModalVisible}
         transparent={true}
         animationType="fade"
-        onRequestClose={() => setImageModalVisible(false)}>
+        onRequestClose={() => setImageModalVisible(false)}
+        presentationStyle="overFullScreen" // Cải thiện full screen trên iOS
+      >
         <View style={styles.modalContainer}>
+          {' '}
+          {/* Nền tối, center content */}
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Ảnh xác nhận</Text>
-              <TouchableOpacity onPress={() => setImageModalVisible(false)}>
+              <Text style={styles.modalTitle}>
+                Ảnh xác nhận ({selectedImages.length} ảnh)
+              </Text>
+              <TouchableOpacity
+                onPress={() => setImageModalVisible(false)}
+                style={{padding: 5}}>
                 <Icon name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
-            <ScrollView style={styles.modalScrollView}>
-              {selectedImages.map((uri, index) => (
-                <Image
-                  key={index}
-                  source={{uri}}
-                  style={styles.modalImage}
-                  resizeMode="contain"
-                />
-              ))}
+            <ScrollView
+              style={styles.modalScrollView}
+              contentContainerStyle={{padding: 10, alignItems: 'center'}} // Center và padding
+              showsVerticalScrollIndicator={true}
+              nestedScrollEnabled={true} // Cho phép scroll nested nếu cần
+            >
+              {selectedImages.length > 0 ? (
+                selectedImages.map((uri, index) => (
+                  <View
+                    key={index}
+                    style={{alignItems: 'center', marginBottom: 15}}>
+                    <Image
+                      source={{uri: uri || ''}} // Fallback empty string
+                      style={styles.modalImage} // Phải có width/height fixed
+                      resizeMode="contain"
+                      onLoad={() =>
+                        console.log(
+                          `✅ Image ${index + 1} loaded successfully!`,
+                        )
+                      }
+                      onError={error => {
+                        console.log(
+                          `❌ Image ${index + 1} load ERROR:`,
+                          error.nativeEvent.error,
+                        );
+                        // Có thể show placeholder
+                      }}
+                    />
+                    {/* Placeholder nếu error (tùy chọn) */}
+                    {/* <Icon name="image-broken" size={100} color="#ccc" /> */}
+                    <Text style={{fontSize: 12, color: '#666', marginTop: 5}}>
+                      Ảnh {index + 1}
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                <View style={{alignItems: 'center', padding: 20}}>
+                  <Icon name="image-off" size={64} color="#999" />
+                  <Text style={{color: '#999', textAlign: 'center'}}>
+                    Không có ảnh nào
+                  </Text>
+                </View>
+              )}
             </ScrollView>
           </View>
         </View>

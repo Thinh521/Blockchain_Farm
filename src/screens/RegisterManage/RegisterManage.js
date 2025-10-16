@@ -18,12 +18,13 @@ const RegisterManage = ({navigation, route}) => {
   const {isConnected} = useAppKitAccount();
   const {walletProvider} = useAppKitProvider();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const {data: user, isLoading, error} = useUser();
+  const {data: user} = useUser();
 
   const generateFarmCode = () => {
     const randomDigits = Math.floor(100000 + Math.random() * 900000);
     return `FARM${randomDigits}`;
   };
+console.log('isConnected:', isConnected, walletProvider);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -183,7 +184,6 @@ const handleImageSelect = (field, imageData, type) => {
         contractArtifact.abi,
         signer,
       );
-
       const tx = await contract.registerFarm(
         formData.farmCode,
         formData.fullName,

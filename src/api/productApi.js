@@ -46,8 +46,8 @@ export const fetchProductsFromFarm = async farmCode => {
     return {
       farmCode: product.farmCode,
       productCode: product.productCode,
-      categoryName: product.categoryName,
       name: product.name,
+      categoryName: product.categoryName,
       quantity: product.quantity,
       price: product.price,
       area: product.area,
