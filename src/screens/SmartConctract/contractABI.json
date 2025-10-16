@@ -578,6 +578,19 @@
     },
     {
       "inputs": [],
+      "name": "getAllCategoryName",
+      "outputs": [
+        {
+          "internalType": "string[]",
+          "name": "",
+          "type": "string[]"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "getAllFarms",
       "outputs": [
         {

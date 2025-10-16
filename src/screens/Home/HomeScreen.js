@@ -54,8 +54,8 @@ const fetchProducts = async () => {
         return {
           farmCode: productData[0],
           productCode: productData[1],
-          categoryName: productData[2],
-          name: productData[3],
+          name: productData[2],
+          categoryName: productData[3],
           quantity: productData[4],
           price: productData[5],
           description: productData[6],
