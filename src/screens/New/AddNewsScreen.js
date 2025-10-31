@@ -39,6 +39,8 @@ const fetchFarmsByUserId = async (userId, isConnected) => {
     throw new Error('Chưa có userId hoặc chưa kết nối ví');
   }
 
+  console.log('farmsData', farmsData);
+
   const rpcProvider = new ethers.JsonRpcProvider(RPC_URL);
   const contractRead = new ethers.Contract(
     CONTRACT_ADDRESS,
@@ -46,7 +48,11 @@ const fetchFarmsByUserId = async (userId, isConnected) => {
     rpcProvider,
   );
 
+  console.log('contractRead', contractRead);
+
   const farmsData = await contractRead.getFarmByUser(userId);
+
+  console.log('farmsData', farmsData);
 
   return farmsData.map(farm => ({
     farmCode: farm.farmCode || farm[0],
