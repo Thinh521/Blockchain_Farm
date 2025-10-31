@@ -24,7 +24,6 @@ const RegisterManage = ({navigation, route}) => {
     const randomDigits = Math.floor(100000 + Math.random() * 900000);
     return `FARM${randomDigits}`;
   };
-console.log('isConnected:', isConnected, walletProvider);
 
   const [formData, setFormData] = useState({
     fullName: '',
