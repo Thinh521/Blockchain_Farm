@@ -479,12 +479,8 @@ const TraceabilityProcess = ({productCode, farmCode, userId}) => {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                Ảnh xác nhận ({selectedImages.length} ảnh)
-              </Text>
-              <TouchableOpacity
-                onPress={() => setImageModalVisible(false)}
-                style={{padding: 5}}>
+              <Text style={styles.modalTitle}>Ảnh xác nhận</Text>
+              <TouchableOpacity onPress={() => setImageModalVisible(false)}>
                 <Icon name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>

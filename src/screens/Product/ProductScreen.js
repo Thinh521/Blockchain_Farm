@@ -87,6 +87,8 @@ const ProductScreen = () => {
     const fetchUserId = async () => {
       try {
         const res = await api.get(`/api/products/details/${productCode}`);
+        console.log('ress', res);
+        
         setUserId(res.data?.data?.userId);
       } catch (e) {
         console.log('Lỗi fetch userId:', e);

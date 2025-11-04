@@ -4,6 +4,7 @@ import {useForm, Controller} from 'react-hook-form';
 import Input from '../../../components/CustomInput/CustomInput';
 import Button from '../../../components/CustomButton/CustomButton';
 import { launchImageLibrary } from 'react-native-image-picker';
+import DateInput from './DateInput';
 
 const TransportationProcessForm = ({onSubmit}) => {
   const {
@@ -63,17 +64,13 @@ const TransportationProcessForm = ({onSubmit}) => {
         name="distributionDate"
         rules={{
           required: 'Ngày phân phối là bắt buộc',
-          pattern: {
-            value: /^\d{4}-\d{2}-\d{2}$/, // YYYY-MM-DD
-            message: 'Ngày phải theo định dạng YYYY-MM-DD',
-          },
         }}
         render={({field: {onChange, value}}) => (
-          <Input
+          <DateInput
             style={{marginBottom: 20}}
-            placeholder="Ngày phân phối (YYYY-MM-DD)"
+            placeholder="Ngày phân phối"
             value={value}
-            onChangeText={onChange}
+            onChange={onChange}
             error={errors.distributionDate?.message}
             isError={!!errors.distributionDate}
           />

@@ -44,6 +44,7 @@ const ProcessScreen = ({route}) => {
   };
 
   const accessToken = getUser().accessToken;
+  console.log('accessToken', accessToken);
 
   // fetch step từ backend
   const fetchProcess = async () => {
@@ -128,11 +129,11 @@ const ProcessScreen = ({route}) => {
       case 1:
         tx = await contract.addFarmingProcess(
           productCode,
-          formData.description, // 🆕 thêm mô tả
+          formData.detail , 
           formData.nameProcess,
           formData.source,
           formData.plantingDate,
-          formData.images || [], // 🆕 thêm danh sách ảnh
+          formData.imageUrl, 
         );
         break;
       case 2:
@@ -143,7 +144,7 @@ const ProcessScreen = ({route}) => {
           formData.medicineDate,
           formData.medicineType,
           formData.applicationMethod,
-          formData.images || [], // 🆕 thêm ảnh
+          formData.imageUrl,
         );
         break;
 
@@ -156,7 +157,7 @@ const ProcessScreen = ({route}) => {
           formData.fertilizerType,
           formData.applicationMethod,
           formData.expectedEffect,
-          formData.images || [], // 🆕 thêm ảnh
+          formData.imageUrl,
         );
         break;
 
@@ -168,7 +169,7 @@ const ProcessScreen = ({route}) => {
           formData.actualQuantity,
           formData.quality,
           formData.harvestMethod,
-          formData.images || [], // 🆕 thêm ảnh
+          formData.imageUrl, 
         );
         break;
 
@@ -180,7 +181,7 @@ const ProcessScreen = ({route}) => {
           formData.distributionDate,
           formData.transportMethod,
           formData.storageConditions,
-          formData.images || [],
+          formData.imageUrl,
         );
         break;
 
@@ -193,6 +194,8 @@ const ProcessScreen = ({route}) => {
 
   // submit form
   const handleFormSubmit = async formData => {
+    console.log('formData', formData);
+
     if (!productCode) {
       showMessage({
         message: 'Lỗi',
@@ -215,35 +218,73 @@ const ProcessScreen = ({route}) => {
     setError(null);
 
     try {
+      // === 1. Upload ảnh lên backend ===
+      let imageUrl = [];
+
+      if (formData.images && formData.images.length > 0) {
+        const uploadData = new FormData();
+        uploadData.append('productCode', productCode);
+        uploadData.append('stepName', stepNameMap[currentStep]);
+
+        formData.images.forEach((image, index) => {
+          console.log('image', image);
+
+          const imageUri = typeof image === 'string' ? image : image.uri;
+
+          uploadData.append('images', {
+            uri: imageUri,
+            type: image.type || 'image/jpeg',
+            name: image.fileName || `image_${index}.jpg`,
+          });
+        });
+
+        console.log('📤 Uploading images to backend...', uploadData);
+        const uploadRes = await api.post('/api/process/upload', uploadData, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'multipart/form-data',
+          },
+          timeout: 120000,
+        });
+
+        imageUrl = uploadRes.data?.imageUrl || [];
+        console.log('✅ Ảnh đã upload Cloudinary:', imageUrl);
+      }
+
+      // === 2. Kết nối contract ===
       const contract = await getContract();
-      const tx = await executeBlockchainTransaction(
-        contract,
-        currentStep,
-        formData,
-      );
 
-      await tx.wait();
-      const txHash = tx.hash;
-      setTxHash(txHash);
-      console.log('🔗 Transaction Hash:', txHash);
+      // === 3. Thực thi giao dịch blockchain ===
+      const tx = await executeBlockchainTransaction(contract, currentStep, {
+        ...formData,
+        imageUrl,
+      });
 
-      await sendToBackend(txHash, currentStep);
+      console.log('⏳ Đang chờ xác nhận giao dịch...');
+      const receipt = await tx.wait(); 
 
-      // refetch để cập nhật step mới
-      await fetchProcess();
+      const hash = receipt?.hash || tx?.hash;
+      setTxHash(hash);
+      console.log('✅ Transaction Hash:', hash);
+
+      // === 4. Gửi hash về backend ===
+      await sendToBackend(hash, currentStep);
+
+      // === 5. Cập nhật tiến trình ===
+      if (currentStep < 5) setCurrentStep(prev => prev + 1);
+      else setIsCompleted(true);
 
       showMessage({
-        message: 'Thành công',
-        description: 'Quy trình đã được ghi nhận!',
+        message: 'Thành công!',
+        description: `Bước ${currentStep} đã hoàn tất!`,
         type: 'success',
       });
     } catch (error) {
-      console.error('❌ Lỗi:', error);
+      console.log('❌ Lỗi khi xử lý quy trình:', error);
       setError(error);
       showMessage({
         message: 'Lỗi',
-        description:
-          error.reason || error.message || 'Đã xảy ra lỗi không xác định.',
+        description: error.message || 'Giao dịch thất bại',
         type: 'danger',
       });
     } finally {
