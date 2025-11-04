@@ -4,7 +4,7 @@ import {useForm, Controller} from 'react-hook-form';
 import DateInput from './DateInput';
 import Input from '../../../components/CustomInput/CustomInput';
 import Button from '../../../components/CustomButton/CustomButton';
-import { launchImageLibrary } from 'react-native-image-picker';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 const SprayingProcessForm = ({onSubmit}) => {
   const {
@@ -109,40 +109,39 @@ const SprayingProcessForm = ({onSubmit}) => {
           />
         )}
       />
-  {/* Ảnh minh họa */}
-<Controller
-  control={control}
-  name="image"
-  render={({field: {onChange, value}}) => (
-    <View style={{marginBottom: 20}}>
-      <Button.Main
-        title={value ? 'Đổi ảnh' : 'Chọn ảnh'}
-        onPress={async () => {
-          const result = await launchImageLibrary({
-            mediaType: 'photo',
-            selectionLimit: 1,
-          });
+      {/* Ảnh minh họa */}
+      <Controller
+        control={control}
+        name="image"
+        render={({field: {onChange, value}}) => (
+          <View style={{marginBottom: 20}}>
+            <Button.Main
+              title={value ? 'Đổi ảnh' : 'Chọn ảnh'}
+              onPress={async () => {
+                const result = await launchImageLibrary({
+                  mediaType: 'photo',
+                  selectionLimit: 1,
+                });
 
-          if (!result.didCancel && result.assets?.[0]?.uri) {
-            onChange(result.assets[0].uri);
-          }
-        }}
+                if (!result.didCancel && result.assets?.[0]?.uri) {
+                  onChange(result.assets[0].uri);
+                }
+              }}
+            />
+            {value && (
+              <Image
+                source={{uri: value}}
+                style={{
+                  width: '100%',
+                  height: 180,
+                  marginTop: 10,
+                  borderRadius: 10,
+                }}
+              />
+            )}
+          </View>
+        )}
       />
-      {value && (
-        <Image
-          source={{uri: value}}
-          style={{
-            width: '100%',
-            height: 180,
-            marginTop: 10,
-            borderRadius: 10,
-          }}
-        />
-      )}
-    </View>
-  )}
-/>
-
 
       {/* Nút Submit */}
       <View style={{marginTop: 16}}>

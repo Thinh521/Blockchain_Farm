@@ -210,20 +210,6 @@ const TraceabilityProcess = ({productCode, farmCode, userId}) => {
   };
 
   const openImageModal = images => {
-    console.log('🖼️ Selected Images URIs (full):', images); // Log full array
-    if (!images || !Array.isArray(images) || images.length === 0) {
-      Alert.alert('Thông báo', 'Không có ảnh để hiển thị!');
-      return;
-    }
-    // Kiểm tra từng URI có phải file:// không
-    images.forEach((uri, idx) => {
-      console.log(`🖼️ URI ${idx + 1}:`, uri);
-      if (uri.startsWith('file://')) {
-        console.log(`✅ Local file detected for ${idx + 1}`);
-      } else {
-        console.log(`⚠️ Non-local URI for ${idx + 1} (có thể cần HTTPS)`);
-      }
-    });
     setSelectedImages(images);
     setImageModalVisible(true);
   };
@@ -499,66 +485,24 @@ const TraceabilityProcess = ({productCode, farmCode, userId}) => {
         visible={imageModalVisible}
         transparent={true}
         animationType="fade"
-        onRequestClose={() => setImageModalVisible(false)}
-        presentationStyle="overFullScreen" // Cải thiện full screen trên iOS
-      >
+        onRequestClose={() => setImageModalVisible(false)}>
         <View style={styles.modalContainer}>
-          {' '}
-          {/* Nền tối, center content */}
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>
-                Ảnh xác nhận ({selectedImages.length} ảnh)
-              </Text>
-              <TouchableOpacity
-                onPress={() => setImageModalVisible(false)}
-                style={{padding: 5}}>
+              <Text style={styles.modalTitle}>Ảnh xác nhận</Text>
+              <TouchableOpacity onPress={() => setImageModalVisible(false)}>
                 <Icon name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
-            <ScrollView
-              style={styles.modalScrollView}
-              contentContainerStyle={{padding: 10, alignItems: 'center'}} // Center và padding
-              showsVerticalScrollIndicator={true}
-              nestedScrollEnabled={true} // Cho phép scroll nested nếu cần
-            >
-              {selectedImages.length > 0 ? (
-                selectedImages.map((uri, index) => (
-                  <View
-                    key={index}
-                    style={{alignItems: 'center', marginBottom: 15}}>
-                    <Image
-                      source={{uri: uri || ''}} // Fallback empty string
-                      style={styles.modalImage} // Phải có width/height fixed
-                      resizeMode="contain"
-                      onLoad={() =>
-                        console.log(
-                          `✅ Image ${index + 1} loaded successfully!`,
-                        )
-                      }
-                      onError={error => {
-                        console.log(
-                          `❌ Image ${index + 1} load ERROR:`,
-                          error.nativeEvent.error,
-                        );
-                        // Có thể show placeholder
-                      }}
-                    />
-                    {/* Placeholder nếu error (tùy chọn) */}
-                    {/* <Icon name="image-broken" size={100} color="#ccc" /> */}
-                    <Text style={{fontSize: 12, color: '#666', marginTop: 5}}>
-                      Ảnh {index + 1}
-                    </Text>
-                  </View>
-                ))
-              ) : (
-                <View style={{alignItems: 'center', padding: 20}}>
-                  <Icon name="image-off" size={64} color="#999" />
-                  <Text style={{color: '#999', textAlign: 'center'}}>
-                    Không có ảnh nào
-                  </Text>
-                </View>
-              )}
+            <ScrollView style={styles.modalScrollView}>
+              {selectedImages.map((uri, index) => (
+                <Image
+                  key={index}
+                  source={{uri}}
+                  style={styles.modalImage}
+                  resizeMode="contain"
+                />
+              ))}
             </ScrollView>
           </View>
         </View>

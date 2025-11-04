@@ -181,21 +181,17 @@ const AddProductScreen = ({navigation, route}) => {
 
       const imageUrlString = uploadedImages.join(',');
 
-
-// registerProduct
-      const tx = await contract.registerProduct({
-        farmCode: farmCode,
-        productCode: formData.productCode,
-        categoryName: formData.categoryName,
-        name: formData.name,
-        quantity: String(formData.quantity),
-        price: String(formData.price),
-        description: formData.description,
-        image: imageUrlString,
-        batchCode: formData.batchCode || '',
-        certification: formData.certification || '',
-        certificationLevel: Number(formData.certificationLevel || 0),
-      });
+      // registerProduct
+      const tx = await contract.registerProduct(
+        farmCode,
+        formData.productCode,
+        formData.name,
+        formData.categoryName,
+        Number(formData.quantity),
+        Number(formData.price),
+        formData.description,
+        imageUrlString,
+      );
 
       await tx.wait();
 
