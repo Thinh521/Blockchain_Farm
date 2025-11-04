@@ -238,6 +238,10 @@ const FarmDetailScreen = ({navigation}) => {
         <View>
           {isLoadingProducts ? (
             <ProductCardSkeleton count={2} />
+          ) : products.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyTitle}>Chưa có nông sản nào</Text>
+            </View>
           ) : productError ? (
             <EmptyState
               message={'Có lỗi khi tải nông sản'}
@@ -246,10 +250,6 @@ const FarmDetailScreen = ({navigation}) => {
               showRetry
               onRetry={refetchProducts}
             />
-          ) : products.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyTitle}>Chưa có nông sản nào</Text>
-            </View>
           ) : (
             <ProductSlider products={products} onPress={handleProductPress} />
           )}

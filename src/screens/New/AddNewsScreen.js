@@ -7,6 +7,7 @@ import {
   Image,
   ScrollView,
   SafeAreaView,
+  Keyboard,
 } from 'react-native';
 import {ethers} from 'ethers';
 import {CONTRACT_ADDRESS, RPC_URL} from '@env';
@@ -38,6 +39,8 @@ const fetchFarmsByUserId = async (userId, isConnected) => {
     throw new Error('Chưa có userId hoặc chưa kết nối ví');
   }
 
+  console.log('farmsData', farmsData);
+
   const rpcProvider = new ethers.JsonRpcProvider(RPC_URL);
   const contractRead = new ethers.Contract(
     CONTRACT_ADDRESS,
@@ -45,7 +48,11 @@ const fetchFarmsByUserId = async (userId, isConnected) => {
     rpcProvider,
   );
 
+  console.log('contractRead', contractRead);
+
   const farmsData = await contractRead.getFarmByUser(userId);
+
+  console.log('farmsData', farmsData);
 
   return farmsData.map(farm => ({
     farmCode: farm.farmCode || farm[0],
@@ -66,6 +73,28 @@ const AddNewsScreen = () => {
 
   const userId = getUser()?.userId;
   const accessToken = getUser()?.accessToken;
+
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true);
+      },
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false);
+      },
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   const {
     data: farms = [],
@@ -434,36 +463,36 @@ const AddNewsScreen = () => {
         </View>
       </ScrollView>
 
-      <View style={styles.buttonActions}>
-        <Button.Main
-          title="Quay lại"
-          onPress={() => {
-            navigation.goBack();
-          }}
-          style={styles.cancelButton}
-          textStyle={styles.cancelButtonText}
-        />
-        <Button.Main
-          title={
-            loading
-              ? 'Đang xử lý...'
-              : mode === 'edit'
-              ? 'Cập nhật'
-              : 'Đăng tin'
-          }
-          onPress={handleSubmit(onSubmit)}
-          iconLeft={
-            !loading &&
-            (mode === 'edit' ? (
-              <Icon name="save" size={16} color={Colors.white} />
-            ) : (
-              <Icon name="send" size={16} color={Colors.white} />
-            ))
-          }
-          disabled={loading}
-          style={{flex: 1}}
-        />
-      </View>
+      {!isKeyboardVisible && (
+        <View style={styles.buttonActions}>
+          <Button.Main
+            title="Quay lại"
+            onPress={() => navigation.goBack()}
+            style={styles.cancelButton}
+            textStyle={styles.cancelButtonText}
+          />
+          <Button.Main
+            title={
+              loading
+                ? 'Đang xử lý...'
+                : mode === 'edit'
+                ? 'Cập nhật'
+                : 'Đăng tin'
+            }
+            onPress={handleSubmit(onSubmit)}
+            iconLeft={
+              !loading &&
+              (mode === 'edit' ? (
+                <Icon name="save" size={16} color={Colors.white} />
+              ) : (
+                <Icon name="send" size={16} color={Colors.white} />
+              ))
+            }
+            disabled={loading}
+            style={{flex: 1}}
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 };

@@ -42,7 +42,6 @@ export const FontWeights = {
 };
 
 export const Shadows = {
-  // Nhẹ, dùng cho button, icon nhỏ
   light: {
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 1},
@@ -50,8 +49,6 @@ export const Shadows = {
     shadowRadius: 2,
     elevation: 2,
   },
-
-  // Trung bình, dùng cho card
   medium: {
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
@@ -59,8 +56,6 @@ export const Shadows = {
     shadowRadius: 3.84,
     elevation: 4,
   },
-
-  // Nổi bật, dùng cho modal, bottom sheet
   dark: {
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 4},
@@ -68,8 +63,6 @@ export const Shadows = {
     shadowRadius: 4.65,
     elevation: 8,
   },
-
-  // Siêu nổi, dùng cho floating button
   strong: {
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 6},
@@ -77,8 +70,6 @@ export const Shadows = {
     shadowRadius: 6.27,
     elevation: 12,
   },
-
-  // Mịn, nhẹ và lan toả
   soft: {
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},

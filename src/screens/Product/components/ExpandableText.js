@@ -1,21 +1,23 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {Colors, FontSizes} from '../../../theme/theme';
 
-const ExpandableText = ({ text, numberOfLines = 2, style }) => {
+const ExpandableText = ({text, numberOfLines = 2, style}) => {
   const [expanded, setExpanded] = useState(false);
   if (!text) return null;
 
   const shouldShowExpand = text.length > 50;
 
   return (
-    <View style={[{ flex: 1 }, style]}>
+    <View style={[{flex: 1}, style]}>
       <Text
         style={{
-          fontSize: 13,
-          color: '#333',
+          fontSize: FontSizes.small,
+          color: Colors.title,
           lineHeight: 20,
           flexShrink: 1,
           flexWrap: 'wrap',
+          textAlign: 'justify',
         }}
         numberOfLines={expanded ? undefined : numberOfLines}>
         {text}

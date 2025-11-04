@@ -1,52 +1,55 @@
 import {StyleSheet} from 'react-native';
+import {Colors, FontSizes, FontWeights} from '../../../theme/theme';
+import {scale} from '../../../utils/scaling';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.background,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#F5F5F5',
   },
   header: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
     padding: 20,
     paddingTop: 40,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: Colors.border_2,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: FontSizes.large,
+    fontWeight: FontWeights.semiBold,
+    color: Colors.title,
     marginBottom: 5,
-  },
-  productCode: {
-    fontSize: 14,
-    color: '#666',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    padding: 16,
+    padding: scale(20),
   },
   timeline: {
     paddingBottom: 20,
   },
   processCard: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
     borderRadius: 12,
-    marginBottom: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: Colors.border_2,
+    padding: 16,
   },
   processHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border_2,
+    paddingBottom: 16,
   },
   iconContainer: {
     width: 40,
@@ -60,36 +63,34 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   stepLabel: {
-    fontSize: 12,
-    color: '#999',
+    color: Colors.gray,
+    fontSize: FontSizes.small,
   },
   processTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: FontSizes.medium,
+    fontWeight: FontWeights.semiBold,
+    color: Colors.title,
     marginTop: 2,
   },
   statusBadge: {
-    backgroundColor: '#10B981',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(6),
+    borderRadius: 9999,
   },
   statusText: {
-    color: '#fff',
+    color: Colors.white,
     fontSize: 12,
     fontWeight: '600',
   },
   detailsSection: {
-    backgroundColor: '#F9FAFB',
-    padding: 20,
-    borderRadius: 8,
+    padding: scale(10),
     marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#333',
+    color: Colors.title,
     marginBottom: 8,
   },
   detailItem: {
@@ -97,13 +98,14 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   detailBullet: {
-    fontSize: 13,
-    color: '#666',
-    minWidth: 100,
+    color: Colors.gray,
+    fontSize: FontSizes.small,
+    marginRight: 6,
   },
   detailText: {
-    fontSize: 13,
-    color: '#333',
+    color: Colors.title,
+    fontSize: FontSizes.small,
+    fontWeight: FontWeights.bold,
     flex: 1,
   },
   imageButton: {
@@ -144,7 +146,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
     borderRadius: 8,
     marginTop: 8,
   },
@@ -184,7 +186,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   retryButtonText: {
-    color: '#fff',
+    color: Colors.white,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -198,7 +200,7 @@ const styles = StyleSheet.create({
   modalContent: {
     width: '90%',
     maxHeight: '80%',
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white,
     borderRadius: 12,
     overflow: 'hidden',
   },

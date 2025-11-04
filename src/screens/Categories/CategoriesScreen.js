@@ -19,8 +19,7 @@ const CategoriesScreen = ({navigation, route}) => {
     error: productError,
     refetch: refetchProducts,
   } = useFarmProducts(farmCode);
-  console.log('products', products);
-  
+
   const handleProductPress = useCallback(
     productItem => {
       navigation.navigate('Product', {
@@ -71,6 +70,11 @@ const CategoriesScreen = ({navigation, route}) => {
           <View style={{padding: scale(20)}}>
             <ProductCardSkeleton count={4} />
           </View>
+        ) : products.length === 0 ? (
+          <EmptyState
+            message="Chưa có sản phẩm nào"
+            style={{marginTop: scale(200)}}
+          />
         ) : productError ? (
           <EmptyState
             message={'Có lỗi khi tải sản phẩm'}
@@ -78,11 +82,6 @@ const CategoriesScreen = ({navigation, route}) => {
             style={{minHeight: scale(150)}}
             showRetry
             onRetry={refetchProducts}
-          />
-        ) : products.length === 0 ? (
-          <EmptyState
-            message="Chưa có sản phẩm nào"
-            style={{marginTop: scale(200)}}
           />
         ) : (
           <ProductList products={products} onPress={handleProductPress} />
