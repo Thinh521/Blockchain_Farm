@@ -1,0 +1,9 @@
+{
+  "network": "zeroscan",
+  "deployTime": "2025-10-14T08:00:07.978Z",
+  "contracts": {
+    "TraceabilityMain": {
+      "address": "0xa0986b80d354E18eA97b06FEAE4677c805CA0216"
+    }
+  }
+}
